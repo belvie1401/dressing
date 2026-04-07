@@ -1,1 +1,202 @@
-// Prisma schema - will be populated in Phase 2
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CLIENT
+  STYLIST
+  ADMIN
+}
+
+enum Category {
+  TOP
+  BOTTOM
+  DRESS
+  JACKET
+  SHOES
+  ACCESSORY
+}
+
+enum Season {
+  SUMMER
+  WINTER
+  ALL
+}
+
+enum Occasion {
+  CASUAL
+  WORK
+  EVENING
+  SPORT
+}
+
+enum ConnectionStatus {
+  PENDING
+  ACTIVE
+  ENDED
+}
+
+enum LookbookStatus {
+  DRAFT
+  SENT
+  APPROVED
+  REJECTED
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  LOOKBOOK
+  OUTFIT
+}
+
+enum Plan {
+  FREE
+  CLIENT_PRO
+  STYLIST_PRO
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  avatar_url    String?
+  role          Role     @default(CLIENT)
+  style_profile Json?
+  location      String?
+  created_at    DateTime @default(now())
+
+  clothing_items      ClothingItem[]
+  outfits             Outfit[]
+  calendar            CalendarEntry[]
+  subscription        Subscription?
+  sent_messages       Message[]       @relation("SentMessages")
+  received_messages   Message[]       @relation("ReceivedMessages")
+  stylist_connections StylistClient[] @relation("StylistConnections")
+  client_connections  StylistClient[] @relation("ClientConnections")
+  stylist_lookbooks   Lookbook[]      @relation("StylistLookbooks")
+  client_lookbooks    Lookbook[]      @relation("ClientLookbooks")
+}
+
+model ClothingItem {
+  id             String    @id @default(cuid())
+  user_id        String
+  user           User      @relation(fields: [user_id], references: [id])
+  photo_url      String
+  bg_removed_url String?
+  category       Category
+  colors         String[]
+  material       String?
+  season         Season    @default(ALL)
+  occasion       Occasion  @default(CASUAL)
+  brand          String?
+  purchase_price Float?
+  purchase_date  DateTime?
+  wear_count     Int       @default(0)
+  last_worn_at   DateTime?
+  ai_tags        Json?
+  created_at     DateTime  @default(now())
+
+  outfit_items OutfitItem[]
+}
+
+model Outfit {
+  id           String    @id @default(cuid())
+  user_id      String
+  user         User      @relation(fields: [user_id], references: [id])
+  name         String
+  occasion     Occasion?
+  season       Season?
+  ai_generated Boolean   @default(false)
+  worn_count   Int       @default(0)
+  last_worn_at DateTime?
+  try_on_url   String?
+  created_at   DateTime  @default(now())
+
+  items          OutfitItem[]
+  calendar       CalendarEntry[]
+  lookbook_items LookbookOutfit[]
+}
+
+model OutfitItem {
+  outfit_id String
+  item_id   String
+  outfit    Outfit       @relation(fields: [outfit_id], references: [id])
+  item      ClothingItem @relation(fields: [item_id], references: [id])
+
+  @@id([outfit_id, item_id])
+}
+
+model CalendarEntry {
+  id           String   @id @default(cuid())
+  user_id      String
+  user         User     @relation(fields: [user_id], references: [id])
+  outfit_id    String
+  outfit       Outfit   @relation(fields: [outfit_id], references: [id])
+  date         DateTime
+  weather_data Json?
+  notes        String?
+}
+
+model StylistClient {
+  id          String           @id @default(cuid())
+  stylist_id  String
+  client_id   String
+  stylist     User             @relation("StylistConnections", fields: [stylist_id], references: [id])
+  client      User             @relation("ClientConnections", fields: [client_id], references: [id])
+  status      ConnectionStatus @default(PENDING)
+  permissions Json?
+  started_at  DateTime?
+  created_at  DateTime         @default(now())
+}
+
+model Lookbook {
+  id          String         @id @default(cuid())
+  stylist_id  String
+  client_id   String
+  stylist     User           @relation("StylistLookbooks", fields: [stylist_id], references: [id])
+  client      User           @relation("ClientLookbooks", fields: [client_id], references: [id])
+  title       String
+  description String?
+  status      LookbookStatus @default(DRAFT)
+  feedback    String?
+  created_at  DateTime       @default(now())
+
+  outfits LookbookOutfit[]
+}
+
+model LookbookOutfit {
+  lookbook_id String
+  outfit_id   String
+  lookbook    Lookbook @relation(fields: [lookbook_id], references: [id])
+  outfit      Outfit   @relation(fields: [outfit_id], references: [id])
+
+  @@id([lookbook_id, outfit_id])
+}
+
+model Message {
+  id         String      @id @default(cuid())
+  from_id    String
+  to_id      String
+  from       User        @relation("SentMessages", fields: [from_id], references: [id])
+  to         User        @relation("ReceivedMessages", fields: [to_id], references: [id])
+  content    String
+  type       MessageType @default(TEXT)
+  metadata   Json?
+  read_at    DateTime?
+  created_at DateTime    @default(now())
+}
+
+model Subscription {
+  id                     String    @id @default(cuid())
+  user_id                String    @unique
+  user                   User      @relation(fields: [user_id], references: [id])
+  plan                   Plan      @default(FREE)
+  stripe_subscription_id String?
+  status                 String
+  current_period_end     DateTime?
+}
