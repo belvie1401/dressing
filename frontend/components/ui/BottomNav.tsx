@@ -1,15 +1,13 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Shirt, Sparkles, Calendar, MessageCircle } from 'lucide-react';
 
 const tabs = [
-  { href: '/dashboard', label: 'Accueil', icon: Home },
-  { href: '/wardrobe', label: 'Dressing', icon: Shirt },
-  { href: '/outfits', label: 'Looks', icon: Sparkles },
-  { href: '/calendar', label: 'Agenda', icon: Calendar },
-  { href: '/messages', label: 'Messages', icon: MessageCircle },
+  { href: '/dashboard', label: 'Accueil', icon: '\uD83C\uDFE0' },
+  { href: '/wardrobe', label: 'Dressing', icon: '\uD83D\uDC55' },
+  { href: '/outfits', label: 'Looks', icon: '\u2728' },
+  { href: '/calendar', label: 'Agenda', icon: '\uD83D\uDCC5' },
+  { href: '/messages', label: 'Messages', icon: '\uD83D\uDCAC' },
 ];
 
 export default function BottomNav() {
@@ -20,10 +18,9 @@ export default function BottomNav() {
       <div className="mx-auto flex max-w-lg items-center justify-around">
         {tabs.map((tab) => {
           const isActive = pathname?.startsWith(tab.href);
-          const Icon = tab.icon;
 
           return (
-            <Link
+            <a
               key={tab.href}
               href={tab.href}
               className={`flex flex-col items-center gap-0.5 px-3 py-2 text-xs transition-colors ${
@@ -32,14 +29,9 @@ export default function BottomNav() {
                   : 'text-gray-400 hover:text-gray-600'
               }`}
             >
-              <div className="relative">
-                <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 1.5} />
-                {isActive && (
-                  <span className="absolute -top-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-black" />
-                )}
-              </div>
+              <span className="text-lg">{tab.icon}</span>
               <span className={isActive ? 'font-semibold' : 'font-normal'}>{tab.label}</span>
-            </Link>
+            </a>
           );
         })}
       </div>

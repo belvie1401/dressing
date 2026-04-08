@@ -1,10 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
-import { Loader2 } from 'lucide-react';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -99,8 +97,7 @@ export default function RegisterPage() {
             disabled={isLoading}
             className="flex w-full items-center justify-center gap-2 rounded-full bg-black py-3 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-50"
           >
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Créer mon compte
+            {isLoading ? 'Chargement...' : 'Créer mon compte'}
           </button>
 
           <button
@@ -113,9 +110,9 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-center text-sm text-gray-500">
           Déjà un compte ?{' '}
-          <Link href="/login" className="font-medium text-black hover:underline">
+          <a href="/login" className="font-medium text-black hover:underline">
             Se connecter
-          </Link>
+          </a>
         </p>
       </div>
     </div>

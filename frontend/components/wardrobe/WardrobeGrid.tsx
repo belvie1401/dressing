@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+
 import { Plus } from 'lucide-react';
 import type { ClothingItem } from '@/types';
 import ClothingCard from './ClothingCard';
@@ -39,12 +39,12 @@ export default function WardrobeGrid({ items }: WardrobeGridProps) {
           <p className="mt-1 text-sm text-gray-500">
             Ajoutez votre premier vêtement pour commencer
           </p>
-          <Link
+          <a
             href="/wardrobe/add"
             className="mt-4 rounded-full bg-black px-6 py-2 text-sm font-medium text-white hover:bg-gray-800"
           >
             Ajouter un vêtement
-          </Link>
+          </a>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">

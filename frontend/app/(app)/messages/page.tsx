@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import Link from 'next/link';
+
 import { useChatStore } from '@/lib/store';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -29,7 +29,7 @@ export default function MessagesPage() {
       ) : (
         <div className="space-y-1">
           {conversations.map((conv) => (
-            <Link
+            <a
               key={conv.contact.id}
               href={`/messages/${conv.contact.id}`}
               className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-gray-100"
@@ -61,7 +61,7 @@ export default function MessagesPage() {
                   {conv.unreadCount}
                 </span>
               )}
-            </Link>
+            </a>
           ))}
         </div>
       )}

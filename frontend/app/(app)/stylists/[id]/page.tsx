@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
+
 import { ArrowLeft } from 'lucide-react';
 
 export default function StylistDetailPage() {
@@ -10,9 +10,9 @@ export default function StylistDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/stylists" className="rounded-lg p-1 hover:bg-gray-100">
+        <a href="/stylists" className="rounded-lg p-1 hover:bg-gray-100">
           <ArrowLeft className="h-5 w-5 text-gray-600" />
-        </Link>
+        </a>
         <h1 className="text-xl font-bold text-gray-900">Profil du styliste</h1>
       </div>
 

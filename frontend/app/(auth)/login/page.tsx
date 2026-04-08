@@ -1,10 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
-import { Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -77,8 +75,7 @@ export default function LoginPage() {
             disabled={isLoading}
             className="flex w-full items-center justify-center gap-2 rounded-full bg-black py-3 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-50"
           >
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Se connecter
+            {isLoading ? 'Chargement...' : 'Se connecter'}
           </button>
 
           <button
@@ -91,9 +88,9 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-gray-500">
           Pas encore de compte ?{' '}
-          <Link href="/register" className="font-medium text-black hover:underline">
-            S&apos;inscrire
-          </Link>
+          <a href="/register" className="font-medium text-black hover:underline">
+            S&#39;inscrire
+          </a>
         </p>
       </div>
     </div>

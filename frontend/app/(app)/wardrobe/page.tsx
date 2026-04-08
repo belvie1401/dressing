@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import Link from 'next/link';
+
 import { Plus } from 'lucide-react';
 import { useWardrobeStore } from '@/lib/store';
 import WardrobeGrid from '@/components/wardrobe/WardrobeGrid';
@@ -34,12 +34,12 @@ export default function WardrobePage() {
       )}
 
       {/* FAB */}
-      <Link
+      <a
         href="/wardrobe/add"
         className="fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-black text-white shadow-lg hover:bg-gray-800 lg:right-8"
       >
         <Plus className="h-6 w-6" />
-      </Link>
+      </a>
     </div>
   );
 }

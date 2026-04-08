@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+
 import { Plus } from 'lucide-react';
 import type { Outfit } from '@/types';
 import { api } from '@/lib/api';
@@ -31,29 +31,29 @@ export default function OutfitsPage() {
       ) : outfits.length === 0 ? (
         <div className="flex flex-col items-center py-16 text-center">
           <p className="text-sm text-gray-500">Aucune tenue créée</p>
-          <Link
+          <a
             href="/outfits/create"
             className="mt-4 rounded-full bg-black px-6 py-2 text-sm font-medium text-white hover:bg-gray-800"
           >
             Créer une tenue
-          </Link>
+          </a>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {outfits.map((outfit) => (
-            <Link key={outfit.id} href={`/outfits/${outfit.id}`}>
+            <a key={outfit.id} href={`/outfits/${outfit.id}`}>
               <OutfitPreview outfit={outfit} />
-            </Link>
+            </a>
           ))}
         </div>
       )}
 
-      <Link
+      <a
         href="/outfits/create"
         className="fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-black text-white shadow-lg hover:bg-gray-800 lg:right-8"
       >
         <Plus className="h-6 w-6" />
-      </Link>
+      </a>
     </div>
   );
 }

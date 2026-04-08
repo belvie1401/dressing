@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
+
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import type { ClothingItem } from '@/types';
 import { api } from '@/lib/api';
@@ -53,9 +53,9 @@ export default function WardrobeItemPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/wardrobe" className="rounded-lg p-1 hover:bg-gray-100">
+        <a href="/wardrobe" className="rounded-lg p-1 hover:bg-gray-100">
           <ArrowLeft className="h-5 w-5 text-gray-600" />
-        </Link>
+        </a>
         <h1 className="text-xl font-bold text-gray-900">{categoryLabels[item.category] || item.category}</h1>
       </div>
 
@@ -98,12 +98,12 @@ export default function WardrobeItemPage() {
       </div>
 
       {/* Create outfit CTA */}
-      <Link
+      <a
         href="/outfits/create"
         className="block w-full rounded-full border border-gray-200 py-3 text-center text-sm font-medium text-gray-700 hover:bg-gray-50"
       >
         Créer un look avec cet article
-      </Link>
+      </a>
     </div>
   );
 }

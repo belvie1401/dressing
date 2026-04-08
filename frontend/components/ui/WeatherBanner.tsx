@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Cloud, Droplets, Wind, Sparkles } from 'lucide-react';
 import type { WeatherData } from '@/types';
 import { api } from '@/lib/api';
-import Link from 'next/link';
+
 
 export default function WeatherBanner() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -53,13 +53,13 @@ export default function WeatherBanner() {
           </div>
         </div>
       </div>
-      <Link
+      <a
         href="/outfits/create"
         className="mt-3 flex items-center gap-2 text-xs font-medium text-blue-600 hover:text-blue-700"
       >
         <Sparkles className="h-3 w-3" />
         Tenue suggérée pour aujourd&apos;hui
-      </Link>
+      </a>
     </div>
   );
 }

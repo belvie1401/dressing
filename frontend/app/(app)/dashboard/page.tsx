@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+
 import Image from 'next/image';
 import { Plus, Sparkles, ChevronRight } from 'lucide-react';
 import { useAuthStore, useWardrobeStore } from '@/lib/store';
@@ -45,7 +45,7 @@ export default function DashboardPage() {
       <WeatherBanner />
 
       {/* AI suggestion card */}
-      <Link href="/outfits/create" className="block rounded-2xl bg-gradient-to-r from-purple-50 to-pink-50 p-4">
+      <a href="/outfits/create" className="block rounded-2xl bg-gradient-to-r from-purple-50 to-pink-50 p-4">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-white/80 p-2">
             <Sparkles className="h-5 w-5 text-purple-600" />
@@ -56,20 +56,20 @@ export default function DashboardPage() {
           </div>
           <ChevronRight className="h-5 w-5 text-gray-400" />
         </div>
-      </Link>
+      </a>
 
       {/* Recent items */}
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-gray-900">Derniers ajouts</h2>
-          <Link href="/wardrobe" className="text-xs font-medium text-gray-500 hover:text-gray-700">
+          <a href="/wardrobe" className="text-xs font-medium text-gray-500 hover:text-gray-700">
             Tout voir
-          </Link>
+          </a>
         </div>
         {recentItems.length > 0 ? (
           <div className="grid grid-cols-3 gap-2">
             {recentItems.map((item) => (
-              <Link key={item.id} href={`/wardrobe/${item.id}`} className="relative aspect-square overflow-hidden rounded-xl bg-gray-100">
+              <a key={item.id} href={`/wardrobe/${item.id}`} className="relative aspect-square overflow-hidden rounded-xl bg-gray-100">
                 <Image
                   src={item.bg_removed_url || item.photo_url}
                   alt={item.category}
@@ -77,7 +77,7 @@ export default function DashboardPage() {
                   className="object-cover"
                   sizes="120px"
                 />
-              </Link>
+              </a>
             ))}
           </div>
         ) : (
@@ -102,12 +102,12 @@ export default function DashboardPage() {
       </div>
 
       {/* FAB */}
-      <Link
+      <a
         href="/wardrobe/add"
         className="fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-black text-white shadow-lg hover:bg-gray-800 lg:right-8"
       >
         <Plus className="h-6 w-6" />
-      </Link>
+      </a>
     </div>
   );
 }

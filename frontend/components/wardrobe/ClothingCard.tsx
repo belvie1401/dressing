@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+
 import Image from 'next/image';
 import type { ClothingItem } from '@/types';
 import WearBadge from './WearBadge';
@@ -22,7 +22,7 @@ export default function ClothingCard({ item }: ClothingCardProps) {
   const imageUrl = item.bg_removed_url || item.photo_url;
 
   return (
-    <Link href={`/wardrobe/${item.id}`} className="group relative block overflow-hidden rounded-xl bg-gray-50">
+    <a href={`/wardrobe/${item.id}`} className="group relative block overflow-hidden rounded-xl bg-gray-50">
       <div className="relative aspect-square">
         {imageUrl ? (
           <Image
@@ -54,6 +54,6 @@ export default function ClothingCard({ item }: ClothingCardProps) {
           <p className="truncate text-xs text-gray-500">{item.brand}</p>
         </div>
       )}
-    </Link>
+    </a>
   );
 }

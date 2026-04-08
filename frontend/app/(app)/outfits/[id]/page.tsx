@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
+
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import type { Outfit } from '@/types';
 import { api } from '@/lib/api';
@@ -47,9 +47,9 @@ export default function OutfitDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/outfits" className="rounded-lg p-1 hover:bg-gray-100">
+        <a href="/outfits" className="rounded-lg p-1 hover:bg-gray-100">
           <ArrowLeft className="h-5 w-5 text-gray-600" />
-        </Link>
+        </a>
         <h1 className="text-xl font-bold text-gray-900">{outfit.name}</h1>
       </div>
 

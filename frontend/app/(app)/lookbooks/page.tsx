@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+
 import type { Lookbook } from '@/types';
 import { api } from '@/lib/api';
 
@@ -42,7 +42,7 @@ export default function LookbooksPage() {
           {lookbooks.map((lb) => {
             const status = statusLabels[lb.status] || statusLabels.DRAFT;
             return (
-              <Link
+              <a
                 key={lb.id}
                 href={`/lookbooks/${lb.id}`}
                 className="block rounded-2xl bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
@@ -59,7 +59,7 @@ export default function LookbooksPage() {
                 <p className="mt-2 text-[10px] text-gray-400">
                   {lb.outfits?.length || 0} tenues • Par {lb.stylist?.name || 'Styliste'}
                 </p>
-              </Link>
+              </a>
             );
           })}
         </div>

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+
 import WardrobeScanner, { type ScanResult } from '@/components/wardrobe/WardrobeScanner';
 import { api } from '@/lib/api';
 import { useWardrobeStore } from '@/lib/store';
@@ -47,9 +47,9 @@ export default function WardrobeAddPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/wardrobe" className="rounded-lg p-1 hover:bg-gray-100">
+        <a href="/wardrobe" className="rounded-lg p-1 hover:bg-gray-100">
           <ArrowLeft className="h-5 w-5 text-gray-600" />
-        </Link>
+        </a>
         <h1 className="text-xl font-bold text-gray-900">Ajouter un vêtement</h1>
       </div>
 

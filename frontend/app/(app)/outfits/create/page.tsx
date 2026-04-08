@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+
 import { ArrowLeft } from 'lucide-react';
 import OutfitBuilder from '@/components/outfits/OutfitBuilder';
 import { api } from '@/lib/api';
@@ -23,9 +23,9 @@ export default function OutfitCreatePage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/outfits" className="rounded-lg p-1 hover:bg-gray-100">
+        <a href="/outfits" className="rounded-lg p-1 hover:bg-gray-100">
           <ArrowLeft className="h-5 w-5 text-gray-600" />
-        </Link>
+        </a>
         <h1 className="text-xl font-bold text-gray-900">Créer une tenue</h1>
       </div>
 

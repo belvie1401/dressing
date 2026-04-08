@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
+
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import type { Lookbook } from '@/types';
 import { api } from '@/lib/api';
@@ -42,9 +42,9 @@ export default function LookbookDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/lookbooks" className="rounded-lg p-1 hover:bg-gray-100">
+        <a href="/lookbooks" className="rounded-lg p-1 hover:bg-gray-100">
           <ArrowLeft className="h-5 w-5 text-gray-600" />
-        </Link>
+        </a>
         <h1 className="text-xl font-bold text-gray-900">Lookbook</h1>
       </div>
 

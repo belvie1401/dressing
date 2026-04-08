@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
+
 import { ArrowLeft } from 'lucide-react';
 import type { User } from '@/types';
 import { api } from '@/lib/api';
@@ -29,9 +29,9 @@ export default function MessageDetailPage() {
   return (
     <div className="flex h-[calc(100vh-6rem)] flex-col">
       <div className="flex items-center gap-3 pb-2">
-        <Link href="/messages" className="rounded-lg p-1 hover:bg-gray-100">
+        <a href="/messages" className="rounded-lg p-1 hover:bg-gray-100">
           <ArrowLeft className="h-5 w-5 text-gray-600" />
-        </Link>
+        </a>
       </div>
       <div className="flex-1 overflow-hidden rounded-2xl bg-white shadow-sm">
         <ChatWindow
