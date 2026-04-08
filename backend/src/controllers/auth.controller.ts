@@ -111,6 +111,12 @@ export async function getMe(req: Request, res: Response): Promise<void> {
       return;
     }
 
+    // Strip password from style_profile before returning
+    if (user.style_profile && typeof user.style_profile === 'object') {
+      const { password, ...safeProfile } = user.style_profile as Record<string, unknown>;
+      (user as any).style_profile = Object.keys(safeProfile).length > 0 ? safeProfile : null;
+    }
+
     res.json({ success: true, data: user });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Erreur serveur' });

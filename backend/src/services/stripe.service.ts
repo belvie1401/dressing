@@ -2,7 +2,8 @@ import Stripe from 'stripe';
 import { Request } from 'express';
 import prisma from '../lib/prisma';
 
-const stripe = new (Stripe as any)(process.env.STRIPE_SECRET_KEY || '');
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+const stripe = stripeKey ? new (Stripe as any)(stripeKey) : null;
 
 const PLAN_PRICES: Record<string, string> = {
   CLIENT_PRO: process.env.STRIPE_CLIENT_PRO_PRICE_ID || '',
@@ -13,6 +14,7 @@ export async function createCheckoutSession(
   userId: string,
   plan: string
 ): Promise<any> {
+  if (!stripe) throw new Error('Stripe non configuré');
   const priceId = PLAN_PRICES[plan];
   if (!priceId) {
     throw new Error('Plan invalide');
@@ -40,6 +42,7 @@ export async function handleWebhook(req: Request): Promise<void> {
   const sig = req.headers['stripe-signature'] as string;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+  if (!stripe) throw new Error('Stripe non configuré');
   if (!webhookSecret) {
     throw new Error('Webhook secret not configured');
   }
@@ -99,5 +102,6 @@ export async function handleWebhook(req: Request): Promise<void> {
 }
 
 export async function cancelSubscription(subscriptionId: string): Promise<void> {
+  if (!stripe) throw new Error('Stripe non configuré');
   await stripe.subscriptions.cancel(subscriptionId);
 }
