@@ -39,8 +39,8 @@ const strategies: Array<{ name: string; config: pg.PoolConfig }> = isRender
         config: { host: dbConfig.host, port: dbConfig.port, database: dbConfig.database, user: dbConfig.user, password: dbConfig.password, ssl: true, connectionTimeoutMillis: 30000, max: 10 },
       },
       {
-        name: 'Connection string with sslmode',
-        config: { connectionString: connectionString + (connectionString.includes('sslmode') ? '' : '?sslmode=require'), connectionTimeoutMillis: 30000, max: 10 },
+        name: 'Connection string with libpq compat',
+        config: { connectionString: connectionString.replace(/\?.*$/, '') + '?uselibpqcompat=true&sslmode=require', connectionTimeoutMillis: 30000, max: 10 },
       },
     ]
   : [
@@ -81,32 +81,43 @@ export async function initDatabase(): Promise<PrismaClient> {
   console.log('DB host:', dbConfig.host);
   console.log('DB internal host:', internalHost);
 
-  for (const strategy of strategies) {
-    console.log(`Trying DB strategy: ${strategy.name}...`);
-    const testClient = new pg.Client({ ...strategy.config, connectionTimeoutMillis: strategy.config.connectionTimeoutMillis || 10000 } as any);
-    try {
-      await testClient.connect();
-      console.log(`DB strategy "${strategy.name}" works!`);
+  const maxRounds = 4;
+  for (let round = 1; round <= maxRounds; round++) {
+    console.log(`\n=== Connection round ${round}/${maxRounds} ===`);
 
-      // Create tables using the working connection
-      console.log('Creating tables...');
-      await testClient.query(setupSchema);
-      console.log('Tables created successfully!');
-      await testClient.end();
+    for (const strategy of strategies) {
+      console.log(`Trying DB strategy: ${strategy.name}...`);
+      const testClient = new pg.Client({ ...strategy.config, connectionTimeoutMillis: strategy.config.connectionTimeoutMillis || 10000 } as any);
+      try {
+        await testClient.connect();
+        console.log(`DB strategy "${strategy.name}" works!`);
 
-      // Create pool with the working strategy
-      const pool = new pg.Pool(strategy.config);
-      pool.on('error', () => {});
-      const adapter = new PrismaPg(pool);
-      prisma = new PrismaClient({ adapter });
-      return prisma;
-    } catch (err: any) {
-      console.error(`  Failed: ${err.message}`);
-      try { await testClient.end(); } catch (_) {}
+        // Create tables using the working connection
+        console.log('Creating tables...');
+        await testClient.query(setupSchema);
+        console.log('Tables created successfully!');
+        await testClient.end();
+
+        // Create pool with the working strategy
+        const pool = new pg.Pool(strategy.config);
+        pool.on('error', () => {});
+        const adapter = new PrismaPg(pool);
+        prisma = new PrismaClient({ adapter });
+        return prisma;
+      } catch (err: any) {
+        console.error(`  Failed: ${err.message}`);
+        try { await testClient.end(); } catch (_) {}
+      }
+    }
+
+    if (round < maxRounds) {
+      const delay = round * 5000;
+      console.log(`All strategies failed. Waiting ${delay / 1000}s before retry...`);
+      await new Promise(r => setTimeout(r, delay));
     }
   }
 
-  throw new Error('All database connection strategies failed');
+  throw new Error('All database connection strategies failed after all retries');
 }
 
 // Also export a lazy default for imports that don't use initDatabase
