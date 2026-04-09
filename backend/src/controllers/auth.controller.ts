@@ -38,6 +38,7 @@ export async function register(req: Request, res: Response): Promise<void> {
       },
     });
   } catch (error) {
+    console.error('Register error:', error);
     res.status(500).json({ success: false, error: 'Erreur lors de l\'inscription' });
   }
 }
@@ -86,6 +87,7 @@ export async function login(req: Request, res: Response): Promise<void> {
       },
     });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ success: false, error: 'Erreur lors de la connexion' });
   }
 }
