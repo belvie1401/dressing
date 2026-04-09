@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   format,
   startOfMonth,
@@ -42,25 +41,29 @@ export default function CalendarView({ entries, onDayClick }: CalendarViewProps)
       <div className="flex items-center justify-between">
         <button
           onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          className="rounded-lg p-2 hover:bg-gray-100"
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F0F0F0]"
         >
-          <ChevronLeft className="h-5 w-5 text-gray-600" />
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
         </button>
-        <h2 className="text-sm font-semibold capitalize text-gray-900">
+        <h2 className="text-sm font-semibold capitalize text-[#0D0D0D]">
           {format(currentMonth, 'MMMM yyyy', { locale: fr })}
         </h2>
         <button
           onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          className="rounded-lg p-2 hover:bg-gray-100"
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F0F0F0]"
         >
-          <ChevronRight className="h-5 w-5 text-gray-600" />
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
         </button>
       </div>
 
       {/* Day names */}
       <div className="grid grid-cols-7 gap-1">
         {dayNames.map((name) => (
-          <div key={name} className="text-center text-xs font-medium text-gray-400 py-1">
+          <div key={name} className="py-1 text-center text-xs font-medium text-[#8A8A8A]">
             {name}
           </div>
         ))}
@@ -77,17 +80,17 @@ export default function CalendarView({ entries, onDayClick }: CalendarViewProps)
             <button
               key={day.toISOString()}
               onClick={() => onDayClick(day)}
-              className={`relative flex aspect-square flex-col items-center justify-center rounded-lg text-sm transition-colors ${
+              className={`relative flex aspect-square flex-col items-center justify-center rounded-xl text-sm transition-colors ${
                 !isCurrentMonth
-                  ? 'text-gray-300'
+                  ? 'text-[#E5E5E5]'
                   : isToday
-                  ? 'bg-black text-white font-semibold'
-                  : 'text-gray-700 hover:bg-gray-100'
+                  ? 'bg-[#0D0D0D] font-semibold text-white'
+                  : 'text-[#0D0D0D] hover:bg-[#F0F0F0]'
               }`}
             >
               {format(day, 'd')}
               {entry && (
-                <span className="absolute bottom-1 h-1.5 w-1.5 rounded-full bg-purple-500" />
+                <span className="absolute bottom-1 h-1.5 w-1.5 rounded-full bg-[#0D0D0D]" />
               )}
             </button>
           );

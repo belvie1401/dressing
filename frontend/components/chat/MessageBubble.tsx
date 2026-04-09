@@ -15,8 +15,8 @@ export default function MessageBubble({ message, isOwn }: MessageBubbleProps) {
       <div
         className={`max-w-[75%] rounded-2xl px-4 py-2 ${
           isOwn
-            ? 'rounded-br-md bg-black text-white'
-            : 'rounded-bl-md bg-gray-100 text-gray-900'
+            ? 'rounded-br-md bg-[#0D0D0D] text-white'
+            : 'rounded-bl-md bg-[#F0F0F0] text-[#0D0D0D]'
         }`}
       >
         {message.type === 'IMAGE' && message.metadata && (
@@ -30,7 +30,7 @@ export default function MessageBubble({ message, isOwn }: MessageBubbleProps) {
         <p className="text-sm">{message.content}</p>
         <p
           className={`mt-1 text-[10px] ${
-            isOwn ? 'text-white/60' : 'text-gray-400'
+            isOwn ? 'text-white/60' : 'text-[#8A8A8A]'
           }`}
         >
           {format(new Date(message.created_at), 'HH:mm', { locale: fr })}

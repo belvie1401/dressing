@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Sparkles, X } from 'lucide-react';
 import type { ClothingItem } from '@/types';
 import { api } from '@/lib/api';
 
@@ -46,24 +45,24 @@ export default function OutfitBuilder({ onSave }: OutfitBuilderProps) {
   };
 
   if (isLoading) {
-    return <div className="py-8 text-center text-sm text-gray-500">Chargement...</div>;
+    return <div className="py-8 text-center text-sm text-[#8A8A8A]">Chargement...</div>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Name input */}
       <input
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Nom de la tenue..."
-        className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-black focus:outline-none"
+        className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
       />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         {/* Wardrobe items */}
         <div>
-          <h3 className="mb-3 text-sm font-semibold text-gray-900">Votre dressing</h3>
+          <h3 className="mb-3 text-sm font-semibold text-[#0D0D0D]">Votre dressing</h3>
           <div className="grid grid-cols-3 gap-2 md:grid-cols-4">
             {wardrobe.map((item) => {
               const isSelected = selectedIds.has(item.id);
@@ -71,8 +70,8 @@ export default function OutfitBuilder({ onSave }: OutfitBuilderProps) {
                 <button
                   key={item.id}
                   onClick={() => toggleItem(item.id)}
-                  className={`relative aspect-square overflow-hidden rounded-xl border-2 transition-all ${
-                    isSelected ? 'border-black ring-2 ring-black/20' : 'border-transparent'
+                  className={`relative aspect-square overflow-hidden rounded-2xl border-2 transition-all ${
+                    isSelected ? 'border-[#0D0D0D] ring-2 ring-[#0D0D0D]/20' : 'border-transparent'
                   }`}
                 >
                   <Image
@@ -83,9 +82,11 @@ export default function OutfitBuilder({ onSave }: OutfitBuilderProps) {
                     sizes="100px"
                   />
                   {isSelected && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                      <div className="rounded-full bg-black p-1">
-                        <Check className="h-3 w-3 text-white" />
+                    <div className="absolute inset-0 flex items-center justify-center bg-[#0D0D0D]/20">
+                      <div className="rounded-full bg-[#0D0D0D] p-1">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
                       </div>
                     </div>
                   )}
@@ -97,17 +98,17 @@ export default function OutfitBuilder({ onSave }: OutfitBuilderProps) {
 
         {/* Selected items canvas */}
         <div>
-          <h3 className="mb-3 text-sm font-semibold text-gray-900">
+          <h3 className="mb-3 text-sm font-semibold text-[#0D0D0D]">
             Tenue ({selectedItems.length} articles)
           </h3>
           {selectedItems.length === 0 ? (
-            <div className="flex h-64 items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 text-sm text-gray-400">
+            <div className="flex h-64 items-center justify-center rounded-2xl border-2 border-dashed border-[#E5E5E5] text-sm text-[#8A8A8A]">
               Sélectionnez des vêtements
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-2">
               {selectedItems.map((item) => (
-                <div key={item.id} className="relative aspect-square overflow-hidden rounded-xl">
+                <div key={item.id} className="relative aspect-square overflow-hidden rounded-2xl">
                   <Image
                     src={item.bg_removed_url || item.photo_url}
                     alt={item.category}
@@ -117,9 +118,11 @@ export default function OutfitBuilder({ onSave }: OutfitBuilderProps) {
                   />
                   <button
                     onClick={() => toggleItem(item.id)}
-                    className="absolute right-1 top-1 rounded-full bg-black/50 p-1 text-white"
+                    className="absolute right-1.5 top-1.5 rounded-full bg-[#0D0D0D]/50 p-1 text-white"
                   >
-                    <X className="h-3 w-3" />
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
                   </button>
                 </div>
               ))}
@@ -133,23 +136,17 @@ export default function OutfitBuilder({ onSave }: OutfitBuilderProps) {
         <button
           onClick={handleSave}
           disabled={!name.trim() || selectedIds.size === 0}
-          className="flex-1 rounded-full bg-black py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-40"
+          className="flex-1 rounded-full bg-[#0D0D0D] py-3 text-sm font-medium text-white disabled:opacity-40"
         >
           Enregistrer la tenue
         </button>
-        <button className="flex items-center gap-2 rounded-full bg-purple-100 px-5 py-3 text-sm font-medium text-purple-700 hover:bg-purple-200">
-          <Sparkles className="h-4 w-4" />
+        <button className="flex items-center gap-2 rounded-full bg-[#F0F0F0] px-5 py-3 text-sm font-medium text-[#0D0D0D]">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 3l1.5 4.5H18l-3.5 2.5L16 14.5 12 11.5 8 14.5l1.5-4.5L6 7.5h4.5z" />
+          </svg>
           Générer avec l&apos;IA
         </button>
       </div>
     </div>
-  );
-}
-
-function Check({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
   );
 }

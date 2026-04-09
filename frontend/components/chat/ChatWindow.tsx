@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Send } from 'lucide-react';
 import type { Message } from '@/types';
 import { useAuthStore, useChatStore } from '@/lib/store';
 import { getSocket } from '@/lib/socket';
@@ -67,9 +66,9 @@ export default function ChatWindow({ recipientId, recipientName, isOnline }: Cha
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="border-b border-gray-100 px-4 py-3">
+      <div className="border-b border-[#F0F0F0] px-4 py-3">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold text-gray-900">{recipientName}</h2>
+          <h2 className="text-sm font-semibold text-[#0D0D0D]">{recipientName}</h2>
           {isOnline && (
             <span className="h-2 w-2 rounded-full bg-green-500" />
           )}
@@ -89,7 +88,7 @@ export default function ChatWindow({ recipientId, recipientName, isOnline }: Cha
       </div>
 
       {/* Input */}
-      <div className="border-t border-gray-100 p-3">
+      <div className="border-t border-[#F0F0F0] p-3">
         <div className="flex items-center gap-2">
           <input
             type="text"
@@ -97,14 +96,16 @@ export default function ChatWindow({ recipientId, recipientName, isOnline }: Cha
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Écrire un message..."
-            className="flex-1 rounded-full border border-gray-200 px-4 py-2 text-sm focus:border-black focus:outline-none"
+            className="flex-1 rounded-full border border-[#E5E5E5] bg-white px-4 py-2 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
           />
           <button
             onClick={handleSend}
             disabled={!input.trim()}
-            className="rounded-full bg-black p-2 text-white hover:bg-gray-800 disabled:opacity-40"
+            className="rounded-full bg-[#0D0D0D] p-2 text-white disabled:opacity-40"
           >
-            <Send className="h-4 w-4" />
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
           </button>
         </div>
       </div>
