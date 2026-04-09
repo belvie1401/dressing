@@ -56,7 +56,7 @@ app.use('/api/weather', weatherRoutes);
 app.use('/api/subscriptions', subscriptionsRoutes);
 
 // Health check
-app.get('/api/health', (_req, res) => {
+app.get('/api/health', (_req: any, res: any) => {
   res.json({ success: true, data: { status: 'ok' } });
 });
 

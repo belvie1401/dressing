@@ -3,7 +3,7 @@ import path from 'path';
 
 const storage = multer.memoryStorage();
 
-const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (_req: any, file: any, cb: any) => {
   const allowedTypes = /jpeg|jpg|png|webp|heic/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = allowedTypes.test(file.mimetype);
