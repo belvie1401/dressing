@@ -17,40 +17,21 @@ function parseDbUrl(dbUrl: string) {
 }
 
 const dbConfig = parseDbUrl(connectionString);
-const isRender = dbConfig.host.includes('render.com');
-const internalHost = dbConfig.host.replace(/\.oregon-postgres\.render\.com$/, '');
+const needsSSL = dbConfig.host.includes('neon.tech') || dbConfig.host.includes('render.com') || process.env.NODE_ENV === 'production';
 
-const strategies: Array<{ name: string; config: pg.PoolConfig }> = isRender
-  ? [
-      {
-        name: 'Internal (no SSL)',
-        config: { host: internalHost, port: dbConfig.port, database: dbConfig.database, user: dbConfig.user, password: dbConfig.password, ssl: false, connectionTimeoutMillis: 10000, max: 10 },
-      },
-      {
-        name: 'External SSL rejectUnauthorized=false',
-        config: { host: dbConfig.host, port: dbConfig.port, database: dbConfig.database, user: dbConfig.user, password: dbConfig.password, ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 30000, max: 10 },
-      },
-      {
-        name: 'External SSL with servername',
-        config: { host: dbConfig.host, port: dbConfig.port, database: dbConfig.database, user: dbConfig.user, password: dbConfig.password, ssl: { rejectUnauthorized: false, servername: dbConfig.host } as any, connectionTimeoutMillis: 30000, max: 10 },
-      },
-      {
-        name: 'External SSL true',
-        config: { host: dbConfig.host, port: dbConfig.port, database: dbConfig.database, user: dbConfig.user, password: dbConfig.password, ssl: true, connectionTimeoutMillis: 30000, max: 10 },
-      },
-      {
-        name: 'Connection string with libpq compat',
-        config: { connectionString: connectionString.replace(/\?.*$/, '') + '?uselibpqcompat=true&sslmode=require', connectionTimeoutMillis: 30000, max: 10 },
-      },
-    ]
-  : [
-      {
-        name: 'Local (no SSL)',
-        config: { host: dbConfig.host, port: dbConfig.port, database: dbConfig.database, user: dbConfig.user, password: dbConfig.password, ssl: false, connectionTimeoutMillis: 10000, max: 10 },
-      },
-    ];
+console.log('DB config:', { host: dbConfig.host, port: dbConfig.port, database: dbConfig.database, ssl: needsSSL });
 
-let prisma: PrismaClient;
+const pool = new pg.Pool({
+  host: dbConfig.host,
+  port: dbConfig.port,
+  database: dbConfig.database,
+  user: dbConfig.user,
+  password: dbConfig.password,
+  ssl: needsSSL ? { rejectUnauthorized: false } : false,
+  connectionTimeoutMillis: 30000,
+  max: 10,
+});
+pool.on('error', () => {});
 
 const setupSchema = `
 DO $$ BEGIN CREATE TYPE "Role" AS ENUM ('CLIENT', 'STYLIST', 'ADMIN'); EXCEPTION WHEN duplicate_object THEN null; END $$;
@@ -75,52 +56,33 @@ CREATE TABLE IF NOT EXISTS "Subscription" ("id" TEXT NOT NULL DEFAULT gen_random
 CREATE UNIQUE INDEX IF NOT EXISTS "Subscription_user_id_key" ON "Subscription"("user_id");
 `;
 
+let prisma: PrismaClient;
+
 export async function initDatabase(): Promise<PrismaClient> {
   if (prisma) return prisma;
 
-  console.log('DB host:', dbConfig.host);
-  console.log('DB internal host:', internalHost);
+  // Try connecting with retries
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      console.log(`DB connection attempt ${attempt}/3...`);
+      const client = await pool.connect();
+      console.log('Connected! Creating tables...');
+      await client.query(setupSchema);
+      console.log('Tables created successfully!');
+      client.release();
 
-  const maxRounds = 4;
-  for (let round = 1; round <= maxRounds; round++) {
-    console.log(`\n=== Connection round ${round}/${maxRounds} ===`);
-
-    for (const strategy of strategies) {
-      console.log(`Trying DB strategy: ${strategy.name}...`);
-      const testClient = new pg.Client({ ...strategy.config, connectionTimeoutMillis: strategy.config.connectionTimeoutMillis || 10000 } as any);
-      try {
-        await testClient.connect();
-        console.log(`DB strategy "${strategy.name}" works!`);
-
-        // Create tables using the working connection
-        console.log('Creating tables...');
-        await testClient.query(setupSchema);
-        console.log('Tables created successfully!');
-        await testClient.end();
-
-        // Create pool with the working strategy
-        const pool = new pg.Pool(strategy.config);
-        pool.on('error', () => {});
-        const adapter = new PrismaPg(pool);
-        prisma = new PrismaClient({ adapter });
-        return prisma;
-      } catch (err: any) {
-        console.error(`  Failed: ${err.message}`);
-        try { await testClient.end(); } catch (_) {}
-      }
-    }
-
-    if (round < maxRounds) {
-      const delay = round * 5000;
-      console.log(`All strategies failed. Waiting ${delay / 1000}s before retry...`);
-      await new Promise(r => setTimeout(r, delay));
+      const adapter = new PrismaPg(pool);
+      prisma = new PrismaClient({ adapter });
+      return prisma;
+    } catch (err: any) {
+      console.error(`  Attempt ${attempt} failed:`, err.message);
+      if (attempt < 3) await new Promise(r => setTimeout(r, 5000));
     }
   }
 
-  throw new Error('All database connection strategies failed after all retries');
+  throw new Error('Database connection failed after 3 attempts');
 }
 
-// Also export a lazy default for imports that don't use initDatabase
 export default new Proxy({} as PrismaClient, {
   get(_target, prop) {
     if (!prisma) throw new Error('Database not initialized. Call initDatabase() first.');
