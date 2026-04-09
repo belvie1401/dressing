@@ -30,24 +30,29 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <div className="flex min-h-screen items-center justify-center px-5" style={{ background: 'var(--color-app-bg)' }}>
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Créer un compte</h1>
-          <p className="mt-2 text-sm text-gray-500">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#0D0D0D]">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-[#0D0D0D]">Créer un compte</h1>
+          <p className="mt-2 text-sm text-[#8A8A8A]">
             Commencez à organiser votre dressing
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
+            <div className="rounded-2xl bg-red-50 p-3 text-sm text-red-600">
               {error}
             </div>
           )}
 
           <div>
-            <label htmlFor="name" className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-[#0D0D0D]">
               Nom
             </label>
             <input
@@ -56,13 +61,13 @@ export default function RegisterPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-black focus:outline-none"
+              className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
               placeholder="Votre nom"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-[#0D0D0D]">
               Email
             </label>
             <input
@@ -71,13 +76,13 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-black focus:outline-none"
+              className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
               placeholder="votre@email.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-[#0D0D0D]">
               Mot de passe
             </label>
             <input
@@ -87,7 +92,7 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-black focus:outline-none"
+              className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
               placeholder="Minimum 6 caractères"
             />
           </div>
@@ -95,22 +100,22 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-black py-3 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-50"
+            className="flex w-full items-center justify-center rounded-full bg-[#0D0D0D] py-3.5 text-sm font-semibold text-white disabled:opacity-50"
           >
             {isLoading ? 'Chargement...' : 'Créer mon compte'}
           </button>
 
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-200 bg-white py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-[#E5E5E5] bg-white py-3.5 text-sm font-medium text-[#0D0D0D]"
           >
             Continuer avec Google
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
+        <p className="mt-6 text-center text-sm text-[#8A8A8A]">
           Déjà un compte ?{' '}
-          <a href="/login" className="font-medium text-black hover:underline">
+          <a href="/login" className="font-semibold text-[#0D0D0D]">
             Se connecter
           </a>
         </p>

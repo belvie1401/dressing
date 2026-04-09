@@ -1,10 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Image from 'next/image';
-
-import { ArrowLeft, Loader2 } from 'lucide-react';
 import type { ClothingItem } from '@/types';
 import { api } from '@/lib/api';
 import WearBadge from '@/components/wardrobe/WearBadge';
@@ -13,9 +11,16 @@ const categoryLabels: Record<string, string> = {
   TOP: 'Haut', BOTTOM: 'Bas', DRESS: 'Robe', JACKET: 'Veste', SHOES: 'Chaussures', ACCESSORY: 'Accessoire',
 };
 
+const seasonLabels: Record<string, string> = {
+  SUMMER: 'Été', WINTER: 'Hiver', ALL: 'Toute saison',
+};
+
+const occasionLabels: Record<string, string> = {
+  CASUAL: 'Casual', WORK: 'Travail', EVENING: 'Soirée', SPORT: 'Sport',
+};
+
 export default function WardrobeItemPage() {
   const { id } = useParams<{ id: string }>();
-  const router = useRouter();
   const [item, setItem] = useState<ClothingItem | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -41,69 +46,91 @@ export default function WardrobeItemPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#0D0D0D] border-t-transparent" />
       </div>
     );
   }
 
   if (!item) {
-    return <div className="py-16 text-center text-sm text-gray-500">Vêtement non trouvé</div>;
+    return <div className="py-16 text-center text-sm text-[#8A8A8A]">Vêtement non trouvé</div>;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <a href="/wardrobe" className="rounded-lg p-1 hover:bg-gray-100">
-          <ArrowLeft className="h-5 w-5 text-gray-600" />
+    <div className="space-y-5">
+      {/* Back button */}
+      <div className="flex items-center gap-3 pt-2">
+        <a href="/wardrobe" className="flex h-10 w-10 items-center justify-center rounded-full bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
         </a>
-        <h1 className="text-xl font-bold text-gray-900">{categoryLabels[item.category] || item.category}</h1>
+        <h1 className="text-lg font-semibold text-[#0D0D0D]">Détails</h1>
       </div>
 
-      {/* Photo */}
-      <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100">
+      {/* Large product photo */}
+      <div className="relative aspect-square overflow-hidden rounded-3xl" style={{ background: 'var(--color-app-bg)' }}>
         <Image
           src={item.bg_removed_url || item.photo_url}
           alt={item.category}
           fill
-          className="object-cover"
+          className="object-contain p-6"
           sizes="(max-width: 768px) 100vw, 500px"
         />
       </div>
 
-      {/* Wear badge */}
-      <div className="flex items-center justify-between">
-        <WearBadge wearCount={item.wear_count} lastWornAt={item.last_worn_at} size="lg" />
-        {item.brand && <span className="text-sm text-gray-500">{item.brand}</span>}
-      </div>
+      {/* Product info card */}
+      <div className="rounded-3xl bg-white p-5" style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.06)' }}>
+        {/* Name + category pill */}
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-[#0D0D0D]">
+              {item.brand || categoryLabels[item.category] || item.category}
+            </h2>
+            {item.brand && (
+              <p className="text-sm text-[#8A8A8A] mt-0.5">{categoryLabels[item.category]}</p>
+            )}
+          </div>
+          <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#0D0D0D]">
+            {categoryLabels[item.category]}
+          </span>
+        </div>
 
-      {/* Mark worn button */}
-      <button
-        onClick={handleMarkWorn}
-        className="w-full rounded-full bg-black py-3 text-sm font-semibold text-white hover:bg-gray-800"
-      >
-        Marquer comme porté aujourd&apos;hui
-      </button>
+        {/* Price */}
+        {item.purchase_price && (
+          <p className="mt-2 text-xl font-bold text-[#0D0D0D]">{item.purchase_price.toFixed(2)}€</p>
+        )}
 
-      {/* Tags */}
-      <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-gray-700">Détails</h3>
-        <div className="flex flex-wrap gap-2">
-          <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">{item.season}</span>
-          <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">{item.occasion}</span>
-          {item.material && <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">{item.material}</span>}
+        {/* Wear badge */}
+        <div className="mt-3">
+          <WearBadge wearCount={item.wear_count} lastWornAt={item.last_worn_at} size="lg" />
+        </div>
+
+        {/* Tags */}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#0D0D0D]">{seasonLabels[item.season] || item.season}</span>
+          <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#0D0D0D]">{occasionLabels[item.occasion] || item.occasion}</span>
+          {item.material && <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#0D0D0D]">{item.material}</span>}
           {item.colors.map((c) => (
-            <span key={c} className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">{c}</span>
+            <span key={c} className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#0D0D0D]">{c}</span>
           ))}
         </div>
-      </div>
 
-      {/* Create outfit CTA */}
-      <a
-        href="/outfits/create"
-        className="block w-full rounded-full border border-gray-200 py-3 text-center text-sm font-medium text-gray-700 hover:bg-gray-50"
-      >
-        Créer un look avec cet article
-      </a>
+        {/* CTA buttons */}
+        <div className="mt-5 flex gap-3">
+          <button
+            onClick={handleMarkWorn}
+            className="flex-1 rounded-full border border-[#0D0D0D] py-3 text-center text-sm font-semibold text-[#0D0D0D]"
+          >
+            Marquer porté
+          </button>
+          <a
+            href="/outfits/create"
+            className="flex-1 rounded-full bg-[#0D0D0D] py-3 text-center text-sm font-semibold text-white"
+          >
+            Créer un look
+          </a>
+        </div>
+      </div>
     </div>
   );
 }

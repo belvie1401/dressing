@@ -30,29 +30,34 @@ export default function CalendarPage() {
     : null;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-xl font-bold text-gray-900">Agenda</h1>
+    <div className="space-y-5">
+      <h1 className="text-2xl font-bold text-[#0D0D0D] pt-2">Agenda</h1>
 
-      <div className="rounded-2xl bg-white p-4 shadow-sm">
+      <div className="rounded-2xl bg-white p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <CalendarView entries={entries} onDayClick={setSelectedDate} />
       </div>
 
       {selectedDate && (
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <h3 className="mb-2 text-sm font-semibold text-gray-900">
+        <div className="rounded-2xl bg-white p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+          <h3 className="mb-2 text-sm font-semibold text-[#0D0D0D]">
             {format(selectedDate, 'dd MMMM yyyy')}
           </h3>
           {selectedEntry ? (
             <div>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-[#0D0D0D]">
                 Tenue : {selectedEntry.outfit?.name || 'Non définie'}
               </p>
               {selectedEntry.notes && (
-                <p className="mt-1 text-xs text-gray-500">{selectedEntry.notes}</p>
+                <p className="mt-1 text-xs text-[#8A8A8A]">{selectedEntry.notes}</p>
               )}
             </div>
           ) : (
-            <p className="text-sm text-gray-400">Aucune tenue planifiée</p>
+            <div className="text-center py-4">
+              <p className="text-sm text-[#8A8A8A]">Aucune tenue planifiée</p>
+              <a href="/outfits" className="mt-2 inline-block text-xs font-medium text-[#0D0D0D] underline">
+                Choisir une tenue
+              </a>
+            </div>
           )}
         </div>
       )}

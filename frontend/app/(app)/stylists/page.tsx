@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search } from 'lucide-react';
 import type { User, StylistClient } from '@/types';
 import { api } from '@/lib/api';
 import StylistCard from '@/components/ui/StylistCard';
@@ -44,22 +43,24 @@ export default function StylistsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-gray-900">Stylistes</h1>
+      <h1 className="text-2xl font-bold text-[#0D0D0D] pt-2">Stylistes</h1>
 
       {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+      <div className="flex items-center gap-3 rounded-full px-4 py-3" style={{ background: '#EFEFEF' }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Rechercher un styliste..."
-          className="w-full rounded-xl border border-gray-200 py-3 pl-10 pr-4 text-sm focus:border-black focus:outline-none"
+          className="flex-1 bg-transparent text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:outline-none"
         />
       </div>
 
       {loading ? (
-        <div className="py-16 text-center text-sm text-gray-400">Chargement...</div>
+        <div className="py-16 text-center text-sm text-[#8A8A8A]">Chargement...</div>
       ) : (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {filtered.map((stylist) => (

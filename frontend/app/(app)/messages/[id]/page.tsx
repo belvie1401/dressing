@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-
-import { ArrowLeft } from 'lucide-react';
 import type { User } from '@/types';
 import { api } from '@/lib/api';
 import ChatWindow from '@/components/chat/ChatWindow';
@@ -13,7 +11,6 @@ export default function MessageDetailPage() {
   const [recipient, setRecipient] = useState<User | null>(null);
 
   useEffect(() => {
-    // Load recipient info from conversations or a dedicated endpoint
     const loadRecipient = async () => {
       const res = await api.get<{ contact: User }[]>('/messages');
       if (res.success && res.data) {
@@ -28,12 +25,20 @@ export default function MessageDetailPage() {
 
   return (
     <div className="flex h-[calc(100vh-6rem)] flex-col">
-      <div className="flex items-center gap-3 pb-2">
-        <a href="/messages" className="rounded-lg p-1 hover:bg-gray-100">
-          <ArrowLeft className="h-5 w-5 text-gray-600" />
+      <div className="flex items-center gap-3 pb-3 pt-2">
+        <a href="/messages" className="flex h-10 w-10 items-center justify-center rounded-full bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
         </a>
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F0F0F0] text-xs font-semibold text-[#8A8A8A]">
+            {recipient?.name?.charAt(0) || '?'}
+          </div>
+          <span className="text-sm font-semibold text-[#0D0D0D]">{recipient?.name || 'Chargement...'}</span>
+        </div>
       </div>
-      <div className="flex-1 overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="flex-1 overflow-hidden rounded-2xl bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <ChatWindow
           recipientId={id}
           recipientName={recipient?.name || 'Chargement...'}

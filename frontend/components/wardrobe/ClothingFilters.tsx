@@ -34,16 +34,16 @@ export default function ClothingFilters({
 }: ClothingFiltersProps) {
   return (
     <div className="space-y-3">
-      {/* Category pills */}
+      {/* Category pills - horizontal scroll */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {categories.map((cat) => (
           <button
             key={cat.value}
             onClick={() => onCategoryChange(cat.value)}
-            className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+            className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all ${
               selectedCategory === cat.value
-                ? 'bg-black text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-[#0D0D0D] text-white'
+                : 'bg-white text-[#0D0D0D] border border-[#E5E5E5]'
             }`}
           >
             {cat.label}
@@ -52,15 +52,15 @@ export default function ClothingFilters({
       </div>
 
       {/* Season selector */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide">
         {seasons.map((s) => (
           <button
             key={s.value}
             onClick={() => onSeasonChange(s.value)}
-            className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
+            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
               selectedSeason === s.value
-                ? 'bg-black text-white'
-                : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+                ? 'bg-[#0D0D0D] text-white'
+                : 'bg-[#F0F0F0] text-[#0D0D0D]'
             }`}
           >
             {s.label}

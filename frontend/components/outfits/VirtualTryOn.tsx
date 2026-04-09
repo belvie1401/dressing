@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, Loader2 } from 'lucide-react';
 
 interface VirtualTryOnProps {
   outfitId: string;
@@ -14,7 +13,6 @@ export default function VirtualTryOn({ outfitId, tryOnUrl }: VirtualTryOnProps) 
 
   const handleGenerate = async () => {
     setLoading(true);
-    // Virtual try-on API integration placeholder
     setTimeout(() => {
       setLoading(false);
     }, 2000);
@@ -27,17 +25,22 @@ export default function VirtualTryOn({ outfitId, tryOnUrl }: VirtualTryOnProps) 
           <img src={imageUrl} alt="Essayage virtuel" className="w-full" />
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-gray-200 py-12">
-          <Eye className="h-10 w-10 text-gray-300" />
-          <p className="text-sm text-gray-500">Essayage virtuel</p>
+        <div className="flex flex-col items-center gap-4 rounded-2xl bg-white py-12" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#F0F0F0]">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+            </svg>
+          </div>
+          <p className="text-sm font-medium text-[#0D0D0D]">Essayage virtuel</p>
+          <p className="text-xs text-[#8A8A8A]">Visualisez cette tenue sur vous</p>
           <button
             onClick={handleGenerate}
             disabled={loading}
-            className="flex items-center gap-2 rounded-full bg-black px-5 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-full bg-[#0D0D0D] px-6 py-2.5 text-sm font-medium text-white disabled:opacity-50"
           >
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 Génération...
               </>
             ) : (

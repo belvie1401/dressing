@@ -1,8 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-
-import { ArrowLeft } from 'lucide-react';
 import OutfitBuilder from '@/components/outfits/OutfitBuilder';
 import { api } from '@/lib/api';
 import type { Outfit } from '@/types';
@@ -21,12 +19,14 @@ export default function OutfitCreatePage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <a href="/outfits" className="rounded-lg p-1 hover:bg-gray-100">
-          <ArrowLeft className="h-5 w-5 text-gray-600" />
+    <div className="space-y-5">
+      <div className="flex items-center gap-3 pt-2">
+        <a href="/outfits" className="flex h-10 w-10 items-center justify-center rounded-full bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
         </a>
-        <h1 className="text-xl font-bold text-gray-900">Créer une tenue</h1>
+        <h1 className="text-lg font-semibold text-[#0D0D0D]">Créer une tenue</h1>
       </div>
 
       <OutfitBuilder onSave={handleSave} />

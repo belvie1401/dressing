@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LogOut, Crown } from 'lucide-react';
 import { useAuthStore, useWardrobeStore } from '@/lib/store';
 import StyleDNAProfile from '@/components/ai/StyleDNAProfile';
 import type { Subscription } from '@/types';
@@ -43,7 +42,6 @@ export default function ProfilePage() {
     ? items.reduce((max, i) => (i.wear_count > max.wear_count ? i : max), items[0])
     : null;
 
-  // Favorite color
   const colorCounts: Record<string, number> = {};
   for (const item of items) {
     for (const color of item.colors) {
@@ -53,10 +51,10 @@ export default function ProfilePage() {
   const favoriteColor = Object.entries(colorCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* User info */}
-      <div className="flex items-center gap-4">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-200 text-xl font-bold text-gray-500">
+      <div className="flex items-center gap-4 pt-2">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-blue-500 text-xl font-bold text-white">
           {user?.avatar_url ? (
             <img src={user.avatar_url} alt={user.name} className="h-full w-full rounded-full object-cover" />
           ) : (
@@ -64,29 +62,33 @@ export default function ProfilePage() {
           )}
         </div>
         <div>
-          <h1 className="text-lg font-bold text-gray-900">{user?.name}</h1>
-          <p className="text-sm text-gray-500">{user?.email}</p>
-          <span className="mt-1 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+          <h1 className="text-lg font-bold text-[#0D0D0D]">{user?.name}</h1>
+          <p className="text-sm text-[#8A8A8A]">{user?.email}</p>
+          <span className="mt-1 inline-block rounded-full bg-[#F0F0F0] px-2.5 py-0.5 text-xs font-medium text-[#0D0D0D]">
             {user?.role === 'STYLIST' ? 'Styliste' : 'Client'}
           </span>
         </div>
       </div>
 
       {/* Subscription */}
-      <div className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm">
-        <div className="flex items-center gap-2">
-          <Crown className="h-5 w-5 text-amber-500" />
+      <div className="flex items-center justify-between rounded-2xl bg-white p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-50">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" strokeWidth="1">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-sm font-semibold text-[#0D0D0D]">
               {planLabels[(subscription as any)?.plan] || 'Gratuit'}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-[#8A8A8A]">
               {subscription?.status === 'active' ? 'Actif' : 'Inactif'}
             </p>
           </div>
         </div>
         {(!subscription || (subscription as any)?.plan === 'FREE') && (
-          <button className="rounded-full bg-black px-4 py-2 text-xs font-medium text-white hover:bg-gray-800">
+          <button className="rounded-full bg-[#0D0D0D] px-4 py-2 text-xs font-medium text-white">
             Passer au Pro
           </button>
         )}
@@ -96,29 +98,29 @@ export default function ProfilePage() {
       <StyleDNAProfile />
 
       {/* Wardrobe stats */}
-      <div className="rounded-2xl bg-white p-4 shadow-sm">
-        <h2 className="mb-3 text-sm font-semibold text-gray-900">Statistiques du dressing</h2>
+      <div className="rounded-2xl bg-white p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <h2 className="mb-3 text-sm font-semibold text-[#0D0D0D]">Statistiques du dressing</h2>
         <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-xl bg-gray-50 p-3 text-center">
-            <p className="text-2xl font-bold text-gray-900">{items.length}</p>
-            <p className="text-xs text-gray-500">Total articles</p>
+          <div className="rounded-2xl p-3 text-center" style={{ background: 'var(--color-app-bg)' }}>
+            <p className="text-2xl font-bold text-[#0D0D0D]">{items.length}</p>
+            <p className="text-xs text-[#8A8A8A]">Total articles</p>
           </div>
-          <div className="rounded-xl bg-gray-50 p-3 text-center">
-            <p className="text-2xl font-bold text-gray-900">{totalWorn}</p>
-            <p className="text-xs text-gray-500">Portés</p>
+          <div className="rounded-2xl p-3 text-center" style={{ background: 'var(--color-app-bg)' }}>
+            <p className="text-2xl font-bold text-[#0D0D0D]">{totalWorn}</p>
+            <p className="text-xs text-[#8A8A8A]">Portés</p>
           </div>
-          <div className="rounded-xl bg-gray-50 p-3 text-center">
-            <p className="text-2xl font-bold text-gray-900">{neverWornPercent}%</p>
-            <p className="text-xs text-gray-500">Jamais portés</p>
+          <div className="rounded-2xl p-3 text-center" style={{ background: 'var(--color-app-bg)' }}>
+            <p className="text-2xl font-bold text-[#0D0D0D]">{neverWornPercent}%</p>
+            <p className="text-xs text-[#8A8A8A]">Jamais portés</p>
           </div>
-          <div className="rounded-xl bg-gray-50 p-3 text-center">
-            <p className="text-lg font-bold text-gray-900">{favoriteColor || '-'}</p>
-            <p className="text-xs text-gray-500">Couleur favorite</p>
+          <div className="rounded-2xl p-3 text-center" style={{ background: 'var(--color-app-bg)' }}>
+            <p className="text-lg font-bold text-[#0D0D0D]">{favoriteColor || '-'}</p>
+            <p className="text-xs text-[#8A8A8A]">Couleur favorite</p>
           </div>
         </div>
         {mostWorn && mostWorn.wear_count > 0 && (
-          <p className="mt-3 text-xs text-gray-500">
-            Article le plus porté : <strong>{mostWorn.brand || mostWorn.category}</strong> ({mostWorn.wear_count} fois)
+          <p className="mt-3 text-xs text-[#8A8A8A]">
+            Article le plus porté : <strong className="text-[#0D0D0D]">{mostWorn.brand || mostWorn.category}</strong> ({mostWorn.wear_count} fois)
           </p>
         )}
       </div>
@@ -126,9 +128,11 @@ export default function ProfilePage() {
       {/* Logout */}
       <button
         onClick={handleLogout}
-        className="flex w-full items-center justify-center gap-2 rounded-full border border-red-200 py-3 text-sm font-medium text-red-600 hover:bg-red-50"
+        className="flex w-full items-center justify-center gap-2 rounded-full border border-red-200 py-3 text-sm font-medium text-red-500"
       >
-        <LogOut className="h-4 w-4" />
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
         Se déconnecter
       </button>
     </div>
