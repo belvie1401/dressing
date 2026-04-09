@@ -4,7 +4,10 @@ import pg from 'pg';
 
 const connectionString = process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/mon_dressing';
 
-const pool = new pg.Pool({ connectionString });
+const pool = new pg.Pool({
+  connectionString,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+});
 const adapter = new PrismaPg(pool);
 
 const prisma = new PrismaClient({ adapter });
