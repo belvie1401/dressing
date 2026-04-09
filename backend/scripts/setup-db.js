@@ -1,48 +1,38 @@
 const pg = require('pg');
 
 const connectionString = process.env.DATABASE_URL || '';
-const cleanConnectionString = connectionString.replace(/[?&]sslmode=[^&]+/g, '');
 
-const pool = new pg.Pool({
-  connectionString: cleanConnectionString,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-});
+// Parse URL into explicit components to avoid sslmode parsing issues
+function parseDbUrl(dbUrl) {
+  const cleaned = dbUrl.replace(/\?.*$/, '');
+  const parsed = new URL(cleaned);
+  return {
+    host: parsed.hostname,
+    port: parseInt(parsed.port) || 5432,
+    database: parsed.pathname.replace('/', ''),
+    user: decodeURIComponent(parsed.username),
+    password: decodeURIComponent(parsed.password),
+  };
+}
+
+const dbConfig = parseDbUrl(connectionString);
+
+console.log('Database config:');
+console.log('  Host:', dbConfig.host);
+console.log('  Port:', dbConfig.port);
+console.log('  Database:', dbConfig.database);
+console.log('  User:', dbConfig.user);
 
 const schema = `
--- Enums
-DO $$ BEGIN
-  CREATE TYPE "Role" AS ENUM ('CLIENT', 'STYLIST', 'ADMIN');
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE "Role" AS ENUM ('CLIENT', 'STYLIST', 'ADMIN'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE "Category" AS ENUM ('TOP', 'BOTTOM', 'DRESS', 'JACKET', 'SHOES', 'ACCESSORY'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE "Season" AS ENUM ('SUMMER', 'WINTER', 'ALL'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE "Occasion" AS ENUM ('CASUAL', 'WORK', 'EVENING', 'SPORT'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE "ConnectionStatus" AS ENUM ('PENDING', 'ACTIVE', 'ENDED'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE "LookbookStatus" AS ENUM ('DRAFT', 'SENT', 'APPROVED', 'REJECTED'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE "MessageType" AS ENUM ('TEXT', 'IMAGE', 'LOOKBOOK', 'OUTFIT'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE "Plan" AS ENUM ('FREE', 'CLIENT_PRO', 'STYLIST_PRO'); EXCEPTION WHEN duplicate_object THEN null; END $$;
 
-DO $$ BEGIN
-  CREATE TYPE "Category" AS ENUM ('TOP', 'BOTTOM', 'DRESS', 'JACKET', 'SHOES', 'ACCESSORY');
-EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-DO $$ BEGIN
-  CREATE TYPE "Season" AS ENUM ('SUMMER', 'WINTER', 'ALL');
-EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-DO $$ BEGIN
-  CREATE TYPE "Occasion" AS ENUM ('CASUAL', 'WORK', 'EVENING', 'SPORT');
-EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-DO $$ BEGIN
-  CREATE TYPE "ConnectionStatus" AS ENUM ('PENDING', 'ACTIVE', 'ENDED');
-EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-DO $$ BEGIN
-  CREATE TYPE "LookbookStatus" AS ENUM ('DRAFT', 'SENT', 'APPROVED', 'REJECTED');
-EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-DO $$ BEGIN
-  CREATE TYPE "MessageType" AS ENUM ('TEXT', 'IMAGE', 'LOOKBOOK', 'OUTFIT');
-EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-DO $$ BEGIN
-  CREATE TYPE "Plan" AS ENUM ('FREE', 'CLIENT_PRO', 'STYLIST_PRO');
-EXCEPTION WHEN duplicate_object THEN null; END $$;
-
--- Tables
 CREATE TABLE IF NOT EXISTS "User" (
   "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
   "email" TEXT NOT NULL,
@@ -174,16 +164,50 @@ CREATE TABLE IF NOT EXISTS "Subscription" (
 CREATE UNIQUE INDEX IF NOT EXISTS "Subscription_user_id_key" ON "Subscription"("user_id");
 `;
 
+async function connectWithRetry(maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    console.log(`\nConnection attempt ${attempt}/${maxRetries}...`);
+    const client = new pg.Client({
+      host: dbConfig.host,
+      port: dbConfig.port,
+      database: dbConfig.database,
+      user: dbConfig.user,
+      password: dbConfig.password,
+      ssl: { rejectUnauthorized: false },
+      connectionTimeoutMillis: 30000,
+    });
+
+    try {
+      await client.connect();
+      console.log('Connected successfully!');
+      return client;
+    } catch (err) {
+      console.error(`Attempt ${attempt} failed:`, err.message);
+      try { await client.end(); } catch (_) {}
+      if (attempt < maxRetries) {
+        const delay = attempt * 3000;
+        console.log(`Waiting ${delay / 1000}s before retry...`);
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+  }
+  throw new Error('All connection attempts failed');
+}
+
 async function main() {
   console.log('Setting up database tables...');
+  let client;
   try {
-    await pool.query(schema);
+    client = await connectWithRetry();
+    await client.query(schema);
     console.log('Database tables created successfully!');
   } catch (err) {
     console.error('Database setup error:', err.message);
-    // Don't exit with error - tables might already exist
+    process.exit(1);
   } finally {
-    await pool.end();
+    if (client) {
+      try { await client.end(); } catch (_) {}
+    }
   }
 }
 
