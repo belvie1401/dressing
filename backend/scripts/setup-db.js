@@ -2,7 +2,7 @@ const pg = require('pg');
 
 const connectionString = process.env.DATABASE_URL || '';
 
-// Parse URL into explicit components to avoid sslmode parsing issues
+// Parse URL into explicit components
 function parseDbUrl(dbUrl) {
   const cleaned = dbUrl.replace(/\?.*$/, '');
   const parsed = new URL(cleaned);
@@ -17,11 +17,16 @@ function parseDbUrl(dbUrl) {
 
 const dbConfig = parseDbUrl(connectionString);
 
+// Extract internal hostname (without .oregon-postgres.render.com)
+const internalHost = dbConfig.host.replace(/\.oregon-postgres\.render\.com$/, '');
+
 console.log('Database config:');
-console.log('  Host:', dbConfig.host);
+console.log('  External host:', dbConfig.host);
+console.log('  Internal host:', internalHost);
 console.log('  Port:', dbConfig.port);
 console.log('  Database:', dbConfig.database);
 console.log('  User:', dbConfig.user);
+console.log('  Node version:', process.version);
 
 const schema = `
 DO $$ BEGIN CREATE TYPE "Role" AS ENUM ('CLIENT', 'STYLIST', 'ADMIN'); EXCEPTION WHEN duplicate_object THEN null; END $$;
@@ -164,10 +169,23 @@ CREATE TABLE IF NOT EXISTS "Subscription" (
 CREATE UNIQUE INDEX IF NOT EXISTS "Subscription_user_id_key" ON "Subscription"("user_id");
 `;
 
-async function connectWithRetry(maxRetries = 3) {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    console.log(`\nConnection attempt ${attempt}/${maxRetries}...`);
-    const client = new pg.Client({
+// Try multiple connection strategies
+const strategies = [
+  {
+    name: 'Internal host (no SSL)',
+    config: {
+      host: internalHost,
+      port: dbConfig.port,
+      database: dbConfig.database,
+      user: dbConfig.user,
+      password: dbConfig.password,
+      ssl: false,
+      connectionTimeoutMillis: 10000,
+    },
+  },
+  {
+    name: 'External host + SSL rejectUnauthorized=false',
+    config: {
       host: dbConfig.host,
       port: dbConfig.port,
       database: dbConfig.database,
@@ -175,30 +193,67 @@ async function connectWithRetry(maxRetries = 3) {
       password: dbConfig.password,
       ssl: { rejectUnauthorized: false },
       connectionTimeoutMillis: 30000,
-    });
+    },
+  },
+  {
+    name: 'External host + SSL with servername',
+    config: {
+      host: dbConfig.host,
+      port: dbConfig.port,
+      database: dbConfig.database,
+      user: dbConfig.user,
+      password: dbConfig.password,
+      ssl: { rejectUnauthorized: false, servername: dbConfig.host },
+      connectionTimeoutMillis: 30000,
+    },
+  },
+  {
+    name: 'External host + SSL true',
+    config: {
+      host: dbConfig.host,
+      port: dbConfig.port,
+      database: dbConfig.database,
+      user: dbConfig.user,
+      password: dbConfig.password,
+      ssl: true,
+      connectionTimeoutMillis: 30000,
+    },
+  },
+  {
+    name: 'Connection string with sslmode=require',
+    config: {
+      connectionString: connectionString.includes('sslmode=')
+        ? connectionString
+        : connectionString + (connectionString.includes('?') ? '&' : '?') + 'sslmode=require',
+      connectionTimeoutMillis: 30000,
+    },
+  },
+];
 
+async function tryConnect() {
+  for (const strategy of strategies) {
+    console.log(`\nTrying: ${strategy.name}...`);
+    const client = new pg.Client(strategy.config);
     try {
       await client.connect();
-      console.log('Connected successfully!');
-      return client;
+      console.log(`SUCCESS with: ${strategy.name}`);
+      return { client, strategyName: strategy.name };
     } catch (err) {
-      console.error(`Attempt ${attempt} failed:`, err.message);
+      console.error(`  Failed: ${err.message}`);
       try { await client.end(); } catch (_) {}
-      if (attempt < maxRetries) {
-        const delay = attempt * 3000;
-        console.log(`Waiting ${delay / 1000}s before retry...`);
-        await new Promise(r => setTimeout(r, delay));
-      }
     }
   }
-  throw new Error('All connection attempts failed');
+  throw new Error('All connection strategies failed');
 }
 
 async function main() {
   console.log('Setting up database tables...');
   let client;
   try {
-    client = await connectWithRetry();
+    const result = await tryConnect();
+    client = result.client;
+    console.log(`\nConnected via: ${result.strategyName}`);
+    console.log('Running schema...');
     await client.query(schema);
     console.log('Database tables created successfully!');
   } catch (err) {

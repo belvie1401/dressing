@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { Server } from 'socket.io';
 import { setupSocket } from './socket/socket.handler';
 import { errorMiddleware } from './middleware/error.middleware';
+import { initDatabase } from './lib/prisma';
 
 import authRoutes from './routes/auth.routes';
 import wardrobeRoutes from './routes/wardrobe.routes';
@@ -68,9 +69,20 @@ app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 4000;
 
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+async function start() {
+  try {
+    await initDatabase();
+    console.log('Database connected successfully');
+  } catch (err) {
+    console.error('Database init failed, server starting without DB:', err);
+  }
+
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+start();
 
 export { io };
 export default app;
