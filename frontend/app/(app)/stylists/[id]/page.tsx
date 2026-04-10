@@ -167,17 +167,12 @@ export default function StylistDetailPage() {
         </div>
 
         {/* CTA */}
-        <button
-          onClick={handleInvite}
-          disabled={invited || inviting}
-          className={`mt-5 w-full rounded-full py-3.5 text-sm font-semibold transition-colors ${
-            invited
-              ? 'bg-[#F0EDE8] text-[#0D0D0D]'
-              : 'bg-[#D4785C] text-white'
-          }`}
+        <a
+          href={`/stylists/${id}/booking`}
+          className="mt-5 block w-full rounded-full bg-[#D4785C] py-3.5 text-center text-sm font-semibold text-white transition-opacity hover:opacity-90"
         >
-          {invited ? 'Demande envoy\u00e9e' : inviting ? 'Envoi...' : 'D\u00e9marrer une session'}
-        </button>
+          D&eacute;marrer une session
+        </a>
       </div>
     </div>
   );
