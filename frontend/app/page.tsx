@@ -103,6 +103,15 @@ export default function LandingPage() {
                 D&#233;couvrir
               </a>
             </div>
+            <a
+              href="/pricing"
+              className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-[#8A8A8A] transition-colors hover:text-[#0D0D0D]"
+            >
+              Voir les formules
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+              </svg>
+            </a>
           </div>
         </section>
 
