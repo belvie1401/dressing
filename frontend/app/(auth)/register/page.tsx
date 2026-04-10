@@ -8,6 +8,7 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<'CLIENT' | 'STYLIST' | ''>('');
   const [error, setError] = useState('');
   const { register, isLoading } = useAuthStore();
   const router = useRouter();
@@ -21,7 +22,12 @@ export default function RegisterPage() {
       return;
     }
 
-    const success = await register(email, password, name);
+    if (!role) {
+      setError('Veuillez choisir un rôle');
+      return;
+    }
+
+    const success = await register(email, password, name, role);
     if (success) {
       router.push('/dashboard');
     } else {
@@ -104,6 +110,45 @@ export default function RegisterPage() {
               className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
               placeholder="Minimum 6 caractères"
             />
+          </div>
+
+          {/* Role selection */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-[#0D0D0D]">
+              Je suis...
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setRole('CLIENT')}
+                className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-4 transition-all ${
+                  role === 'CLIENT'
+                    ? 'border-[#0D0D0D] bg-white shadow-md'
+                    : 'border-transparent bg-[#F5F5F5]'
+                }`}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
+                </svg>
+                <span className="text-sm font-semibold text-[#0D0D0D]">Cliente</span>
+                <span className="text-center text-[11px] leading-tight text-[#8A8A8A]">Je gère mon dressing personnel</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole('STYLIST')}
+                className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-4 transition-all ${
+                  role === 'STYLIST'
+                    ? 'border-[#0D0D0D] bg-white shadow-md'
+                    : 'border-transparent bg-[#F5F5F5]'
+                }`}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 3l1.5 4.5H18l-3.5 2.5L16 14.5 12 11.5 8 14.5l1.5-4.5L6 7.5h4.5z" />
+                </svg>
+                <span className="text-sm font-semibold text-[#0D0D0D]">Styliste</span>
+                <span className="text-center text-[11px] leading-tight text-[#8A8A8A]">Je gère le dressing de mes clientes</span>
+              </button>
+            </div>
           </div>
 
           <button
