@@ -288,6 +288,36 @@ export default function DashboardPage() {
           <p className="text-xs text-[#8A8A8A] mt-1">Planifiées</p>
         </div>
       </div>
+
+      {/* Styliste CTA */}
+      <div className="mb-6 rounded-3xl bg-black p-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="mb-2 inline-block rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-black">
+              NOUVEAU
+            </span>
+            <p className="text-[17px] font-bold text-white">Votre styliste personnel</p>
+            <p className="mt-1 max-w-[180px] text-[12px] text-gray-300">
+              Laissez un expert composer vos looks avec vos pièces existantes
+            </p>
+            <a
+              href="/stylists"
+              className="mt-3 inline-block rounded-full bg-white px-4 py-2 text-xs font-semibold text-black"
+            >
+              Trouver un styliste →
+            </a>
+          </div>
+          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-2 ring-white ring-offset-2 ring-offset-black">
+            <Image
+              src="https://i.pravatar.cc/150?img=32"
+              alt="Styliste"
+              fill
+              className="object-cover"
+              sizes="80px"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
