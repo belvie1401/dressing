@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import type { ClothingItem } from '@/types';
 import { api } from '@/lib/api';
+import { useWardrobeStore } from '@/lib/store';
 import WearBadge from '@/components/wardrobe/WearBadge';
 
 const categoryLabels: Record<string, string> = {
@@ -23,6 +24,8 @@ export default function WardrobeItemPage() {
   const { id } = useParams<{ id: string }>();
   const [item, setItem] = useState<ClothingItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState('');
+  const markWornInStore = useWardrobeStore((s) => s.markWorn);
 
   useEffect(() => {
     const load = async () => {
@@ -40,6 +43,9 @@ export default function WardrobeItemPage() {
     const res = await api.post<ClothingItem>(`/wardrobe/${id}/wear`);
     if (res.success && res.data) {
       setItem(res.data);
+      markWornInStore(id);
+      setToast('\u2713 Enregistr\u00e9 !');
+      setTimeout(() => setToast(''), 3000);
     }
   };
 
@@ -121,7 +127,7 @@ export default function WardrobeItemPage() {
             onClick={handleMarkWorn}
             className="flex-1 rounded-full border border-[#0D0D0D] py-3 text-center text-sm font-semibold text-[#0D0D0D]"
           >
-            Marquer porté
+            Marquer comme porté
           </button>
           <a
             href="/outfits/create"
@@ -131,6 +137,13 @@ export default function WardrobeItemPage() {
           </a>
         </div>
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#0D0D0D] px-5 py-2.5 text-sm font-medium text-white shadow-lg">
+          {toast}
+        </div>
+      )}
     </div>
   );
 }
