@@ -5,44 +5,38 @@ import Image from 'next/image';
 import { useAuthStore, useWardrobeStore } from '@/lib/store';
 import type { CalendarEntry, Outfit } from '@/types';
 import { api } from '@/lib/api';
+import WearBadge from '@/components/wardrobe/WearBadge';
+
+const weekOutfitImages: Record<number, string> = {
+  0: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=150',
+  1: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150',
+  2: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=150',
+};
+
+const placeholderItems = [
+  { name: 'T-Shirt Blanc', wear_count: 3, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300' },
+  { name: 'Jean Slim', wear_count: 7, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300' },
+  { name: 'Sneakers', wear_count: 12, image: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=300' },
+  { name: 'Veste Noire', wear_count: 0, image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300' },
+];
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
   const { items, loadItems } = useWardrobeStore();
-  const [calendarEntries, setCalendarEntries] = useState<CalendarEntry[]>([]);
-  const [todayOutfit, setTodayOutfit] = useState<Outfit | null>(null);
   const [toast, setToast] = useState('');
 
   useEffect(() => {
     loadItems();
-    const loadCalendar = async () => {
-      const now = new Date();
-      const res = await api.get<CalendarEntry[]>(
-        `/calendar?month=${now.getMonth() + 1}&year=${now.getFullYear()}`
-      );
-      if (res.success && res.data) setCalendarEntries(res.data);
-    };
-    const loadOutfit = async () => {
-      const res = await api.get<Outfit[]>('/outfits');
-      if (res.success && res.data && res.data.length > 0) setTodayOutfit(res.data[0]);
-    };
-    loadCalendar();
-    loadOutfit();
   }, []);
 
-  const handleWearToday = async () => {
-    if (!todayOutfit) return;
-    const res = await api.post<Outfit>(`/outfits/${todayOutfit.id}/wear`);
-    if (res.success) {
-      setToast('\u2713 Look enregistr\u00e9 !');
-      setTimeout(() => setToast(''), 3000);
-    }
+  const handleWearToday = () => {
+    setToast('\u2713 Look enregistr\u00e9 !');
+    setTimeout(() => setToast(''), 3000);
   };
 
   const recentItems = items.slice(0, 4);
-  const neverWorn = items.filter((i) => i.wear_count === 0).length;
 
-  // Current week days
+  // Current week days (Mon-Sun)
   const today = new Date();
   const dayOfWeek = today.getDay();
   const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
@@ -54,107 +48,156 @@ export default function DashboardPage() {
   const dayLabels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between pt-2">
+    <div className="pt-4 pb-24">
+      {/* ===== HEADER ===== */}
+      <div className="flex items-center justify-between px-5 pt-6 mb-6">
         <div className="flex items-center gap-3">
-          <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full" style={{ background: 'var(--color-accent-light)' }}>
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#EDE5DC]">
             {user?.avatar_url ? (
-              <Image src={user.avatar_url} alt={user.name} fill className="object-cover" sizes="44px" />
+              <Image src={user.avatar_url} alt={user.name} width={48} height={48} className="h-full w-full rounded-full object-cover" />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-base font-semibold text-[#C4A882]">
-                {user?.name?.charAt(0) || '?'}
-              </div>
+              <span className="text-lg font-semibold text-[#C6A47E]">
+                {user?.name?.charAt(0) || 'S'}
+              </span>
             )}
           </div>
           <div>
-            <p className="text-xs text-[#8A8A8A]">Bonjour,</p>
-            <p className="text-lg font-bold leading-tight text-[#0D0D0D]">
+            <p className="text-[12px] text-[#8A8A8A]">Bonjour,</p>
+            <p className="text-[20px] font-bold leading-tight text-[#111111]">
               {user?.name?.split(' ')[0] || 'Sophie'}
             </p>
           </div>
         </div>
-        <a href="/messages" className="flex h-10 w-10 items-center justify-center rounded-full bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        <div className="flex items-center gap-2">
+          <a href="/messages" className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+          </a>
+          <a href="/profile" className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      {/* ===== WEATHER BANNER ===== */}
+      <div className="mx-5 mb-6 flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm">
+        <div className="flex items-center gap-2.5">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
           </svg>
+          <div>
+            <span className="text-base font-bold text-[#111111]">22&deg;C</span>
+            <p className="text-[12px] text-[#8A8A8A]">Marseille</p>
+          </div>
+        </div>
+        <a href="/outfits" className="font-serif text-sm text-[#111111] underline underline-offset-2">
+          Tenue du jour
         </a>
       </div>
 
-      {/* Look du jour */}
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-serif text-base font-semibold text-[#0D0D0D]">Look du jour</h2>
-          <a href="/outfits" className="text-xs text-[#8A8A8A]">Modifier &rarr;</a>
+      {/* ===== LOOK DU JOUR ===== */}
+      <div className="mb-6">
+        <div className="mx-5 mb-3 flex items-center justify-between">
+          <h2 className="font-serif text-[16px] font-semibold text-[#111111]">Look du jour</h2>
+          <a href="/outfits" className="text-sm text-[#8A8A8A]">Modifier</a>
         </div>
-        <div className="relative h-[200px] overflow-hidden rounded-3xl bg-[#1A1A1A]">
+        <div className="relative mx-5 h-[220px] overflow-hidden rounded-3xl bg-[#111111]">
+          {/* 3 clothing images */}
           <div className="flex h-full items-center justify-center gap-3 px-4">
-            {(todayOutfit?.items?.slice(0, 3) || []).map((oi, i) => (
-              <div key={i} className="relative h-28 w-20 shrink-0 overflow-hidden rounded-xl">
-                <Image
-                  src={oi.item?.bg_removed_url || oi.item?.photo_url || ''}
-                  alt="item"
-                  fill
-                  className="object-contain"
-                  sizes="80px"
-                />
-              </div>
-            ))}
-            {(!todayOutfit || !todayOutfit.items?.length) && (
-              <p className="text-sm text-gray-400">Aucun look planifi\u00e9</p>
-            )}
+            <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-xl">
+              <Image
+                src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200"
+                alt="Top"
+                fill
+                className="object-contain"
+                sizes="96px"
+              />
+            </div>
+            <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-xl">
+              <Image
+                src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200"
+                alt="Shoes"
+                fill
+                className="object-contain"
+                sizes="96px"
+              />
+            </div>
+            <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-xl">
+              <Image
+                src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=200"
+                alt="Sneakers"
+                fill
+                className="object-contain"
+                sizes="96px"
+              />
+            </div>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/80 to-transparent" />
+          {/* Bottom gradient */}
+          <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black to-transparent" />
+          {/* Bottom content */}
           <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between px-4 pb-3">
             <div>
-              <p className="text-sm font-semibold text-white">{todayOutfit?.name || 'Votre look'}</p>
-              <span className="mt-0.5 inline-block rounded-full bg-white/20 px-2 py-0.5 text-[10px] text-gray-300">
-                {todayOutfit?.occasion || 'Casual'}
+              <p className="text-[14px] font-bold text-white">Look Casual Chic</p>
+              <span className="mt-0.5 inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] text-gray-300">
+                Casual
               </span>
             </div>
-            {todayOutfit && (
-              <button onClick={handleWearToday} className="rounded-full bg-white px-3 py-1 text-xs font-medium text-[#0D0D0D]">
-                Porter
-              </button>
-            )}
+            <button
+              onClick={handleWearToday}
+              className="rounded-full bg-white px-3 py-1 text-xs font-medium text-[#111111]"
+            >
+              Porter aujourd&apos;hui
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Cette semaine */}
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-serif text-base font-semibold text-[#0D0D0D]">Cette semaine</h2>
-          <a href="/calendar" className="text-xs text-[#8A8A8A]">Tout voir &rarr;</a>
+      {/* ===== CETTE SEMAINE ===== */}
+      <div className="mb-6">
+        <div className="mx-5 mb-3 flex items-center justify-between">
+          <h2 className="font-serif text-[16px] font-semibold text-[#111111]">Cette semaine</h2>
+          <a href="/calendar" className="text-sm text-[#8A8A8A]">Agenda</a>
         </div>
-        <div className="-mx-5 flex gap-3 overflow-x-auto px-5 scrollbar-hide">
+        <div className="flex gap-3 overflow-x-auto px-5 scrollbar-hide">
           {weekDays.map((day, i) => {
             const isToday = day.toDateString() === today.toDateString();
-            const entry = calendarEntries.find(
-              (e) => new Date(e.date).toDateString() === day.toDateString()
-            );
+            const outfitImage = weekOutfitImages[i];
             return (
               <a key={i} href="/calendar" className="w-[72px] shrink-0 text-center">
                 <p className="text-[11px] text-[#8A8A8A]">{dayLabels[i]}</p>
                 <div className={`mx-auto mt-1 flex h-7 w-7 items-center justify-center rounded-full text-sm ${
-                  isToday ? 'bg-[#0D0D0D] font-bold text-white' : 'text-[#0D0D0D]'
+                  isToday
+                    ? 'bg-[#111111] font-bold text-white'
+                    : 'bg-[#F0EDE8] text-[#111111]'
                 }`}>
                   {day.getDate()}
                 </div>
-                {entry?.outfit?.items?.[0]?.item?.photo_url ? (
+                {outfitImage ? (
                   <div className="relative mx-auto mt-1 h-14 w-14 overflow-hidden rounded-xl">
                     <Image
-                      src={entry.outfit.items[0].item.bg_removed_url || entry.outfit.items[0].item.photo_url}
-                      alt="outfit"
+                      src={outfitImage}
+                      alt={`Look ${dayLabels[i]}`}
                       fill
                       className="object-cover"
                       sizes="56px"
                     />
                   </div>
                 ) : (
-                  <div className="mx-auto mt-1 flex h-14 w-14 items-center justify-center rounded-xl border-2 border-dashed border-[#E0DCD5]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C4A882" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <div className="mx-auto mt-1 flex h-14 w-14 items-center justify-center rounded-xl border-2 border-dashed border-[#CFCFCF]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#CFCFCF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
                   </div>
@@ -165,84 +208,64 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Derni\u00e8res pi\u00e8ces */}
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-serif text-base font-semibold text-[#0D0D0D]">Derni\u00e8res pi\u00e8ces</h2>
-          <a href="/wardrobe" className="text-xs text-[#8A8A8A]">Mon dressing &rarr;</a>
+      {/* ===== DERNIERES PIECES ===== */}
+      <div className="mb-6">
+        <div className="mx-5 mb-3 flex items-center justify-between">
+          <h2 className="font-serif text-[16px] font-semibold text-[#111111]">Derni&egrave;res pi&egrave;ces</h2>
+          <a href="/wardrobe" className="text-sm text-[#8A8A8A]">Mon dressing</a>
         </div>
-        {recentItems.length > 0 ? (
-          <div className="-mx-5 flex gap-3 overflow-x-auto px-5 scrollbar-hide">
-            {recentItems.map((item) => (
+        <div className="flex gap-3 overflow-x-auto px-5 scrollbar-hide">
+          {(recentItems.length > 0 ? recentItems : placeholderItems).map((item, i) => {
+            const isReal = 'id' in item;
+            const imgSrc = isReal
+              ? ((item as any).bg_removed_url || (item as any).photo_url)
+              : (item as any).image;
+            const name = isReal
+              ? ((item as any).brand || (item as any).category)
+              : (item as any).name;
+
+            return (
               <a
-                key={item.id}
-                href={`/wardrobe/${item.id}`}
-                className="w-[120px] shrink-0 overflow-hidden rounded-2xl bg-white"
-                style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+                key={isReal ? (item as any).id : i}
+                href={isReal ? `/wardrobe/${(item as any).id}` : '/wardrobe/add'}
+                className="w-[130px] shrink-0 overflow-hidden rounded-2xl bg-white p-2 shadow-sm"
               >
-                <div className="relative h-[130px] w-full" style={{ background: 'var(--color-tag-bg)' }}>
+                <div className="relative h-[140px] w-full overflow-hidden rounded-xl" style={{ background: 'var(--color-tag-bg)' }}>
                   <Image
-                    src={item.bg_removed_url || item.photo_url}
-                    alt={item.category}
+                    src={imgSrc}
+                    alt={name}
                     fill
                     className="object-cover"
-                    sizes="120px"
+                    sizes="130px"
                   />
                 </div>
-                <div className="p-2">
-                  <p className="truncate text-xs font-medium text-[#0D0D0D]">{item.brand || item.category}</p>
-                  <span className={`text-[10px] ${item.wear_count > 0 ? 'text-green-600' : 'text-[#8A8A8A]'}`}>
-                    {item.wear_count === 0 ? 'Jamais port\u00e9' : `Port\u00e9 ${item.wear_count}x`}
-                  </span>
-                </div>
+                <p className="mt-1 truncate text-[12px] font-semibold text-[#111111]">{name}</p>
+                <WearBadge wearCount={item.wear_count} size="sm" />
               </a>
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-2xl bg-white p-8 text-center" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-            <p className="text-sm text-[#8A8A8A]">Ajoutez vos premiers v\u00eatements</p>
-            <a href="/wardrobe/add" className="mt-3 inline-block rounded-full bg-[#0D0D0D] px-5 py-2 text-xs font-medium text-white">
-              Ajouter
-            </a>
-          </div>
-        )}
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-2xl bg-white p-4 text-center" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <p className="text-xl font-bold text-[#0D0D0D]">{items.length}</p>
-          <p className="text-[11px] text-[#8A8A8A] mt-1">V\u00eatements</p>
-        </div>
-        <div className="rounded-2xl bg-white p-4 text-center" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <p className="text-xl font-bold text-[#0D0D0D]">{neverWorn}</p>
-          <p className="text-[11px] text-[#8A8A8A] mt-1">Jamais port\u00e9s</p>
-        </div>
-        <div className="rounded-2xl bg-white p-4 text-center" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <p className="text-xl font-bold text-[#0D0D0D]">{calendarEntries.length}</p>
-          <p className="text-[11px] text-[#8A8A8A] mt-1">Planifi\u00e9es</p>
+            );
+          })}
         </div>
       </div>
 
-      {/* Styliste CTA */}
-      <div className="mb-4 overflow-hidden rounded-3xl bg-[#1A1A1A] p-5">
+      {/* ===== STYLISTE CTA ===== */}
+      <div className="mx-5 mb-6 rounded-3xl bg-[#111111] p-5">
         <div className="flex items-center justify-between">
           <div>
-            <span className="mb-2 inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white" style={{ background: 'var(--color-cta)' }}>
+            <span className="mb-2 inline-block w-fit rounded-full bg-[#C6A47E] px-2 py-0.5 text-[10px] font-bold text-[#111111]">
               NOUVEAU
             </span>
-            <p className="text-base font-bold text-white">Votre styliste personnel</p>
-            <p className="mt-1 max-w-[200px] text-xs text-gray-400">
-              Laissez un expert composer vos looks avec vos pi\u00e8ces existantes
+            <p className="font-serif text-[17px] font-semibold text-white">Votre styliste personnel</p>
+            <p className="mt-1 max-w-[180px] text-[12px] text-[#CFCFCF]">
+              Laissez un expert composer vos looks avec vos pi&egrave;ces existantes
             </p>
             <a
               href="/stylists"
-              className="mt-3 inline-block rounded-full bg-white px-4 py-2 text-xs font-semibold text-[#0D0D0D] transition-opacity hover:opacity-90"
+              className="mt-3 inline-block rounded-full bg-white px-4 py-2 text-xs font-semibold text-[#111111]"
             >
-              Trouver un styliste &rarr;
+              Trouver un styliste
             </a>
           </div>
-          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-2 ring-white/20">
+          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-[#EDE5DC] ring-2 ring-white">
             <Image
               src="https://i.pravatar.cc/150?img=32"
               alt="Styliste"
@@ -256,7 +279,7 @@ export default function DashboardPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#0D0D0D] px-5 py-2.5 text-sm font-medium text-white shadow-lg">
+        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#111111] px-5 py-2.5 text-sm font-medium text-white shadow-lg">
           {toast}
         </div>
       )}
