@@ -14,67 +14,67 @@ export default function MessagesPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-[#0D0D0D] pt-2">Messages</h1>
+      <h1 className="font-serif text-xl font-semibold text-[#111111] pt-2">Messages</h1>
 
       {/* Search */}
-      <div className="flex items-center gap-3 rounded-full px-4 py-3" style={{ background: '#EFEFEF' }}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <div className="flex items-center gap-3 rounded-full px-4 py-2.5" style={{ background: 'var(--color-tag-bg)' }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
         <span className="text-sm text-[#8A8A8A]">Rechercher une conversation...</span>
       </div>
 
       {isLoading ? (
-        <div className="py-16 text-center text-sm text-[#8A8A8A]">Chargement...</div>
+        <div className="flex justify-center py-16">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#111111] border-t-transparent" />
+        </div>
       ) : conversations.length === 0 ? (
-        <div className="flex flex-col items-center rounded-2xl bg-white py-16 text-center" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-[#F0F0F0]">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="1.5">
+        <div className="flex flex-col items-center rounded-2xl bg-white py-16 text-center shadow-sm">
+          <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-[#EDE5DC]">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="1.5">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
           </div>
-          <p className="text-sm text-[#8A8A8A]">Aucune conversation</p>
+          <p className="text-sm font-medium text-[#111111]">Aucune conversation</p>
           <p className="mt-1 text-xs text-[#8A8A8A]">
             Connectez-vous avec un styliste pour commencer
           </p>
-          <a href="/stylists" className="mt-4 rounded-full bg-[#0D0D0D] px-6 py-2.5 text-sm font-medium text-white">
+          <a href="/stylists" className="mt-4 rounded-full bg-[#111111] px-6 py-2.5 text-sm font-medium text-white">
             Trouver un styliste
           </a>
         </div>
       ) : (
-        <div className="space-y-1">
+        <div className="space-y-2">
           {conversations.map((conv) => (
             <a
               key={conv.contact.id}
               href={`/messages/${conv.contact.id}`}
-              className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 transition-colors" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}
+              className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm transition-colors"
             >
-              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-[#F0F0F0]">
+              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-[#EDE5DC]">
                 {conv.contact.avatar_url ? (
                   <img src={conv.contact.avatar_url} alt={conv.contact.name} className="h-full w-full object-cover" />
                 ) : (
-                  <div className="flex h-full items-center justify-center text-sm font-semibold text-[#8A8A8A]">
+                  <div className="flex h-full items-center justify-center text-sm font-semibold text-[#C6A47E]">
                     {conv.contact.name.charAt(0)}
                   </div>
                 )}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-[#0D0D0D]">{conv.contact.name}</p>
+                  <p className="text-sm font-semibold text-[#111111]">{conv.contact.name}</p>
                   {conv.lastMessage && (
-                    <span className="text-[10px] text-[#8A8A8A]">
+                    <span className="text-xs text-[#CFCFCF]">
                       {format(new Date(conv.lastMessage.created_at), 'HH:mm', { locale: fr })}
                     </span>
                   )}
                 </div>
                 {conv.lastMessage && (
-                  <p className="truncate text-xs text-[#8A8A8A]">{conv.lastMessage.content}</p>
+                  <p className="truncate text-sm text-[#8A8A8A]">{conv.lastMessage.content}</p>
                 )}
               </div>
               {conv.unreadCount > 0 && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0D0D0D] text-[10px] font-bold text-white">
-                  {conv.unreadCount}
-                </span>
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[#111111]" />
               )}
             </a>
           ))}
