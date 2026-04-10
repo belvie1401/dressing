@@ -3,7 +3,7 @@ import Image from 'next/image';
 const steps = [
   {
     icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2L8 6H3v14h18V6h-5l-4-4z" />
         <path d="M9 14l2 2 4-4" />
       </svg>
@@ -13,7 +13,7 @@ const steps = [
   },
   {
     icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
         <path d="M8 11h6" /><path d="M11 8v6" />
       </svg>
@@ -23,7 +23,7 @@ const steps = [
   },
   {
     icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
     ),
@@ -48,19 +48,19 @@ export default function LandingPage() {
       {/* Header */}
       <header className="px-5 py-5">
         <nav className="mx-auto flex max-w-6xl items-center justify-between">
-          <span className="font-serif text-2xl font-semibold tracking-wide text-[#0D0D0D]">LIEN</span>
+          <span className="font-serif text-2xl font-semibold tracking-wide text-[#111111]">LIEN</span>
           <div className="hidden items-center gap-8 md:flex">
-            <a href="#how" className="text-sm text-[#8A8A8A] hover:text-[#0D0D0D] transition-colors">Fonctionnalit\u00e9s</a>
-            <a href="#stylists" className="text-sm text-[#8A8A8A] hover:text-[#0D0D0D] transition-colors">Pour les stylistes</a>
-            <a href="#about" className="text-sm text-[#8A8A8A] hover:text-[#0D0D0D] transition-colors">\u00c0 propos</a>
+            <a href="#how" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">Fonctionnalit\u00e9s</a>
+            <a href="#stylists" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">Pour les stylistes</a>
+            <a href="#about" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">\u00c0 propos</a>
           </div>
           <div className="flex items-center gap-3">
-            <a href="/login" className="text-sm font-medium text-[#0D0D0D] hover:underline">
+            <a href="/login" className="text-sm font-medium text-[#111111] hover:underline">
               Se connecter
             </a>
             <a
               href="/register"
-              className="rounded-full bg-[#0D0D0D] px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+              className="rounded-full bg-[#111111] px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
             >
               Commencer
             </a>
@@ -73,7 +73,7 @@ export default function LandingPage() {
         <section className="px-5 pt-12 pb-16 md:pt-20 md:pb-24">
           <div className="mx-auto flex max-w-6xl flex-col items-center gap-12 md:flex-row md:items-center md:gap-16">
             <div className="flex-1 text-center md:text-left">
-              <h1 className="font-serif text-4xl font-semibold leading-tight text-[#0D0D0D] md:text-[56px] md:leading-[1.1]">
+              <h1 className="font-serif text-4xl font-semibold leading-tight text-[#111111] md:text-[56px] md:leading-[1.1]">
                 Votre dressing,<br />
                 <em className="font-serif italic">connect\u00e9 aux stylistes</em>
               </h1>
@@ -83,15 +83,15 @@ export default function LandingPage() {
               <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row md:justify-start">
                 <a
                   href="/register"
-                  className="w-full rounded-full bg-[#0D0D0D] px-7 py-3.5 text-center text-sm font-semibold text-white sm:w-auto transition-opacity hover:opacity-90"
+                  className="w-full rounded-full bg-[#111111] px-7 py-3.5 text-center text-sm font-semibold text-white sm:w-auto transition-opacity hover:opacity-90"
                 >
                   Commencer
                 </a>
                 <a
                   href="#how"
-                  className="flex w-full items-center justify-center gap-2 rounded-full border border-[#E0DCD5] bg-white px-7 py-3.5 text-center text-sm font-medium text-[#0D0D0D] sm:w-auto transition-colors hover:bg-[#F0EDE8]"
+                  className="flex w-full items-center justify-center gap-2 rounded-full border border-[#E0DCD5] bg-white px-7 py-3.5 text-center text-sm font-medium text-[#111111] sm:w-auto transition-colors hover:bg-[#F0EDE8]"
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#0D0D0D" stroke="none">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#111111" stroke="none">
                     <polygon points="5 3 19 12 5 21 5 3" />
                   </svg>
                   Voir comment \u00e7a marche
@@ -126,7 +126,7 @@ export default function LandingPage() {
         {/* Comment \u00e7a marche ? */}
         <section id="how" className="px-5 py-16">
           <div className="mx-auto max-w-6xl">
-            <h2 className="mb-12 text-center font-serif text-2xl font-semibold text-[#0D0D0D] md:text-3xl">
+            <h2 className="mb-12 text-center font-serif text-2xl font-semibold text-[#111111] md:text-3xl">
               Comment \u00e7a marche ?
             </h2>
             <div className="grid gap-8 md:grid-cols-3">
@@ -135,7 +135,7 @@ export default function LandingPage() {
                   <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full" style={{ background: 'var(--color-accent-light)' }}>
                     {step.icon}
                   </div>
-                  <h3 className="text-base font-semibold text-[#0D0D0D]">{step.title}</h3>
+                  <h3 className="text-base font-semibold text-[#111111]">{step.title}</h3>
                   <p className="mt-2 max-w-[240px] text-sm text-[#8A8A8A]">{step.description}</p>
                 </div>
               ))}
@@ -147,10 +147,10 @@ export default function LandingPage() {
         <section className="py-16">
           <div className="mx-auto max-w-6xl px-5">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-serif text-2xl font-semibold text-[#0D0D0D] md:text-3xl">
+              <h2 className="font-serif text-2xl font-semibold text-[#111111] md:text-3xl">
                 De l&apos;inspiration, chaque jour
               </h2>
-              <a href="/register" className="text-sm font-medium text-[#8A8A8A] hover:text-[#0D0D0D] transition-colors whitespace-nowrap">
+              <a href="/register" className="text-sm font-medium text-[#8A8A8A] hover:text-[#111111] transition-colors whitespace-nowrap">
                 Voir plus de looks &rarr;
               </a>
             </div>
@@ -176,7 +176,7 @@ export default function LandingPage() {
         {/* CTA section */}
         <section className="px-5 py-16">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="font-serif text-3xl font-semibold text-[#0D0D0D] md:text-4xl">
+            <h2 className="font-serif text-3xl font-semibold text-[#111111] md:text-4xl">
               Pr\u00eat\u00b7e \u00e0 r\u00e9inventer votre style ?
             </h2>
             <p className="mt-4 text-base text-[#8A8A8A]">
@@ -184,7 +184,7 @@ export default function LandingPage() {
             </p>
             <a
               href="/register"
-              className="mt-8 inline-block rounded-full bg-[#0D0D0D] px-8 py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              className="mt-8 inline-block rounded-full bg-[#111111] px-8 py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
             >
               Cr\u00e9er mon compte gratuitement
             </a>
@@ -194,14 +194,14 @@ export default function LandingPage() {
 
       <footer className="border-t border-[#E0DCD5] px-5 py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:flex-row md:justify-between">
-          <span className="font-serif text-lg font-semibold text-[#0D0D0D]">LIEN</span>
+          <span className="font-serif text-lg font-semibold text-[#111111]">LIEN</span>
           <p className="text-xs text-[#8A8A8A]">
             &copy; {new Date().getFullYear()} Lien. Tous droits r\u00e9serv\u00e9s.
           </p>
           <div className="flex items-center gap-6">
-            <a href="/pricing" className="text-xs text-[#8A8A8A] hover:text-[#0D0D0D]">Tarifs</a>
-            <a href="#" className="text-xs text-[#8A8A8A] hover:text-[#0D0D0D]">CGU</a>
-            <a href="#" className="text-xs text-[#8A8A8A] hover:text-[#0D0D0D]">Confidentialit\u00e9</a>
+            <a href="/pricing" className="text-xs text-[#8A8A8A] hover:text-[#111111]">Tarifs</a>
+            <a href="#" className="text-xs text-[#8A8A8A] hover:text-[#111111]">CGU</a>
+            <a href="#" className="text-xs text-[#8A8A8A] hover:text-[#111111]">Confidentialit\u00e9</a>
           </div>
         </div>
       </footer>

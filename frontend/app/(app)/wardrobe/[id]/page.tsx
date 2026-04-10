@@ -52,7 +52,7 @@ export default function WardrobeItemPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-16">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#0D0D0D] border-t-transparent" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#111111] border-t-transparent" />
       </div>
     );
   }
@@ -66,11 +66,11 @@ export default function WardrobeItemPage() {
       {/* Back button */}
       <div className="flex items-center gap-3 pt-2">
         <a href="/wardrobe" className="flex h-10 w-10 items-center justify-center rounded-full bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </a>
-        <h1 className="text-lg font-semibold text-[#0D0D0D]">Détails</h1>
+        <h1 className="text-lg font-semibold text-[#111111]">Détails</h1>
       </div>
 
       {/* Large product photo */}
@@ -89,21 +89,21 @@ export default function WardrobeItemPage() {
         {/* Name + category pill */}
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-xl font-bold text-[#0D0D0D]">
+            <h2 className="text-xl font-bold text-[#111111]">
               {item.brand || categoryLabels[item.category] || item.category}
             </h2>
             {item.brand && (
               <p className="text-sm text-[#8A8A8A] mt-0.5">{categoryLabels[item.category]}</p>
             )}
           </div>
-          <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#0D0D0D]">
+          <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#111111]">
             {categoryLabels[item.category]}
           </span>
         </div>
 
         {/* Price */}
         {item.purchase_price && (
-          <p className="mt-2 text-xl font-bold text-[#0D0D0D]">{item.purchase_price.toFixed(2)}€</p>
+          <p className="mt-2 text-xl font-bold text-[#111111]">{item.purchase_price.toFixed(2)}€</p>
         )}
 
         {/* Wear badge */}
@@ -113,11 +113,11 @@ export default function WardrobeItemPage() {
 
         {/* Tags */}
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#0D0D0D]">{seasonLabels[item.season] || item.season}</span>
-          <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#0D0D0D]">{occasionLabels[item.occasion] || item.occasion}</span>
-          {item.material && <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#0D0D0D]">{item.material}</span>}
+          <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#111111]">{seasonLabels[item.season] || item.season}</span>
+          <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#111111]">{occasionLabels[item.occasion] || item.occasion}</span>
+          {item.material && <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#111111]">{item.material}</span>}
           {item.colors.map((c) => (
-            <span key={c} className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#0D0D0D]">{c}</span>
+            <span key={c} className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#111111]">{c}</span>
           ))}
         </div>
 
@@ -125,13 +125,13 @@ export default function WardrobeItemPage() {
         <div className="mt-5 flex gap-3">
           <button
             onClick={handleMarkWorn}
-            className="flex-1 rounded-full border border-[#0D0D0D] py-3 text-center text-sm font-semibold text-[#0D0D0D]"
+            className="flex-1 rounded-full border border-[#111111] py-3 text-center text-sm font-semibold text-[#111111]"
           >
             Marquer comme porté
           </button>
           <a
             href="/outfits/create"
-            className="flex-1 rounded-full bg-[#0D0D0D] py-3 text-center text-sm font-semibold text-white"
+            className="flex-1 rounded-full bg-[#111111] py-3 text-center text-sm font-semibold text-white"
           >
             Créer un look
           </a>
@@ -140,7 +140,7 @@ export default function WardrobeItemPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#0D0D0D] px-5 py-2.5 text-sm font-medium text-white shadow-lg">
+        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#111111] px-5 py-2.5 text-sm font-medium text-white shadow-lg">
           {toast}
         </div>
       )}

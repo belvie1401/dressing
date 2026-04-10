@@ -42,7 +42,7 @@ export default function StylistDetailPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-16">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#0D0D0D] border-t-transparent" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#111111] border-t-transparent" />
       </div>
     );
   }
@@ -64,12 +64,12 @@ export default function StylistDetailPage() {
       {/* Back + favorite */}
       <div className="flex items-center justify-between pt-2">
         <a href="/stylists" className="flex h-10 w-10 items-center justify-center rounded-full bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </a>
         <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
         </button>
@@ -90,7 +90,7 @@ export default function StylistDetailPage() {
       <div className="rounded-3xl bg-white p-5" style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.06)' }}>
         {/* Name + verified + location */}
         <div className="flex items-center gap-2">
-          <h2 className="text-xl font-bold text-[#0D0D0D]">{stylist.name}</h2>
+          <h2 className="text-xl font-bold text-[#111111]">{stylist.name}</h2>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="#3B82F6" stroke="white" strokeWidth="2">
             <circle cx="12" cy="12" r="10" />
             <polyline points="9 12 11 14 15 10" />
@@ -104,7 +104,7 @@ export default function StylistDetailPage() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#F59E0B" stroke="none">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
-            <span className="text-sm font-semibold text-[#0D0D0D]">{rating}</span>
+            <span className="text-sm font-semibold text-[#111111]">{rating}</span>
             {reviews && <span className="text-sm text-[#8A8A8A]">({reviews} avis)</span>}
           </div>
         )}
@@ -113,7 +113,7 @@ export default function StylistDetailPage() {
         {specs && specs.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
             {specs.map((s) => (
-              <span key={s} className="rounded-full border border-[#E0DCD5] px-3 py-1 text-xs font-medium text-[#0D0D0D]">
+              <span key={s} className="rounded-full border border-[#E0DCD5] px-3 py-1 text-xs font-medium text-[#111111]">
                 {s}
               </span>
             ))}
@@ -128,15 +128,15 @@ export default function StylistDetailPage() {
         {/* Stats */}
         <div className="mt-5 grid grid-cols-3 gap-3">
           <div className="text-center">
-            <p className="text-lg font-bold text-[#0D0D0D]">{looksCount || 0}</p>
+            <p className="text-lg font-bold text-[#111111]">{looksCount || 0}</p>
             <p className="text-[11px] text-[#8A8A8A]">looks cr\u00e9\u00e9s</p>
           </div>
           <div className="text-center">
-            <p className="text-lg font-bold text-[#0D0D0D]">{satisfaction || 0}%</p>
+            <p className="text-lg font-bold text-[#111111]">{satisfaction || 0}%</p>
             <p className="text-[11px] text-[#8A8A8A]">clients satisfaits</p>
           </div>
           <div className="text-center">
-            <p className="text-lg font-bold text-[#0D0D0D]">{experience || '0'}</p>
+            <p className="text-lg font-bold text-[#111111]">{experience || '0'}</p>
             <p className="text-[11px] text-[#8A8A8A]">ans d&apos;exp\u00e9rience</p>
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function StylistDetailPage() {
         {/* Looks r\u00e9cents */}
         <div className="mt-5">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-[#0D0D0D]">Looks r\u00e9cents</h3>
+            <h3 className="text-sm font-semibold text-[#111111]">Looks r\u00e9cents</h3>
             <span className="text-xs text-[#8A8A8A]">Voir tout</span>
           </div>
           <div className="flex gap-2 overflow-x-auto scrollbar-hide">

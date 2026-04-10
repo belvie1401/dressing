@@ -212,7 +212,7 @@ export default function DashboardPage() {
       <div className="mb-6">
         <div className="mx-5 mb-3 flex items-center justify-between">
           <h2 className="font-serif text-[16px] font-semibold text-[#111111]">Derni&egrave;res pi&egrave;ces</h2>
-          <a href="/wardrobe" className="text-sm text-[#8A8A8A]">Mon dressing</a>
+          <a href="/wardrobe" className="text-sm text-[#8A8A8A]">Voir tout</a>
         </div>
         <div className="flex gap-3 overflow-x-auto px-5 scrollbar-hide">
           {(recentItems.length > 0 ? recentItems : placeholderItems).map((item, i) => {

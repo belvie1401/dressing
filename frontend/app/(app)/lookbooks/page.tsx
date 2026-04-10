@@ -5,7 +5,7 @@ import type { Lookbook } from '@/types';
 import { api } from '@/lib/api';
 
 const statusLabels: Record<string, { label: string; bg: string; text: string }> = {
-  DRAFT: { label: 'Brouillon', bg: '#F0F0F0', text: '#0D0D0D' },
+  DRAFT: { label: 'Brouillon', bg: '#F0F0F0', text: '#111111' },
   SENT: { label: 'Envoyé', bg: '#DBEAFE', text: '#1D4ED8' },
   APPROVED: { label: 'Approuvé', bg: '#DCFCE7', text: '#16A34A' },
   REJECTED: { label: 'Refusé', bg: '#FEE2E2', text: '#DC2626' },
@@ -28,7 +28,7 @@ export default function LookbooksPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-[#0D0D0D] pt-2">Lookbooks</h1>
+      <h1 className="text-2xl font-bold text-[#111111] pt-2">Lookbooks</h1>
 
       {loading ? (
         <div className="py-16 text-center text-sm text-[#8A8A8A]">Chargement...</div>
@@ -47,7 +47,7 @@ export default function LookbooksPage() {
                 className="block rounded-2xl bg-white p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-[#0D0D0D]">{lb.title}</h3>
+                  <h3 className="text-sm font-semibold text-[#111111]">{lb.title}</h3>
                   <span className="rounded-full px-2.5 py-0.5 text-xs font-medium" style={{ background: status.bg, color: status.text }}>
                     {status.label}
                   </span>

@@ -31,7 +31,7 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-bold text-[#0D0D0D] pt-2">Agenda</h1>
+      <h1 className="text-2xl font-bold text-[#111111] pt-2">Agenda</h1>
 
       <div className="rounded-2xl bg-white p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <CalendarView entries={entries} onDayClick={setSelectedDate} />
@@ -39,12 +39,12 @@ export default function CalendarPage() {
 
       {selectedDate && (
         <div className="rounded-2xl bg-white p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <h3 className="mb-2 text-sm font-semibold text-[#0D0D0D]">
+          <h3 className="mb-2 text-sm font-semibold text-[#111111]">
             {format(selectedDate, 'dd MMMM yyyy')}
           </h3>
           {selectedEntry ? (
             <div>
-              <p className="text-sm text-[#0D0D0D]">
+              <p className="text-sm text-[#111111]">
                 Tenue : {selectedEntry.outfit?.name || 'Non définie'}
               </p>
               {selectedEntry.notes && (
@@ -54,7 +54,7 @@ export default function CalendarPage() {
           ) : (
             <div className="text-center py-4">
               <p className="text-sm text-[#8A8A8A]">Aucune tenue planifiée</p>
-              <a href="/outfits" className="mt-2 inline-block text-xs font-medium text-[#0D0D0D] underline">
+              <a href="/outfits" className="mt-2 inline-block text-xs font-medium text-[#111111] underline">
                 Choisir une tenue
               </a>
             </div>

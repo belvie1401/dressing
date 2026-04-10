@@ -54,11 +54,11 @@ export default function WardrobeAddPage() {
     <div className="space-y-5">
       <div className="flex items-center gap-3 pt-2">
         <a href="/wardrobe" className="flex h-10 w-10 items-center justify-center rounded-full bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </a>
-        <h1 className="text-lg font-semibold text-[#0D0D0D]">Ajouter un vêtement</h1>
+        <h1 className="text-lg font-semibold text-[#111111]">Ajouter un vêtement</h1>
       </div>
 
       {saving ? (
@@ -74,26 +74,26 @@ export default function WardrobeAddPage() {
 
           {/* Optional form fields */}
           <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-[#0D0D0D]">Informations complémentaires</h2>
+            <h2 className="text-sm font-semibold text-[#111111]">Informations complémentaires</h2>
             <input
               type="text"
               placeholder="Marque"
               value={formData.brand}
               onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-              className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
+              className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#111111] placeholder-[#8A8A8A] focus:border-[#111111] focus:outline-none"
             />
             <input
               type="number"
               placeholder="Prix d'achat (€)"
               value={formData.purchase_price}
               onChange={(e) => setFormData({ ...formData, purchase_price: e.target.value })}
-              className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
+              className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#111111] placeholder-[#8A8A8A] focus:border-[#111111] focus:outline-none"
             />
             <input
               type="date"
               value={formData.purchase_date}
               onChange={(e) => setFormData({ ...formData, purchase_date: e.target.value })}
-              className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
+              className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#111111] placeholder-[#8A8A8A] focus:border-[#111111] focus:outline-none"
             />
           </div>
         </>

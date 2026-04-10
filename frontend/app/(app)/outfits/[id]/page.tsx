@@ -35,7 +35,7 @@ export default function OutfitDetailPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-16">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#0D0D0D] border-t-transparent" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#111111] border-t-transparent" />
       </div>
     );
   }
@@ -51,11 +51,11 @@ export default function OutfitDetailPage() {
       {/* Back button */}
       <div className="flex items-center gap-3 pt-2">
         <a href="/outfits" className="flex h-10 w-10 items-center justify-center rounded-full bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </a>
-        <h1 className="text-lg font-semibold text-[#0D0D0D]">{outfit.name}</h1>
+        <h1 className="text-lg font-semibold text-[#111111]">{outfit.name}</h1>
         {outfit.ai_generated && (
           <span className="ml-auto rounded-full bg-gradient-to-r from-purple-100 to-pink-100 px-3 py-1 text-xs font-medium text-purple-700">IA</span>
         )}
@@ -95,13 +95,13 @@ export default function OutfitDetailPage() {
         <div className="mt-4 flex gap-3">
           <button
             onClick={handleMarkWorn}
-            className="flex-1 rounded-full bg-[#0D0D0D] py-3 text-center text-sm font-semibold text-white"
+            className="flex-1 rounded-full bg-[#111111] py-3 text-center text-sm font-semibold text-white"
           >
             Marquer porté
           </button>
           <a
             href={`/calendar`}
-            className="flex-1 rounded-full border border-[#0D0D0D] py-3 text-center text-sm font-semibold text-[#0D0D0D]"
+            className="flex-1 rounded-full border border-[#111111] py-3 text-center text-sm font-semibold text-[#111111]"
           >
             Planifier
           </a>

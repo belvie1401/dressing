@@ -28,7 +28,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <a
           href="/"
-          className="mb-6 flex min-h-[44px] w-fit items-center gap-2 text-sm text-[#8A8A8A] hover:text-[#0D0D0D] transition-colors"
+          className="mb-6 flex min-h-[44px] w-fit items-center gap-2 text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
@@ -36,8 +36,8 @@ export default function LoginPage() {
           Accueil
         </a>
         <div className="mb-8 text-center">
-          <span className="font-serif text-3xl font-semibold tracking-wide text-[#0D0D0D]">LIEN</span>
-          <h1 className="mt-4 text-xl font-bold text-[#0D0D0D]">Bon retour</h1>
+          <span className="font-serif text-3xl font-semibold tracking-wide text-[#111111]">LIEN</span>
+          <h1 className="mt-4 text-xl font-bold text-[#111111]">Bon retour</h1>
           <p className="mt-1 text-sm text-[#8A8A8A]">
             Connectez-vous \u00e0 votre compte
           </p>
@@ -51,7 +51,7 @@ export default function LoginPage() {
           )}
 
           <div>
-            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-[#0D0D0D]">
+            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-[#111111]">
               Email
             </label>
             <input
@@ -60,13 +60,13 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl border border-[#E0DCD5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
+              className="w-full rounded-xl border border-[#E0DCD5] bg-white px-4 py-3 text-sm text-[#111111] placeholder-[#8A8A8A] focus:border-[#111111] focus:outline-none"
               placeholder="votre@email.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-[#0D0D0D]">
+            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-[#111111]">
               Mot de passe
             </label>
             <input
@@ -75,7 +75,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-xl border border-[#E0DCD5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
+              className="w-full rounded-xl border border-[#E0DCD5] bg-white px-4 py-3 text-sm text-[#111111] placeholder-[#8A8A8A] focus:border-[#111111] focus:outline-none"
               placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"
             />
           </div>
@@ -83,14 +83,14 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="flex w-full items-center justify-center rounded-full bg-[#0D0D0D] py-3.5 text-sm font-semibold text-white disabled:opacity-50"
+            className="flex w-full items-center justify-center rounded-full bg-[#111111] py-3.5 text-sm font-semibold text-white disabled:opacity-50"
           >
             {isLoading ? 'Connexion...' : 'Se connecter'}
           </button>
 
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-[#E0DCD5] bg-white py-3.5 text-sm font-medium text-[#0D0D0D]"
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-[#E0DCD5] bg-white py-3.5 text-sm font-medium text-[#111111]"
           >
             Continuer avec Google
           </button>
@@ -98,7 +98,7 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-[#8A8A8A]">
           Pas encore de compte ?{' '}
-          <a href="/register" className="font-semibold text-[#0D0D0D]">
+          <a href="/register" className="font-semibold text-[#111111]">
             S&apos;inscrire
           </a>
         </p>

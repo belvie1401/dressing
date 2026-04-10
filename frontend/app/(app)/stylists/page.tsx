@@ -42,16 +42,16 @@ export default function StylistsPage() {
       <div className="flex items-center justify-between pt-2">
         <div className="flex items-center gap-3">
           <button className="flex h-10 w-10 items-center justify-center">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round">
               <line x1="3" y1="6" x2="21" y2="6" />
               <line x1="3" y1="12" x2="21" y2="12" />
               <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
-          <h1 className="font-serif text-xl font-semibold text-[#0D0D0D]">Nos stylistes</h1>
+          <h1 className="font-serif text-xl font-semibold text-[#111111]">Nos stylistes</h1>
         </div>
         <a href="/messages" className="flex h-10 w-10 items-center justify-center">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
@@ -69,11 +69,11 @@ export default function StylistsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher un styliste"
-            className="flex-1 bg-transparent text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-[#111111] placeholder-[#8A8A8A] focus:outline-none"
           />
         </div>
         <button className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--color-tag-bg)' }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" />
             <line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" />
             <line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" />
@@ -91,8 +91,8 @@ export default function StylistsPage() {
             onClick={() => setActiveFilter(f)}
             className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all ${
               activeFilter === f
-                ? 'bg-[#0D0D0D] text-white'
-                : 'bg-white text-[#0D0D0D] border border-[#E0DCD5]'
+                ? 'bg-[#111111] text-white'
+                : 'bg-white text-[#111111] border border-[#E0DCD5]'
             }`}
           >
             {f}
@@ -103,7 +103,7 @@ export default function StylistsPage() {
       {/* Stylists list */}
       {loading ? (
         <div className="flex justify-center py-16">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#0D0D0D] border-t-transparent" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#111111] border-t-transparent" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-16 text-center text-sm text-[#8A8A8A]">Aucun styliste trouv\u00e9</div>
@@ -132,7 +132,7 @@ export default function StylistsPage() {
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-[#0D0D0D]">{stylist.name}</p>
+                  <p className="text-sm font-semibold text-[#111111]">{stylist.name}</p>
                   {stylist.location && (
                     <p className="text-xs text-[#8A8A8A]">{stylist.location}</p>
                   )}
@@ -143,7 +143,7 @@ export default function StylistsPage() {
                   )}
                   <div className="mt-1 flex items-center gap-2">
                     {rating && (
-                      <span className="flex items-center gap-0.5 text-xs text-[#0D0D0D]">
+                      <span className="flex items-center gap-0.5 text-xs text-[#111111]">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="#F59E0B" stroke="none">
                           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                         </svg>

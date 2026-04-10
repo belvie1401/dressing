@@ -43,16 +43,16 @@ export default function WardrobePage() {
       <div className="flex items-center justify-between pt-2">
         <div className="flex items-center gap-3">
           <button className="flex h-10 w-10 items-center justify-center">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round">
               <line x1="3" y1="6" x2="21" y2="6" />
               <line x1="3" y1="12" x2="21" y2="12" />
               <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
-          <h1 className="font-serif text-xl font-semibold text-[#0D0D0D]">Mon dressing</h1>
+          <h1 className="font-serif text-xl font-semibold text-[#111111]">Mon dressing</h1>
         </div>
         <a href="/messages" className="flex h-10 w-10 items-center justify-center">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
@@ -71,7 +71,7 @@ export default function WardrobePage() {
             onClick={() => setTab(t.key)}
             className={`flex-1 rounded-full py-2 text-sm font-medium transition-all ${
               tab === t.key
-                ? 'bg-[#0D0D0D] text-white'
+                ? 'bg-[#111111] text-white'
                 : 'text-[#8A8A8A]'
             }`}
           >
@@ -91,11 +91,11 @@ export default function WardrobePage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher"
-            className="flex-1 bg-transparent text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-[#111111] placeholder-[#8A8A8A] focus:outline-none"
           />
         </div>
         <button className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--color-tag-bg)' }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" />
             <line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" />
             <line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" />
@@ -108,7 +108,7 @@ export default function WardrobePage() {
       {/* Tab content */}
       {isLoading ? (
         <div className="flex justify-center py-16">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#0D0D0D] border-t-transparent" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#111111] border-t-transparent" />
         </div>
       ) : tab === 'clothes' ? (
         <>
@@ -119,7 +119,7 @@ export default function WardrobePage() {
                   <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-[#0D0D0D]">Votre dressing est vide</p>
+              <p className="text-sm font-medium text-[#111111]">Votre dressing est vide</p>
               <p className="mt-1 text-xs text-[#8A8A8A]">Ajoutez votre premier v\u00eatement</p>
             </div>
           ) : (
@@ -146,7 +146,7 @@ export default function WardrobePage() {
           {/* + Ajouter button */}
           <a
             href="/wardrobe/add"
-            className="flex items-center justify-center gap-2 rounded-full border border-[#0D0D0D] py-3 text-sm font-semibold text-[#0D0D0D] transition-colors hover:bg-[#0D0D0D] hover:text-white"
+            className="flex items-center justify-center gap-2 rounded-full border border-[#111111] py-3 text-sm font-semibold text-[#111111] transition-colors hover:bg-[#111111] hover:text-white"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -159,7 +159,7 @@ export default function WardrobePage() {
           {outfits.length === 0 ? (
             <div className="flex flex-col items-center py-16 text-center">
               <p className="text-sm text-[#8A8A8A]">Aucun look cr\u00e9\u00e9 pour le moment</p>
-              <a href="/outfits/create" className="mt-3 rounded-full bg-[#0D0D0D] px-5 py-2.5 text-sm font-medium text-white">
+              <a href="/outfits/create" className="mt-3 rounded-full bg-[#111111] px-5 py-2.5 text-sm font-medium text-white">
                 Cr\u00e9er un look
               </a>
             </div>
@@ -184,7 +184,7 @@ export default function WardrobePage() {
                     )}
                   </div>
                   <div className="p-2.5">
-                    <p className="text-sm font-medium text-[#0D0D0D] truncate">{outfit.name}</p>
+                    <p className="text-sm font-medium text-[#111111] truncate">{outfit.name}</p>
                     <p className="text-xs text-[#8A8A8A]">{outfit.items?.length || 0} pi\u00e8ces</p>
                   </div>
                 </a>
