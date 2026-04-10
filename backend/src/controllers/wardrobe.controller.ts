@@ -51,7 +51,7 @@ export async function getItem(req: Request, res: Response): Promise<void> {
 
 export async function createItem(req: Request, res: Response): Promise<void> {
   try {
-    const { category, colors, material, season, occasion, brand, purchase_price, purchase_date, ai_tags } = req.body;
+    const { category, colors, material, season, occasion, brand, purchase_price, purchase_date, ai_tags, remove_bg } = req.body;
 
     let photo_url = '';
     let bg_removed_url: string | undefined;
@@ -60,10 +60,12 @@ export async function createItem(req: Request, res: Response): Promise<void> {
       const result = await uploadImage(req.file.buffer);
       photo_url = result.url;
 
-      try {
-        bg_removed_url = await removeBackground(result.public_id);
-      } catch {
-        // Background removal failed, continue without it
+      if (remove_bg !== '0') {
+        try {
+          bg_removed_url = await removeBackground(result.public_id);
+        } catch {
+          // Background removal failed, continue without it
+        }
       }
     } else if (req.body.photo_url) {
       photo_url = req.body.photo_url;

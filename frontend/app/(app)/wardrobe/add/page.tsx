@@ -10,6 +10,7 @@ import type { ClothingItem } from '@/types';
 export default function WardrobeAddPage() {
   const router = useRouter();
   const addItem = useWardrobeStore((s) => s.addItem);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     brand: '',
     purchase_price: '',
@@ -18,28 +19,35 @@ export default function WardrobeAddPage() {
 
   const handleScanComplete = async (
     result: ScanResult,
-    imageBase64: string
+    file: File,
+    removeBg: boolean
   ) => {
-    const body = {
-      photo_url: `data:image/jpeg;base64,${imageBase64}`,
-      category: result.category || 'TOP',
-      colors: result.secondary_colors
-        ? [result.primary_color, ...(result.secondary_colors as string[])]
-        : [result.primary_color],
-      material: result.material_guess,
-      season: (result.season_tags as string[])?.[0] || 'ALL',
-      occasion: (result.occasion_tags as string[])?.[0] || 'CASUAL',
-      brand: formData.brand || undefined,
-      purchase_price: formData.purchase_price || undefined,
-      purchase_date: formData.purchase_date || undefined,
-      ai_tags: result,
-    };
+    setSaving(true);
+
+    const body = new FormData();
+    body.append('photo', file);
+    body.append('category', result.category || 'TOP');
+    body.append('colors', JSON.stringify(
+      result.secondary_colors
+        ? [result.primary_color, ...result.secondary_colors]
+        : [result.primary_color]
+    ));
+    body.append('material', result.material_guess || '');
+    body.append('season', (result.season_tags as string[])?.[0] || 'ALL');
+    body.append('occasion', (result.occasion_tags as string[])?.[0] || 'CASUAL');
+    body.append('ai_tags', JSON.stringify(result));
+    body.append('remove_bg', removeBg ? '1' : '0');
+
+    if (formData.brand) body.append('brand', formData.brand);
+    if (formData.purchase_price) body.append('purchase_price', formData.purchase_price);
+    if (formData.purchase_date) body.append('purchase_date', formData.purchase_date);
 
     const res = await api.post<ClothingItem>('/wardrobe', body);
     if (res.success && res.data) {
       addItem(res.data);
       router.push('/wardrobe');
     }
+    setSaving(false);
   };
 
   return (
@@ -53,32 +61,43 @@ export default function WardrobeAddPage() {
         <h1 className="text-lg font-semibold text-[#0D0D0D]">Ajouter un vêtement</h1>
       </div>
 
-      <WardrobeScanner onScanComplete={handleScanComplete} />
+      {saving ? (
+        <div className="flex flex-col items-center gap-3 py-16">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="2" className="animate-spin">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+          </svg>
+          <p className="text-sm text-[#8A8A8A]">Ajout en cours...</p>
+        </div>
+      ) : (
+        <>
+          <WardrobeScanner onScanComplete={handleScanComplete} />
 
-      {/* Optional form fields */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-[#0D0D0D]">Informations complémentaires</h2>
-        <input
-          type="text"
-          placeholder="Marque"
-          value={formData.brand}
-          onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-          className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
-        />
-        <input
-          type="number"
-          placeholder="Prix d'achat (€)"
-          value={formData.purchase_price}
-          onChange={(e) => setFormData({ ...formData, purchase_price: e.target.value })}
-          className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
-        />
-        <input
-          type="date"
-          value={formData.purchase_date}
-          onChange={(e) => setFormData({ ...formData, purchase_date: e.target.value })}
-          className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
-        />
-      </div>
+          {/* Optional form fields */}
+          <div className="space-y-3">
+            <h2 className="text-sm font-semibold text-[#0D0D0D]">Informations complémentaires</h2>
+            <input
+              type="text"
+              placeholder="Marque"
+              value={formData.brand}
+              onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+              className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
+            />
+            <input
+              type="number"
+              placeholder="Prix d'achat (€)"
+              value={formData.purchase_price}
+              onChange={(e) => setFormData({ ...formData, purchase_price: e.target.value })}
+              className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
+            />
+            <input
+              type="date"
+              value={formData.purchase_date}
+              onChange={(e) => setFormData({ ...formData, purchase_date: e.target.value })}
+              className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }

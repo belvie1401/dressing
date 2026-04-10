@@ -14,28 +14,32 @@ export interface ScanResult {
 }
 
 interface WardrobeScannerProps {
-  onScanComplete: (result: ScanResult, imageBase64: string) => void;
+  onScanComplete: (result: ScanResult, file: File, removeBg: boolean) => void;
 }
 
 export default function WardrobeScanner({ onScanComplete }: WardrobeScannerProps) {
   const [preview, setPreview] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
+  const [removeBg, setRemoveBg] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+
+    setFile(selected);
+    setScanResult(null);
 
     const reader = new FileReader();
     reader.onload = (ev) => {
       const dataUrl = ev.target?.result as string;
       setPreview(dataUrl);
       setImageBase64(dataUrl.split(',')[1]);
-      setScanResult(null);
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(selected);
   };
 
   const handleScan = async () => {
@@ -54,13 +58,14 @@ export default function WardrobeScanner({ onScanComplete }: WardrobeScannerProps
   };
 
   const handleConfirm = () => {
-    if (scanResult && imageBase64) {
-      onScanComplete(scanResult, imageBase64);
+    if (scanResult && file) {
+      onScanComplete(scanResult, file, removeBg);
     }
   };
 
   const handleReset = () => {
     setPreview(null);
+    setFile(null);
     setImageBase64(null);
     setScanResult(null);
   };
@@ -153,6 +158,24 @@ export default function WardrobeScanner({ onScanComplete }: WardrobeScannerProps
                   </span>
                 ))}
               </div>
+
+              {/* Remove background toggle */}
+              <button
+                type="button"
+                onClick={() => setRemoveBg(!removeBg)}
+                className="flex w-full items-center justify-between rounded-2xl bg-white p-3"
+                style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+              >
+                <div className="flex items-center gap-2.5">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /><path d="M3 9h6" /><path d="M3 15h6" />
+                  </svg>
+                  <span className="text-sm font-medium text-[#0D0D0D]">Supprimer le fond</span>
+                </div>
+                <div className={`flex h-6 w-11 items-center rounded-full px-0.5 transition-colors ${removeBg ? 'bg-[#0D0D0D]' : 'bg-gray-200'}`}>
+                  <div className={`h-5 w-5 rounded-full bg-white shadow transition-transform ${removeBg ? 'translate-x-5' : 'translate-x-0'}`} />
+                </div>
+              </button>
 
               <button
                 onClick={handleConfirm}
