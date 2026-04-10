@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { connectSocket, disconnectSocket } from '@/lib/socket';
 import BottomNav from '@/components/ui/BottomNav';
+import Sidebar from '@/components/ui/Sidebar';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, token, _hasHydrated, loadUser } = useAuthStore();
@@ -15,13 +16,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!_hasHydrated) return;
 
-    // No token after hydration → definitely not logged in
     if (!token) {
       router.push('/login');
       return;
     }
 
-    // Token exists but no user object → validate with the API
     if (!user) {
       loadUser().then(() => {
         setAuthChecked(true);
@@ -60,14 +59,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // After check, if no token, don't render (redirect is in flight)
   if (!token) return null;
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: 'var(--color-app-bg)' }}>
-      <main className="mx-auto max-w-lg px-5 py-4 lg:max-w-6xl">
+    <div className="flex min-h-screen" style={{ background: 'var(--color-app-bg)' }}>
+      {/* Desktop sidebar — hidden on mobile */}
+      <Sidebar />
+
+      {/* Main content */}
+      <main className="flex-1 min-w-0 pb-24 lg:pb-8">
         {children}
       </main>
+
+      {/* Mobile bottom nav — hidden on desktop */}
       <BottomNav />
     </div>
   );
