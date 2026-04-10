@@ -13,7 +13,7 @@ const tabs: Tab[] = [
     href: '/dashboard',
     label: 'Accueil',
     icon: (active) => (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#0D0D0D' : 'none'} stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#111111' : 'none'} stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
         {!active && <polyline points="9 22 9 12 15 12 15 22" />}
       </svg>
@@ -23,7 +23,7 @@ const tabs: Tab[] = [
     href: '/wardrobe',
     label: 'Dressing',
     icon: (active) => (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#0D0D0D' : 'none'} stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#111111' : 'none'} stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2C12 2 8 2 8 6H4l1 14h14l1-14h-4c0-4-4-4-4-4z" />
         <line x1="8" y1="6" x2="8" y2="8" />
         <line x1="16" y1="6" x2="16" y2="8" />
@@ -34,18 +34,18 @@ const tabs: Tab[] = [
     href: '/stylists',
     label: 'Styliste',
     icon: (active) => (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#0D0D0D' : 'none'} stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#111111' : 'none'} stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
         <circle cx="12" cy="7" r="4" />
       </svg>
     ),
   },
   {
-    href: '/messages',
-    label: 'Messages',
+    href: '/favorites',
+    label: 'Favoris',
     icon: (active) => (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#0D0D0D' : 'none'} stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#111111' : 'none'} stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
     ),
   },
@@ -53,10 +53,10 @@ const tabs: Tab[] = [
     href: '/profile',
     label: 'Profil',
     icon: (active) => (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" fill={active ? '#0D0D0D' : 'none'} />
-        <path d="M12 14c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill={active ? 'white' : 'none'} stroke={active ? 'white' : '#0D0D0D'} />
-        <path d="M6 20.5c0-2.5 2.5-4.5 6-4.5s6 2 6 4.5" stroke={active ? 'white' : '#0D0D0D'} fill="none" />
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" fill={active ? '#111111' : 'none'} />
+        <path d="M12 14c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill={active ? 'white' : 'none'} stroke={active ? 'white' : '#111111'} />
+        <path d="M6 20.5c0-2.5 2.5-4.5 6-4.5s6 2 6 4.5" stroke={active ? 'white' : '#111111'} fill="none" />
       </svg>
     ),
   },
@@ -82,7 +82,7 @@ export default function BottomNav() {
               <div className={`relative flex h-8 w-8 items-center justify-center ${isActive ? 'opacity-100' : 'opacity-50'}`}>
                 {tab.icon(!!isActive)}
               </div>
-              <span className={`text-[10px] ${isActive ? 'font-semibold text-[#0D0D0D]' : 'text-[#8A8A8A]'}`}>
+              <span className={`text-[10px] ${isActive ? 'font-semibold text-[#111111]' : 'text-[#8A8A8A]'}`}>
                 {tab.label}
               </span>
             </a>
