@@ -36,150 +36,135 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-5" style={{ background: 'var(--color-app-bg)' }}>
-      <div className="w-full max-w-sm">
-        <a
-          href="/"
-          className="mb-6 flex min-h-[44px] w-fit items-center gap-2 text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
-          </svg>
-          Accueil
-        </a>
-        <div className="mb-8 text-center">
-          <span className="font-serif text-3xl font-semibold tracking-wide text-[#111111]">LIEN</span>
-          <h1 className="mt-4 text-xl font-bold text-[#111111]">Cr\u00e9er un compte</h1>
-          <p className="mt-1 text-sm text-[#8A8A8A]">
-            Rejoignez la communaut\u00e9 Lien
-          </p>
+    <div className="min-h-screen bg-[#F7F5F2] flex flex-col px-5 py-8">
+      {/* Back */}
+      <a href="/" className="flex items-center gap-2 text-sm text-[#8A8A8A] w-fit">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        Accueil
+      </a>
+
+      {/* Brand */}
+      <div className="text-center mt-6 mb-2">
+        <span className="font-serif text-2xl text-[#111111]">LIEN</span>
+      </div>
+      <h1 className="font-serif text-xl text-center text-[#111111]">Cr&eacute;er un compte</h1>
+      <p className="text-sm text-[#8A8A8A] text-center mb-8">Rejoignez la communaut&eacute; Lien</p>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-sm mx-auto w-full">
+        {error && (
+          <div className="rounded-2xl bg-red-50 p-3 text-sm text-red-600">{error}</div>
+        )}
+
+        {/* Nom */}
+        <div>
+          <label className="text-xs text-[#8A8A8A] mb-1 font-medium uppercase tracking-wide block">Nom</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="w-full bg-white border border-[#EFEFEF] rounded-2xl px-4 py-3 text-[#111111] text-sm focus:outline-none focus:border-[#111111] placeholder:text-[#CFCFCF]"
+            placeholder="Votre nom"
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="rounded-2xl bg-red-50 p-3 text-sm text-red-600">
-              {error}
-            </div>
-          )}
+        {/* Email */}
+        <div>
+          <label className="text-xs text-[#8A8A8A] mb-1 font-medium uppercase tracking-wide block">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full bg-white border border-[#EFEFEF] rounded-2xl px-4 py-3 text-[#111111] text-sm focus:outline-none focus:border-[#111111] placeholder:text-[#CFCFCF]"
+            placeholder="votre@email.com"
+          />
+        </div>
 
-          <div>
-            <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-[#111111]">
-              Nom
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="w-full rounded-xl border border-[#E0DCD5] bg-white px-4 py-3 text-sm text-[#111111] placeholder-[#8A8A8A] focus:border-[#111111] focus:outline-none"
-              placeholder="Votre nom"
-            />
-          </div>
+        {/* Mot de passe */}
+        <div>
+          <label className="text-xs text-[#8A8A8A] mb-1 font-medium uppercase tracking-wide block">Mot de passe</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
+            className="w-full bg-white border border-[#EFEFEF] rounded-2xl px-4 py-3 text-[#111111] text-sm focus:outline-none focus:border-[#111111] placeholder:text-[#CFCFCF]"
+            placeholder="Minimum 6 caract\u00e8res"
+          />
+        </div>
 
-          <div>
-            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-[#111111]">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full rounded-xl border border-[#E0DCD5] bg-white px-4 py-3 text-sm text-[#111111] placeholder-[#8A8A8A] focus:border-[#111111] focus:outline-none"
-              placeholder="votre@email.com"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-[#111111]">
-              Mot de passe
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="w-full rounded-xl border border-[#E0DCD5] bg-white px-4 py-3 text-sm text-[#111111] placeholder-[#8A8A8A] focus:border-[#111111] focus:outline-none"
-              placeholder="Minimum 6 caract\u00e8res"
-            />
-          </div>
-
-          {/* Role selection */}
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-[#111111]">
-              Je suis...
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setRole('CLIENT')}
-                className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-4 transition-all ${
-                  role === 'CLIENT'
-                    ? 'border-[#111111] bg-white shadow-md'
-                    : 'border-[#E0DCD5] bg-white'
-                }`}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={role === 'CLIENT' ? '#111111' : '#8A8A8A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        {/* Role selection */}
+        <div>
+          <label className="text-xs text-[#8A8A8A] uppercase tracking-wide block mb-1">Je suis...</label>
+          <div className="grid grid-cols-2 gap-3 mt-1">
+            <button
+              type="button"
+              onClick={() => setRole('CLIENT')}
+              className={`cursor-pointer rounded-2xl p-4 border-2 transition-all duration-200 ${
+                role === 'CLIENT' ? 'bg-white border-[#111111] shadow-md' : 'bg-white border-[#EFEFEF]'
+              }`}
+            >
+              <div className="w-10 h-10 rounded-full bg-[#F0EDE8] flex items-center justify-center mx-auto mb-2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2C12 2 8 2 8 6H4l1 14h14l1-14h-4c0-4-4-4-4-4z" />
                 </svg>
-                <span className="text-sm font-semibold text-[#111111]">Cliente</span>
-                <span className="text-center text-[11px] leading-tight text-[#8A8A8A]">Je g\u00e8re mon dressing</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('STYLIST')}
-                className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-4 transition-all ${
-                  role === 'STYLIST'
-                    ? 'border-[#111111] bg-white shadow-md'
-                    : 'border-[#E0DCD5] bg-white'
-                }`}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={role === 'STYLIST' ? '#111111' : '#8A8A8A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              </div>
+              <p className="text-sm font-semibold text-center text-[#111111]">Cliente</p>
+              <p className="text-xs text-[#8A8A8A] text-center mt-1">Je g&egrave;re mon dressing</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole('STYLIST')}
+              className={`cursor-pointer rounded-2xl p-4 border-2 transition-all duration-200 ${
+                role === 'STYLIST' ? 'bg-white border-[#111111] shadow-md' : 'bg-white border-[#EFEFEF]'
+              }`}
+            >
+              <div className="w-10 h-10 rounded-full bg-[#F0EDE8] flex items-center justify-center mx-auto mb-2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
                 </svg>
-                <span className="text-sm font-semibold text-[#111111]">Styliste</span>
-                <span className="text-center text-[11px] leading-tight text-[#8A8A8A]">Je conseille mes clientes</span>
-              </button>
-            </div>
+              </div>
+              <p className="text-sm font-semibold text-center text-[#111111]">Styliste</p>
+              <p className="text-xs text-[#8A8A8A] text-center mt-1">Je conseille mes clientes</p>
+            </button>
           </div>
+        </div>
 
-          <a
-            href="/pricing"
-            className="flex items-center justify-center gap-1 text-xs font-medium text-[#8A8A8A] transition-colors hover:text-[#111111]"
-          >
-            Voir les abonnements
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-            </svg>
-          </a>
+        <a href="/pricing" className="text-xs text-[#8A8A8A] underline text-center">
+          Voir les abonnements
+        </a>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="flex w-full items-center justify-center rounded-full bg-[#111111] py-3.5 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            {isLoading ? 'Cr\u00e9ation...' : 'Cr\u00e9er mon compte'}
-          </button>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="bg-[#111111] text-white rounded-full w-full py-4 text-sm font-medium mt-2 disabled:opacity-50"
+        >
+          {isLoading ? 'Cr\u00e9ation...' : 'Cr\u00e9er mon compte'}
+        </button>
 
-          <button
-            type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-[#E0DCD5] bg-white py-3.5 text-sm font-medium text-[#111111]"
-          >
-            Continuer avec Google
-          </button>
-        </form>
+        <button
+          type="button"
+          className="bg-white border border-[#EFEFEF] rounded-full w-full py-4 text-sm text-[#111111] font-medium flex items-center justify-center gap-2"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+          </svg>
+          Continuer avec Google
+        </button>
+      </form>
 
-        <p className="mt-6 text-center text-sm text-[#8A8A8A]">
-          D\u00e9j\u00e0 un compte ?{' '}
-          <a href="/login" className="font-semibold text-[#111111]">
-            Se connecter
-          </a>
-        </p>
-      </div>
+      <p className="text-sm text-[#8A8A8A] text-center mt-4">
+        D&eacute;j&agrave; un compte ?{' '}
+        <a href="/login" className="font-semibold text-[#111111]">Se connecter</a>
+      </p>
     </div>
   );
 }

@@ -1,37 +1,5 @@
 import Image from 'next/image';
 
-const steps = [
-  {
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2L8 6H3v14h18V6h-5l-4-4z" />
-        <path d="M9 14l2 2 4-4" />
-      </svg>
-    ),
-    title: 'Ajoutez votre dressing',
-    description: 'Importez vos v\u00eatements en quelques photos.',
-  },
-  {
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-        <path d="M8 11h6" /><path d="M11 8v6" />
-      </svg>
-    ),
-    title: 'Trouvez un styliste',
-    description: 'D\u00e9couvrez des profils et choisissez celui qui vous correspond.',
-  },
-  {
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-      </svg>
-    ),
-    title: 'Recevez vos looks',
-    description: '\u00c9changez, affinez, adoptez le style qui vous sublime.',
-  },
-];
-
 const inspirationImages = [
   'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=300&h=400&fit=crop',
   'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&h=400&fit=crop',
@@ -44,24 +12,21 @@ const inspirationImages = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-app-bg)' }}>
-      {/* Header */}
-      <header className="px-5 py-5">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between">
-          <span className="font-serif text-2xl font-semibold tracking-wide text-[#111111]">LIEN</span>
+    <div className="min-h-screen bg-[#F7F5F2]">
+      {/* Navbar */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#EFEFEF]">
+        <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
+          <span className="font-serif text-xl text-[#111111]">LIEN</span>
           <div className="hidden items-center gap-8 md:flex">
-            <a href="#how" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">Fonctionnalit\u00e9s</a>
+            <a href="#how" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">Fonctionnalit&eacute;s</a>
             <a href="#stylists" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">Pour les stylistes</a>
-            <a href="#about" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">\u00c0 propos</a>
+            <a href="#about" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">&Agrave; propos</a>
           </div>
           <div className="flex items-center gap-3">
-            <a href="/login" className="text-sm font-medium text-[#111111] hover:underline">
+            <a href="/login" className="rounded-full border border-[#111111] px-5 py-2 text-sm text-[#111111]">
               Se connecter
             </a>
-            <a
-              href="/register"
-              className="rounded-full bg-[#111111] px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
-            >
+            <a href="/register" className="rounded-full bg-[#111111] px-5 py-2 text-sm text-white">
               Commencer
             </a>
           </div>
@@ -70,52 +35,47 @@ export default function LandingPage() {
 
       <main>
         {/* Hero */}
-        <section className="px-5 pt-12 pb-16 md:pt-20 md:pb-24">
-          <div className="mx-auto flex max-w-6xl flex-col items-center gap-12 md:flex-row md:items-center md:gap-16">
-            <div className="flex-1 text-center md:text-left">
-              <h1 className="font-serif text-4xl font-semibold leading-tight text-[#111111] md:text-[56px] md:leading-[1.1]">
+        <section className="min-h-screen flex items-center">
+          <div className="mx-auto flex max-w-6xl w-full flex-col lg:flex-row">
+            {/* Left column */}
+            <div className="flex flex-1 flex-col justify-center px-8 lg:px-16 py-16">
+              <p className="font-serif text-5xl text-[#111111] mb-4">LIEN</p>
+              <h1 className="font-serif text-[48px] leading-[1.1] text-[#111111]">
                 Votre dressing,<br />
-                <em className="font-serif italic">connect\u00e9 aux stylistes</em>
+                <em className="italic">connect&eacute; aux stylistes</em>
               </h1>
-              <p className="mt-5 max-w-md text-base text-[#8A8A8A] md:text-lg mx-auto md:mx-0">
-                Ajoutez vos v\u00eatements, \u00e9changez avec des stylistes et recevez des looks qui vous ressemblent.
+              <p className="mt-4 max-w-sm text-base text-[#8A8A8A]">
+                Ajoutez vos v&ecirc;tements, &eacute;changez avec des stylistes et recevez des looks qui vous ressemblent.
               </p>
-              <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row md:justify-start">
-                <a
-                  href="/register"
-                  className="w-full rounded-full bg-[#111111] px-7 py-3.5 text-center text-sm font-semibold text-white sm:w-auto transition-opacity hover:opacity-90"
-                >
+              <div className="mt-8 flex gap-3 flex-wrap">
+                <a href="/register" className="rounded-full bg-[#111111] px-8 py-3 text-base text-white">
                   Commencer
                 </a>
-                <a
-                  href="#how"
-                  className="flex w-full items-center justify-center gap-2 rounded-full border border-[#E0DCD5] bg-white px-7 py-3.5 text-center text-sm font-medium text-[#111111] sm:w-auto transition-colors hover:bg-[#F0EDE8]"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#111111" stroke="none">
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
-                  Voir comment \u00e7a marche
+                <a href="#how" className="rounded-full border border-[#111111] px-8 py-3 text-base text-[#111111]">
+                  Voir comment &ccedil;a marche
                 </a>
               </div>
-              <div className="mt-6 flex items-center justify-center gap-2 md:justify-start">
-                <div className="flex -space-x-2">
-                  {[47, 32, 44, 29].map((i) => (
-                    <div key={i} className="relative h-7 w-7 overflow-hidden rounded-full border-2 border-white">
-                      <Image src={`https://i.pravatar.cc/60?img=${i}`} alt="" fill className="object-cover" sizes="28px" />
+              <div className="mt-8 flex items-center gap-3">
+                <div className="flex">
+                  {[47, 32, 44, 29].map((i, idx) => (
+                    <div key={i} className={`relative h-10 w-10 overflow-hidden rounded-full border-2 border-white ${idx > 0 ? '-ml-3' : ''}`}>
+                      <Image src={`https://i.pravatar.cc/80?img=${i}`} alt="" fill className="object-cover" sizes="40px" />
                     </div>
                   ))}
                 </div>
                 <span className="text-sm text-[#8A8A8A]">+2 000 utilisateurs conquis</span>
               </div>
             </div>
-            <div className="relative w-full max-w-sm flex-shrink-0 md:max-w-md">
-              <div className="relative aspect-[3/4] overflow-hidden rounded-3xl">
+
+            {/* Right column */}
+            <div className="hidden lg:block flex-1 relative overflow-hidden">
+              <div className="relative h-full min-h-[600px] rounded-3xl overflow-hidden m-8">
                 <Image
                   src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=800&fit=crop"
-                  alt="Dressing organis\u00e9"
+                  alt="Mode"
                   fill
                   className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 400px"
+                  sizes="50vw"
                   priority
                 />
               </div>
@@ -123,85 +83,90 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Comment \u00e7a marche ? */}
-        <section id="how" className="px-5 py-16">
+        {/* How it works */}
+        <section id="how" className="bg-white py-20 px-8">
           <div className="mx-auto max-w-6xl">
-            <h2 className="mb-12 text-center font-serif text-2xl font-semibold text-[#111111] md:text-3xl">
-              Comment \u00e7a marche ?
+            <h2 className="font-serif text-4xl text-center mb-16 text-[#111111]">
+              Comment &ccedil;a marche ?
             </h2>
-            <div className="grid gap-8 md:grid-cols-3">
-              {steps.map((step) => (
-                <div key={step.title} className="flex flex-col items-center text-center">
-                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full" style={{ background: 'var(--color-accent-light)' }}>
-                    {step.icon}
-                  </div>
-                  <h3 className="text-base font-semibold text-[#111111]">{step.title}</h3>
-                  <p className="mt-2 max-w-[240px] text-sm text-[#8A8A8A]">{step.description}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              {/* Step 1 */}
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-[#F0EDE8] mx-auto mb-6 flex items-center justify-center">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2L8 6H3v14h18V6h-5l-4-4z" />
+                    <path d="M9 14l2 2 4-4" />
+                  </svg>
                 </div>
-              ))}
+                <h3 className="font-serif text-xl mb-3 text-[#111111]">Ajoutez votre dressing</h3>
+                <p className="text-[#8A8A8A] text-sm leading-relaxed">Importez vos v&ecirc;tements en quelques photos.</p>
+              </div>
+              {/* Step 2 */}
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-[#F0EDE8] mx-auto mb-6 flex items-center justify-center">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </div>
+                <h3 className="font-serif text-xl mb-3 text-[#111111]">Trouvez un styliste</h3>
+                <p className="text-[#8A8A8A] text-sm leading-relaxed">D&eacute;couvrez des profils et choisissez celui qui vous correspond.</p>
+              </div>
+              {/* Step 3 */}
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-[#F0EDE8] mx-auto mb-6 flex items-center justify-center">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 3l1.5 4.5H18l-3.5 2.5L16 14.5 12 11.5 8 14.5l1.5-4.5L6 7.5h4.5z" />
+                    <path d="M5 19l2-3" /><path d="M19 19l-2-3" />
+                  </svg>
+                </div>
+                <h3 className="font-serif text-xl mb-3 text-[#111111]">Recevez vos looks</h3>
+                <p className="text-[#8A8A8A] text-sm leading-relaxed">&Eacute;changez, affinez, adoptez le style qui vous sublime.</p>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* De l'inspiration, chaque jour */}
-        <section className="py-16">
-          <div className="mx-auto max-w-6xl px-5">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-serif text-2xl font-semibold text-[#111111] md:text-3xl">
-                De l&apos;inspiration, chaque jour
-              </h2>
-              <a href="/register" className="text-sm font-medium text-[#8A8A8A] hover:text-[#111111] transition-colors whitespace-nowrap">
-                Voir plus de looks &rarr;
-              </a>
-            </div>
+        {/* Inspiration */}
+        <section className="py-20">
+          <div className="flex items-center justify-between px-8 mb-8 max-w-6xl mx-auto">
+            <h2 className="font-serif text-3xl text-[#111111]">De l&apos;inspiration, chaque jour</h2>
+            <a href="/register" className="text-sm text-[#8A8A8A] underline whitespace-nowrap">Voir plus de looks</a>
           </div>
-          <div className="flex gap-3 overflow-x-auto px-5 scrollbar-hide">
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide px-8">
             {inspirationImages.map((img, i) => (
-              <div
-                key={i}
-                className="relative h-[200px] w-[150px] shrink-0 overflow-hidden rounded-2xl md:h-[260px] md:w-[190px]"
-              >
-                <Image
-                  src={img}
-                  alt={`Inspiration ${i + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="190px"
-                />
+              <div key={i} className="relative w-[200px] h-[280px] flex-shrink-0 rounded-2xl overflow-hidden">
+                <Image src={img} alt={`Inspiration ${i + 1}`} fill className="object-cover" sizes="200px" />
               </div>
             ))}
           </div>
         </section>
 
-        {/* CTA section */}
-        <section className="px-5 py-16">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="font-serif text-3xl font-semibold text-[#111111] md:text-4xl">
-              Pr\u00eat\u00b7e \u00e0 r\u00e9inventer votre style ?
-            </h2>
-            <p className="mt-4 text-base text-[#8A8A8A]">
-              Rejoignez une communaut\u00e9 de passionn\u00e9s de mode et de stylistes professionnels.
-            </p>
-            <a
-              href="/register"
-              className="mt-8 inline-block rounded-full bg-[#111111] px-8 py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-            >
-              Cr\u00e9er mon compte gratuitement
-            </a>
-          </div>
+        {/* Final CTA */}
+        <section className="bg-[#111111] py-24 px-8 text-center">
+          <h2 className="font-serif text-4xl text-white">
+            Pr&ecirc;t&middot;e &agrave; r&eacute;inventer votre style ?
+          </h2>
+          <p className="text-[#CFCFCF] mt-4 text-lg">
+            Rejoignez une communaut&eacute; de passionn&eacute;s de mode et de stylistes professionnels.
+          </p>
+          <a href="/register" className="mt-8 inline-block bg-white text-[#111111] rounded-full px-10 py-4 text-base font-medium">
+            Cr&eacute;er mon compte gratuitement
+          </a>
         </section>
       </main>
 
-      <footer className="border-t border-[#E0DCD5] px-5 py-8">
+      {/* Footer */}
+      <footer className="bg-[#111111] border-t border-[#222] py-8 px-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:flex-row md:justify-between">
-          <span className="font-serif text-lg font-semibold text-[#111111]">LIEN</span>
-          <p className="text-xs text-[#8A8A8A]">
-            &copy; {new Date().getFullYear()} Lien. Tous droits r\u00e9serv\u00e9s.
+          <span className="font-serif text-white">LIEN</span>
+          <p className="text-sm text-[#8A8A8A]">
+            &copy; {new Date().getFullYear()} Lien. Tous droits r&eacute;serv&eacute;s.
           </p>
           <div className="flex items-center gap-6">
-            <a href="/pricing" className="text-xs text-[#8A8A8A] hover:text-[#111111]">Tarifs</a>
-            <a href="#" className="text-xs text-[#8A8A8A] hover:text-[#111111]">CGU</a>
-            <a href="#" className="text-xs text-[#8A8A8A] hover:text-[#111111]">Confidentialit\u00e9</a>
+            <a href="/pricing" className="text-sm text-[#8A8A8A] hover:text-white">Tarifs</a>
+            <a href="#" className="text-sm text-[#8A8A8A] hover:text-white">CGU</a>
+            <a href="#" className="text-sm text-[#8A8A8A] hover:text-white">Confidentialit&eacute;</a>
           </div>
         </div>
       </footer>

@@ -1,139 +1,102 @@
 export default function PricingPage() {
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-app-bg)' }}>
-      {/* Nav */}
-      <header className="px-5 py-5">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between">
-          <a href="/" className="font-serif text-2xl font-semibold tracking-wide text-[#111111]">LIEN</a>
-          <div className="flex items-center gap-3">
-            <a href="/login" className="text-sm font-medium text-[#111111] hover:underline">
-              Se connecter
-            </a>
-            <a
-              href="/register"
-              className="rounded-full bg-[#111111] px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
-            >
-              Commencer
-            </a>
+    <div className="min-h-screen bg-[#F7F5F2]">
+      {/* Back to home */}
+      <div className="px-5 py-6">
+        <a href="/" className="flex items-center gap-2 text-sm text-[#8A8A8A] w-fit">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Accueil
+        </a>
+      </div>
+
+      {/* Header */}
+      <div className="text-center py-16 px-5">
+        <h1 className="font-serif text-4xl text-[#111111]">Choisissez votre formule</h1>
+        <p className="text-[#8A8A8A] mt-3">Commencez gratuitement, &eacute;voluez quand vous voulez</p>
+      </div>
+
+      {/* Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-5 pb-16 max-w-4xl mx-auto">
+
+        {/* Card 1 — Gratuit */}
+        <div className="bg-white rounded-3xl p-8">
+          <p className="text-sm font-medium text-[#8A8A8A] uppercase tracking-wide">Gratuit</p>
+          <div className="mt-2 flex items-baseline gap-1">
+            <span className="font-serif text-5xl text-[#111111]">0</span>
+            <span className="text-sm text-[#8A8A8A]">&euro;/mois</span>
           </div>
-        </nav>
-      </header>
-
-      <main className="px-5 py-12 md:py-20">
-        <div className="mx-auto max-w-5xl">
-          {/* Header */}
-          <div className="mb-12 text-center">
-            <h1 className="font-serif text-3xl font-semibold text-[#111111] md:text-4xl">
-              Choisissez votre formule
-            </h1>
-            <p className="mt-3 text-base text-[#8A8A8A]">
-              Commencez gratuitement, &eacute;voluez quand vous voulez
-            </p>
+          <div className="border-t border-[#EFEFEF] my-6" />
+          <div className="flex flex-col gap-3">
+            <Feature included>50 v&ecirc;tements max</Feature>
+            <Feature included>5 suggestions IA/mois</Feature>
+            <Feature included>Calendrier de tenues</Feature>
+            <Feature included={false}>Connexion styliste</Feature>
+            <Feature included={false}>Essayage virtuel</Feature>
           </div>
-
-          {/* Pricing cards */}
-          <div className="grid gap-5 md:grid-cols-3">
-            {/* Card 1 — Gratuit */}
-            <div className="flex flex-col rounded-2xl border border-[#E0DCD5] bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-[#111111]">Gratuit</h2>
-              <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-3xl font-bold text-[#111111]">0&euro;</span>
-                <span className="text-sm text-[#8A8A8A]">/mois</span>
-              </div>
-
-              <ul className="mt-6 flex-1 space-y-3">
-                <Feature included>50 v&ecirc;tements max</Feature>
-                <Feature included>5 suggestions IA/mois</Feature>
-                <Feature included>Calendrier de tenues</Feature>
-                <Feature included={false}>Connexion styliste</Feature>
-                <Feature included={false}>Essayage virtuel</Feature>
-              </ul>
-
-              <a
-                href="/register"
-                className="mt-8 block w-full rounded-full bg-[#111111] py-3.5 text-center text-sm font-semibold text-white transition-opacity hover:opacity-90"
-              >
-                Commencer gratuitement
-              </a>
-            </div>
-
-            {/* Card 2 — Cliente Pro (FEATURED) */}
-            <div
-              className="relative flex flex-col rounded-2xl border-2 border-[#111111] bg-white p-6"
-              style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.10)' }}
-            >
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#111111] px-4 py-1 text-xs font-semibold text-white">
-                Le plus populaire
-              </span>
-              <h2 className="text-lg font-semibold text-[#111111]">Cliente Pro</h2>
-              <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-3xl font-bold text-[#111111]">9,99&euro;</span>
-                <span className="text-sm text-[#8A8A8A]">/mois</span>
-              </div>
-
-              <ul className="mt-6 flex-1 space-y-3">
-                <Feature included>V&ecirc;tements illimit&eacute;s</Feature>
-                <Feature included>Suggestions IA illimit&eacute;es</Feature>
-                <Feature included>Essayage virtuel 10x/mois</Feature>
-                <Feature included>1 styliste connect&eacute;</Feature>
-                <Feature included>Statistiques avanc&eacute;es</Feature>
-              </ul>
-
-              <a
-                href="/register?plan=client_pro"
-                className="mt-8 block w-full rounded-full py-3.5 text-center text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                style={{ background: 'var(--color-cta)' }}
-              >
-                Essai gratuit 14 jours
-              </a>
-            </div>
-
-            {/* Card 3 — Styliste Pro */}
-            <div className="flex flex-col rounded-2xl border border-[#E0DCD5] bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-[#111111]">Styliste Pro</h2>
-              <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-3xl font-bold text-[#111111]">19,99&euro;</span>
-                <span className="text-sm text-[#8A8A8A]">/mois</span>
-              </div>
-
-              <ul className="mt-6 flex-1 space-y-3">
-                <Feature included>Clients illimit&eacute;s</Feature>
-                <Feature included>Cr&eacute;ation de lookbooks</Feature>
-                <Feature included>Acc&egrave;s garde-robe clients</Feature>
-                <Feature included>Chat temps r&eacute;el</Feature>
-                <Feature included>Dashboard analytique</Feature>
-              </ul>
-
-              <a
-                href="/register?plan=stylist_pro"
-                className="mt-8 block w-full rounded-full bg-[#111111] py-3.5 text-center text-sm font-semibold text-white transition-opacity hover:opacity-90"
-              >
-                Devenir styliste
-              </a>
-            </div>
-          </div>
-
-          {/* Footer note */}
-          <p className="mt-10 text-center text-sm text-[#8A8A8A]">
-            14 jours d&apos;essai gratuit. Sans engagement.
-          </p>
+          <a href="/register" className="mt-8 block w-full rounded-full border border-[#111111] py-3 text-center text-sm text-[#111111]">
+            Commencer gratuitement
+          </a>
         </div>
-      </main>
 
-      <footer className="border-t border-[#E0DCD5] px-5 py-8">
-        <p className="text-center text-xs text-[#8A8A8A]">
-          &copy; {new Date().getFullYear()} Lien. Tous droits r&eacute;serv&eacute;s.
-        </p>
-      </footer>
+        {/* Card 2 — Cliente Pro (FEATURED) */}
+        <div className="bg-[#111111] rounded-3xl p-8">
+          <span className="bg-[#C6A47E] text-[#111111] text-[10px] font-bold px-3 py-1 rounded-full inline-block mb-4">
+            Le plus populaire
+          </span>
+          <p className="text-sm font-medium text-[#CFCFCF] uppercase tracking-wide">Cliente Pro</p>
+          <div className="mt-2 flex items-baseline gap-1">
+            <span className="font-serif text-5xl text-white">9,99</span>
+            <span className="text-sm text-[#CFCFCF]">&euro;/mois</span>
+          </div>
+          <div className="border-t border-[#333] my-6" />
+          <div className="flex flex-col gap-3">
+            <FeatureDark>V&ecirc;tements illimit&eacute;s</FeatureDark>
+            <FeatureDark>Suggestions IA illimit&eacute;es</FeatureDark>
+            <FeatureDark>Essayage virtuel 10x/mois</FeatureDark>
+            <FeatureDark>1 styliste connect&eacute;</FeatureDark>
+            <FeatureDark>Statistiques avanc&eacute;es</FeatureDark>
+          </div>
+          <a href="/register?plan=client_pro" className="mt-8 block w-full rounded-full bg-[#D4785C] py-3 text-center text-sm font-medium text-white">
+            Essai gratuit 14 jours
+          </a>
+        </div>
+
+        {/* Card 3 — Styliste Pro */}
+        <div className="bg-white rounded-3xl p-8">
+          <p className="text-sm font-medium text-[#8A8A8A] uppercase tracking-wide">Styliste Pro</p>
+          <div className="mt-2 flex items-baseline gap-1">
+            <span className="font-serif text-5xl text-[#111111]">19,99</span>
+            <span className="text-sm text-[#8A8A8A]">&euro;/mois</span>
+          </div>
+          <div className="border-t border-[#EFEFEF] my-6" />
+          <div className="flex flex-col gap-3">
+            <Feature included>Clients illimit&eacute;s</Feature>
+            <Feature included>Cr&eacute;ation de lookbooks</Feature>
+            <Feature included>Acc&egrave;s garde-robe clients</Feature>
+            <Feature included>Chat temps r&eacute;el</Feature>
+            <Feature included>Dashboard analytique</Feature>
+          </div>
+          <a href="/register?plan=stylist_pro" className="mt-8 block w-full rounded-full bg-[#111111] py-3 text-center text-sm font-medium text-white">
+            Devenir styliste
+          </a>
+        </div>
+      </div>
+
+      {/* Footer note */}
+      <p className="text-center text-sm text-[#8A8A8A] mt-8 pb-16">
+        14 jours d&apos;essai gratuit. Sans engagement. R&eacute;siliable &agrave; tout moment.
+      </p>
     </div>
   );
 }
 
 function Feature({ included, children }: { included: boolean; children: React.ReactNode }) {
   return (
-    <li className="flex items-center gap-2.5 text-sm">
+    <div className="flex items-center gap-2.5 text-sm">
       {included ? (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
           <polyline points="20 6 9 17 4 12" />
         </svg>
       ) : (
@@ -142,6 +105,17 @@ function Feature({ included, children }: { included: boolean; children: React.Re
         </svg>
       )}
       <span className={included ? 'text-[#111111]' : 'text-[#CFCFCF]'}>{children}</span>
-    </li>
+    </div>
+  );
+}
+
+function FeatureDark({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2.5 text-sm">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+      <span className="text-white">{children}</span>
+    </div>
   );
 }
