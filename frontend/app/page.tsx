@@ -19,7 +19,7 @@ export default function LandingPage() {
           <span className="font-serif text-xl text-[#111111]">LIEN</span>
           <div className="hidden items-center gap-8 md:flex">
             <a href="#how" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">Fonctionnalit&eacute;s</a>
-            <a href="/stylists-pro" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">Pour les stylistes</a>
+            <a href="/pour-les-stylistes" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">Pour les stylistes</a>
             <a href="/a-propos" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">&Agrave; propos</a>
           </div>
           <div className="flex items-center gap-3">
@@ -166,7 +166,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-6">
             <a href="/a-propos" className="text-sm text-[#8A8A8A] hover:text-white">&Agrave; propos</a>
             <a href="/pricing" className="text-sm text-[#8A8A8A] hover:text-white">Tarifs</a>
-            <a href="/stylists-pro" className="text-sm text-[#8A8A8A] hover:text-white">Pour les stylistes</a>
+            <a href="/pour-les-stylistes" className="text-sm text-[#8A8A8A] hover:text-white">Pour les stylistes</a>
           </div>
         </div>
       </footer>
