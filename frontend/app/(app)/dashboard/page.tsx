@@ -46,6 +46,13 @@ export default function DashboardPage() {
   const recentItems = items.slice(0, 4);
   const neverWorn = items.filter((i) => i.wear_count === 0).length;
 
+  const placeholderItems = [
+    { name: 'T-Shirt Blanc', wear_count: 3, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300' },
+    { name: 'Jean Slim', wear_count: 7, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300' },
+    { name: 'Sneakers', wear_count: 12, image: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=300' },
+    { name: 'Veste Noire', wear_count: 0, image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300' },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -167,59 +174,40 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* AI suggestion card */}
-      <a href="/outfits/create" className="block rounded-2xl bg-white p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-100 to-pink-100">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9333ea" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-[#0D0D0D]">Look du jour</p>
-            <p className="text-xs text-[#8A8A8A]">Laissez l&apos;IA composer votre tenue</p>
-          </div>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </div>
-      </a>
-
-      {/* Recent items */}
+      {/* Dernières pièces */}
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-[#0D0D0D]">Derniers ajouts</h2>
-          <a href="/wardrobe" className="text-xs font-medium text-[#8A8A8A]">
-            Tout voir
-          </a>
+          <h2 className="text-[16px] font-semibold text-[#0D0D0D]">Dernières pièces</h2>
+          <a href="/wardrobe" className="text-[13px] text-gray-400">Mon dressing →</a>
         </div>
-        {recentItems.length > 0 ? (
-          <div className="grid grid-cols-2 gap-4">
-            {recentItems.map((item) => (
-              <a key={item.id} href={`/wardrobe/${item.id}`} className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div className="-mx-5 flex gap-3 overflow-x-auto px-5 scrollbar-hide">
+          {(recentItems.length > 0 ? recentItems : placeholderItems).map((item, i) => (
+            <a
+              key={'id' in item ? item.id : i}
+              href={'id' in item ? `/wardrobe/${item.id}` : '/wardrobe/add'}
+              className="w-[130px] shrink-0 overflow-hidden rounded-2xl bg-white p-2"
+              style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
+            >
+              <div className="relative h-[140px] w-full overflow-hidden rounded-xl bg-[#F0F0F0]">
                 <Image
-                  src={item.bg_removed_url || item.photo_url}
-                  alt={item.category}
+                  src={'photo_url' in item ? (item.bg_removed_url || item.photo_url) : item.image}
+                  alt={'category' in item ? item.category : item.name}
                   fill
-                  className="object-contain p-2"
-                  sizes="200px"
+                  className="object-cover"
+                  sizes="130px"
                 />
-                {item.brand && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-white/90 px-3 py-2 backdrop-blur-sm">
-                    <p className="text-xs font-medium text-[#0D0D0D] truncate">{item.brand}</p>
-                  </div>
-                )}
-              </a>
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-2xl bg-white p-8 text-center" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-            <p className="text-sm text-[#8A8A8A]">Aucun vêtement ajouté</p>
-            <a href="/wardrobe/add" className="mt-3 inline-block rounded-full bg-[#0D0D0D] px-5 py-2 text-xs font-medium text-white">
-              Ajouter
+              </div>
+              <p className="mt-2 truncate text-[12px] font-semibold text-[#0D0D0D]">
+                {'category' in item ? (item.brand || item.category) : item.name}
+              </p>
+              <span className={`mt-0.5 inline-block text-[11px] font-medium ${
+                item.wear_count > 0 ? 'text-green-600' : 'text-[#8A8A8A]'
+              }`}>
+                {item.wear_count === 0 ? 'Jamais porté' : `Porté ${item.wear_count}x`}
+              </span>
             </a>
-          </div>
-        )}
+          ))}
+        </div>
       </div>
 
       {/* Stats strip */}
