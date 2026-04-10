@@ -45,7 +45,7 @@ export async function register(req: Request, res: Response): Promise<void> {
 
 export async function login(req: Request, res: Response): Promise<void> {
   try {
-    const { email, password } = req.body;
+    const { email, password, remember_me } = req.body;
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user || !user.style_profile) {
@@ -66,10 +66,13 @@ export async function login(req: Request, res: Response): Promise<void> {
       return;
     }
 
+    // remember_me === true (default) → 30 day session, false → 24 hours
+    const expiresIn: string = remember_me === false ? '24h' : '30d';
+
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET!,
-      { expiresIn: '7d' }
+      { expiresIn: expiresIn as any }
     );
 
     res.json({

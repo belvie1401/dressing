@@ -143,9 +143,16 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="bg-[#111111] text-white rounded-full w-full py-4 text-sm font-medium mt-2 disabled:opacity-50"
+          className="bg-[#111111] text-white rounded-full w-full py-4 text-sm font-medium mt-2 disabled:opacity-60 flex items-center justify-center gap-2"
         >
-          {isLoading ? 'Cr\u00e9ation...' : 'Cr\u00e9er mon compte'}
+          {isLoading ? (
+            <>
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              Cr&eacute;ation en cours...
+            </>
+          ) : (
+            'Cr\u00e9er mon compte'
+          )}
         </button>
 
         <button

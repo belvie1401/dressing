@@ -10,8 +10,9 @@ interface AuthState {
   isLoading: boolean;
   _hasHydrated: boolean;
   _setHasHydrated: (v: boolean) => void;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<boolean>;
   register: (email: string, password: string, name: string, role?: string) => Promise<boolean>;
+  requestMagicLink: (email: string) => Promise<boolean>;
   logout: () => void;
   loadUser: () => Promise<void>;
 }
@@ -25,16 +26,31 @@ export const useAuthStore = create<AuthState>()(
       _hasHydrated: false,
       _setHasHydrated: (v) => set({ _hasHydrated: v }),
 
-      login: async (email, password) => {
+      login: async (email, password, rememberMe = true) => {
         set({ isLoading: true });
-        const res = await api.post<{ user: User; token: string }>('/auth/login', { email, password });
+        const res = await api.post<{ user: User; token: string }>('/auth/login', {
+          email,
+          password,
+          remember_me: rememberMe,
+        });
         if (res.success && res.data) {
           localStorage.setItem('lien_token', res.data.token);
+          localStorage.setItem('lien_remember_me', rememberMe ? 'true' : 'false');
           set({ user: res.data.user, token: res.data.token, isLoading: false });
           return true;
         }
         set({ isLoading: false });
         return false;
+      },
+
+      requestMagicLink: async (email) => {
+        set({ isLoading: true });
+        const res = await api.post<{ email: string; expires_in_minutes: number }>(
+          '/auth/magic-link',
+          { email }
+        );
+        set({ isLoading: false });
+        return res.success === true;
       },
 
       register: async (email, password, name, role?) => {

@@ -200,3 +200,14 @@ model Subscription {
   status                 String
   current_period_end     DateTime?
 }
+
+model MagicLinkToken {
+  id         String   @id @default(cuid())
+  email      String
+  token      String   @unique
+  expires_at DateTime
+  created_at DateTime @default(now())
+
+  @@index([email])
+  @@index([token])
+}

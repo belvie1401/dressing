@@ -8,8 +8,11 @@ import { useAuthStore } from '@/lib/store';
 function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
-  const { login, isLoading } = useAuthStore();
+  const [magicStatus, setMagicStatus] = useState<'idle' | 'loading' | 'sent'>('idle');
+  const [magicSentTo, setMagicSentTo] = useState('');
+  const { login, requestMagicLink, isLoading } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -33,7 +36,7 @@ function LoginForm() {
     e.preventDefault();
     setError('');
 
-    const success = await login(email, password);
+    const success = await login(email, password, rememberMe);
     if (success) {
       const role = useAuthStore.getState().user?.role;
       router.push(role === 'STYLIST' ? '/stylist-dashboard' : '/dashboard');
@@ -41,6 +44,60 @@ function LoginForm() {
       setError('Email ou mot de passe incorrect');
     }
   };
+
+  const handleMagicLink = async () => {
+    setError('');
+
+    if (!email || !email.includes('@')) {
+      setError('Veuillez saisir un email valide pour recevoir un lien');
+      return;
+    }
+
+    setMagicStatus('loading');
+    const success = await requestMagicLink(email);
+    if (success) {
+      setMagicSentTo(email);
+      setMagicStatus('sent');
+    } else {
+      setMagicStatus('idle');
+      setError('Impossible d\u2019envoyer le lien. R\u00e9essayez dans un instant.');
+    }
+  };
+
+  if (magicStatus === 'sent') {
+    return (
+      <div className="flex flex-col gap-4 max-w-sm mx-auto w-full">
+        <div className="rounded-2xl bg-[#F0EDE8] p-6 text-center">
+          <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center mx-auto mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+              <polyline points="22,6 12,13 2,6" />
+            </svg>
+          </div>
+          <h2 className="font-serif text-lg text-[#111111] mb-2">Lien envoy&eacute; !</h2>
+          <p className="text-sm text-[#8A8A8A] leading-relaxed">
+            Un lien de connexion a &eacute;t&eacute; envoy&eacute; &agrave;{' '}
+            <span className="font-medium text-[#111111]">{magicSentTo}</span>.
+            <br />
+            Cliquez dessus pour vous connecter instantan&eacute;ment.
+          </p>
+          <p className="text-xs text-[#8A8A8A] mt-4">
+            Le lien expire dans 15 minutes.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setMagicStatus('idle');
+            setMagicSentTo('');
+          }}
+          className="text-sm text-[#8A8A8A] underline"
+        >
+          Utiliser un autre email
+        </button>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-sm mx-auto w-full">
@@ -72,12 +129,60 @@ function LoginForm() {
         />
       </div>
 
+      {/* Remember me */}
+      <label className="flex items-center gap-2 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={rememberMe}
+          onChange={(e) => setRememberMe(e.target.checked)}
+          className="w-4 h-4 accent-[#111111] cursor-pointer"
+        />
+        <span className="text-sm text-[#8A8A8A]">Rester connect&eacute;</span>
+      </label>
+
       <button
         type="submit"
-        disabled={isLoading}
-        className="bg-[#111111] text-white rounded-full w-full py-4 text-sm font-medium disabled:opacity-50"
+        disabled={isLoading || magicStatus === 'loading'}
+        className="bg-[#111111] text-white rounded-full w-full py-4 text-sm font-medium disabled:opacity-60 flex items-center justify-center gap-2"
       >
-        {isLoading ? 'Connexion...' : 'Se connecter'}
+        {isLoading ? (
+          <>
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            Connexion en cours...
+          </>
+        ) : (
+          'Se connecter'
+        )}
+      </button>
+
+      {/* Divider */}
+      <div className="flex items-center gap-3 my-1">
+        <div className="flex-1 h-px bg-[#EFEFEF]" />
+        <span className="text-xs text-[#8A8A8A]">ou</span>
+        <div className="flex-1 h-px bg-[#EFEFEF]" />
+      </div>
+
+      {/* Magic link */}
+      <button
+        type="button"
+        onClick={handleMagicLink}
+        disabled={isLoading || magicStatus === 'loading'}
+        className="bg-[#F0EDE8] text-[#111111] rounded-full w-full py-4 text-sm font-medium disabled:opacity-60 flex items-center justify-center gap-2"
+      >
+        {magicStatus === 'loading' ? (
+          <>
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#111111] border-t-transparent" />
+            Envoi du lien...
+          </>
+        ) : (
+          <>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+              <polyline points="22,6 12,13 2,6" />
+            </svg>
+            Recevoir un lien de connexion par email
+          </>
+        )}
       </button>
 
       <button

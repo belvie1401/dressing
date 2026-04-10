@@ -167,6 +167,18 @@ CREATE TABLE IF NOT EXISTS "Subscription" (
   CONSTRAINT "Subscription_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX IF NOT EXISTS "Subscription_user_id_key" ON "Subscription"("user_id");
+
+CREATE TABLE IF NOT EXISTS "MagicLinkToken" (
+  "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
+  "email" TEXT NOT NULL,
+  "token" TEXT NOT NULL,
+  "expires_at" TIMESTAMP(3) NOT NULL,
+  "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "MagicLinkToken_pkey" PRIMARY KEY ("id")
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "MagicLinkToken_token_key" ON "MagicLinkToken"("token");
+CREATE INDEX IF NOT EXISTS "MagicLinkToken_email_idx" ON "MagicLinkToken"("email");
+CREATE INDEX IF NOT EXISTS "MagicLinkToken_token_idx" ON "MagicLinkToken"("token");
 `;
 
 // Try multiple connection strategies
