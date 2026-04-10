@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Mon Dressing — Votre dressing intelligent",
-  description: "Gérez votre garde-robe, créez des tenues et recevez des conseils de style personnalisés par IA.",
+  title: "Lien — Votre style, connect\u00e9",
+  description: "Votre dressing connect\u00e9 aux stylistes. Ajoutez vos v\u00eatements, \u00e9changez avec des stylistes et recevez des looks qui vous ressemblent.",
 };
 
 export const viewport: Viewport = {

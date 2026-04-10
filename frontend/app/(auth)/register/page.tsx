@@ -18,20 +18,20 @@ export default function RegisterPage() {
     setError('');
 
     if (password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères');
+      setError('Le mot de passe doit contenir au moins 6 caract\u00e8res');
       return;
     }
 
     if (!role) {
-      setError('Veuillez choisir un rôle');
+      setError('Veuillez choisir un r\u00f4le');
       return;
     }
 
     const success = await register(email, password, name, role);
     if (success) {
-      router.push('/dashboard');
+      router.push('/onboarding');
     } else {
-      setError('Erreur lors de l\'inscription. Cet email est peut-être déjà utilisé.');
+      setError('Erreur lors de l\'inscription. Cet email est peut-\u00eatre d\u00e9j\u00e0 utilis\u00e9.');
     }
   };
 
@@ -40,7 +40,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm">
         <a
           href="/"
-          className="mb-6 flex min-h-[44px] w-fit items-center gap-2 text-sm text-gray-500 hover:text-black"
+          className="mb-6 flex min-h-[44px] w-fit items-center gap-2 text-sm text-[#8A8A8A] hover:text-[#0D0D0D] transition-colors"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
@@ -48,14 +48,10 @@ export default function RegisterPage() {
           Accueil
         </a>
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#0D0D0D]">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-[#0D0D0D]">Créer un compte</h1>
-          <p className="mt-2 text-sm text-[#8A8A8A]">
-            Commencez à organiser votre dressing
+          <span className="font-serif text-3xl font-semibold tracking-wide text-[#0D0D0D]">LIEN</span>
+          <h1 className="mt-4 text-xl font-bold text-[#0D0D0D]">Cr\u00e9er un compte</h1>
+          <p className="mt-1 text-sm text-[#8A8A8A]">
+            Rejoignez la communaut\u00e9 Lien
           </p>
         </div>
 
@@ -76,7 +72,7 @@ export default function RegisterPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
+              className="w-full rounded-xl border border-[#E0DCD5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
               placeholder="Votre nom"
             />
           </div>
@@ -91,7 +87,7 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
+              className="w-full rounded-xl border border-[#E0DCD5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
               placeholder="votre@email.com"
             />
           </div>
@@ -107,8 +103,8 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full rounded-full border border-[#E5E5E5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
-              placeholder="Minimum 6 caractères"
+              className="w-full rounded-xl border border-[#E0DCD5] bg-white px-4 py-3 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
+              placeholder="Minimum 6 caract\u00e8res"
             />
           </div>
 
@@ -124,14 +120,14 @@ export default function RegisterPage() {
                 className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-4 transition-all ${
                   role === 'CLIENT'
                     ? 'border-[#0D0D0D] bg-white shadow-md'
-                    : 'border-transparent bg-[#F5F5F5]'
+                    : 'border-[#E0DCD5] bg-white'
                 }`}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={role === 'CLIENT' ? '#0D0D0D' : '#8A8A8A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2C12 2 8 2 8 6H4l1 14h14l1-14h-4c0-4-4-4-4-4z" />
                 </svg>
                 <span className="text-sm font-semibold text-[#0D0D0D]">Cliente</span>
-                <span className="text-center text-[11px] leading-tight text-[#8A8A8A]">Je gère mon dressing personnel</span>
+                <span className="text-center text-[11px] leading-tight text-[#8A8A8A]">Je g\u00e8re mon dressing</span>
               </button>
               <button
                 type="button"
@@ -139,14 +135,14 @@ export default function RegisterPage() {
                 className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-4 transition-all ${
                   role === 'STYLIST'
                     ? 'border-[#0D0D0D] bg-white shadow-md'
-                    : 'border-transparent bg-[#F5F5F5]'
+                    : 'border-[#E0DCD5] bg-white'
                 }`}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 3l1.5 4.5H18l-3.5 2.5L16 14.5 12 11.5 8 14.5l1.5-4.5L6 7.5h4.5z" />
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={role === 'STYLIST' ? '#0D0D0D' : '#8A8A8A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
                 </svg>
                 <span className="text-sm font-semibold text-[#0D0D0D]">Styliste</span>
-                <span className="text-center text-[11px] leading-tight text-[#8A8A8A]">Je gère le dressing de mes clientes</span>
+                <span className="text-center text-[11px] leading-tight text-[#8A8A8A]">Je conseille mes clientes</span>
               </button>
             </div>
           </div>
@@ -166,19 +162,19 @@ export default function RegisterPage() {
             disabled={isLoading}
             className="flex w-full items-center justify-center rounded-full bg-[#0D0D0D] py-3.5 text-sm font-semibold text-white disabled:opacity-50"
           >
-            {isLoading ? 'Chargement...' : 'Créer mon compte'}
+            {isLoading ? 'Cr\u00e9ation...' : 'Cr\u00e9er mon compte'}
           </button>
 
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-[#E5E5E5] bg-white py-3.5 text-sm font-medium text-[#0D0D0D]"
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-[#E0DCD5] bg-white py-3.5 text-sm font-medium text-[#0D0D0D]"
           >
             Continuer avec Google
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-[#8A8A8A]">
-          Déjà un compte ?{' '}
+          D\u00e9j\u00e0 un compte ?{' '}
           <a href="/login" className="font-semibold text-[#0D0D0D]">
             Se connecter
           </a>
