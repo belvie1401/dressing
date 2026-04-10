@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useAuthStore, useWardrobeStore } from '@/lib/store';
-import WeatherBanner from '@/components/ui/WeatherBanner';
 import type { CalendarEntry } from '@/types';
 import { api } from '@/lib/api';
 
@@ -34,56 +33,57 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between pt-2">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-blue-500 text-sm font-bold text-white">
-            {user?.name?.charAt(0) || '?'}
+          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gray-200">
+            {user?.avatar_url ? (
+              <Image
+                src={user.avatar_url}
+                alt={user.name}
+                fill
+                className="object-cover"
+                sizes="48px"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-lg font-semibold text-[#8A8A8A]">
+                {user?.name?.charAt(0) || '?'}
+              </div>
+            )}
           </div>
           <div>
-            <p className="text-xs text-[#8A8A8A]">Bonjour</p>
-            <p className="text-sm font-semibold text-[#0D0D0D]">{user?.name || 'Mon Dressing'}</p>
+            <p className="text-[13px] text-gray-500">Bonjour,</p>
+            <p className="text-[22px] font-bold leading-tight text-[#0D0D0D]">
+              {user?.name?.split(' ')[0] || 'Sophie'}
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <a href="/wardrobe" className="flex h-10 w-10 items-center justify-center rounded-full bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-          </a>
+        <div className="flex items-center gap-2">
           <a href="/messages" className="flex h-10 w-10 items-center justify-center rounded-full bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
           </a>
-        </div>
-      </div>
-
-      {/* Hero heading */}
-      <div>
-        <h1 className="text-4xl font-bold leading-tight text-[#0D0D0D]">
-          Discover<br />Your Best Clothes
-        </h1>
-      </div>
-
-      {/* Search bar */}
-      <div className="relative">
-        <div className="flex items-center gap-3 rounded-full px-4 py-3" style={{ background: '#EFEFEF' }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-          <span className="text-sm text-[#8A8A8A]">Rechercher dans mon dressing...</span>
-          <div className="ml-auto">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" />
-              <line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" />
-              <line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" />
-              <line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" />
-              <line x1="17" y1="16" x2="23" y2="16" />
+          <a href="/profile" className="flex h-10 w-10 items-center justify-center rounded-full bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
             </svg>
-          </div>
+          </a>
         </div>
       </div>
 
-      {/* Weather */}
-      <WeatherBanner />
+      {/* Weather banner */}
+      <div className="rounded-2xl bg-white p-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="text-2xl">☀️</span>
+            <div>
+              <span className="text-base font-bold text-[#0D0D0D]">22°C</span>
+              <p className="text-[12px] text-gray-500">Marseille</p>
+            </div>
+          </div>
+          <a href="/outfits" className="text-[12px] text-[#8A8A8A] underline">
+            Tenue du jour →
+          </a>
+        </div>
+      </div>
 
       {/* AI suggestion card */}
       <a href="/outfits/create" className="block rounded-2xl bg-white p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
