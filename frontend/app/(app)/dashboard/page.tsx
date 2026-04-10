@@ -46,6 +46,22 @@ export default function DashboardPage() {
   const recentItems = items.slice(0, 4);
   const neverWorn = items.filter((i) => i.wear_count === 0).length;
 
+  // Current week days (Mon–Sun)
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon...
+  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() + mondayOffset + i);
+    return d;
+  });
+  const dayLabels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  const weekOutfits: Record<number, string> = {
+    0: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=150',
+    1: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150',
+    2: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=150',
+  };
+
   const placeholderItems = [
     { name: 'T-Shirt Blanc', wear_count: 3, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300' },
     { name: 'Jean Slim', wear_count: 7, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300' },
@@ -164,6 +180,53 @@ export default function DashboardPage() {
               Porter aujourd&apos;hui
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Looks de la semaine */}
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-[16px] font-semibold text-[#0D0D0D]">Cette semaine</h2>
+          <a href="/calendar" className="text-[13px] text-gray-400">Tout voir →</a>
+        </div>
+        <div className="-mx-5 flex gap-3 overflow-x-auto px-5 scrollbar-hide">
+          {weekDays.map((day, i) => {
+            const isToday = day.toDateString() === today.toDateString();
+            const outfitImage = weekOutfits[i];
+            return (
+              <a
+                key={i}
+                href="/calendar"
+                className="w-[72px] shrink-0 text-center"
+              >
+                <p className="text-[11px] text-gray-400">{dayLabels[i]}</p>
+                <div className={`mx-auto mt-1 flex h-7 w-7 items-center justify-center rounded-full text-sm ${
+                  isToday
+                    ? 'bg-[#0D0D0D] font-bold text-white'
+                    : 'bg-gray-100 text-[#0D0D0D]'
+                }`}>
+                  {day.getDate()}
+                </div>
+                {outfitImage ? (
+                  <div className="relative mx-auto mt-1 h-14 w-14 overflow-hidden rounded-xl">
+                    <Image
+                      src={outfitImage}
+                      alt={`Look ${dayLabels[i]}`}
+                      fill
+                      className="object-cover"
+                      sizes="56px"
+                    />
+                  </div>
+                ) : (
+                  <div className="mx-auto mt-1 flex h-14 w-14 items-center justify-center rounded-xl border-2 border-dashed border-gray-200">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                  </div>
+                )}
+              </a>
+            );
+          })}
         </div>
       </div>
 
