@@ -20,7 +20,7 @@ export default function LandingPage() {
           <div className="hidden items-center gap-8 md:flex">
             <a href="#how" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">Fonctionnalit&eacute;s</a>
             <a href="/stylists-pro" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">Pour les stylistes</a>
-            <a href="#about" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">&Agrave; propos</a>
+            <a href="/a-propos" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">&Agrave; propos</a>
           </div>
           <div className="flex items-center gap-3">
             <a href="/login" className="rounded-full border border-[#111111] px-5 py-2 text-sm text-[#111111]">
@@ -164,9 +164,9 @@ export default function LandingPage() {
             &copy; {new Date().getFullYear()} Lien. Tous droits r&eacute;serv&eacute;s.
           </p>
           <div className="flex items-center gap-6">
+            <a href="/a-propos" className="text-sm text-[#8A8A8A] hover:text-white">&Agrave; propos</a>
             <a href="/pricing" className="text-sm text-[#8A8A8A] hover:text-white">Tarifs</a>
-            <a href="#" className="text-sm text-[#8A8A8A] hover:text-white">CGU</a>
-            <a href="#" className="text-sm text-[#8A8A8A] hover:text-white">Confidentialit&eacute;</a>
+            <a href="/stylists-pro" className="text-sm text-[#8A8A8A] hover:text-white">Pour les stylistes</a>
           </div>
         </div>
       </footer>
