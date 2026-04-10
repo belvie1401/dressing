@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { useAuthStore } from '@/lib/store';
 
 function LoginForm() {
@@ -110,7 +111,7 @@ export default function LoginPage() {
       </a>
 
       <div className="text-center mt-6 mb-2">
-        <span className="font-serif text-2xl text-[#111111]">LIEN</span>
+        <Link href="/" className="font-serif text-2xl text-[#111111] no-underline">LIEN</Link>
       </div>
       <h1 className="font-serif text-xl text-center text-[#111111]">Bon retour</h1>
       <p className="text-sm text-[#8A8A8A] text-center mb-8">Connectez-vous &agrave; votre compte</p>

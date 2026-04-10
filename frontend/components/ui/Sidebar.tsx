@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useAuthStore } from '@/lib/store';
 
 interface NavItem {
@@ -148,7 +149,6 @@ export default function Sidebar() {
   const isStylist = user?.role === 'STYLIST';
 
   const navItems = isStylist ? stylistNavItems : clientNavItems;
-  const logoHref = isStylist ? '/stylist-dashboard' : '/dashboard';
   const profileHref = isStylist ? '/stylist-profile' : '/profile';
   const exactMatches = new Set(['/dashboard', '/stylist-dashboard']);
 
@@ -158,9 +158,9 @@ export default function Sidebar() {
   return (
     <aside className="hidden lg:flex flex-col w-[220px] shrink-0 h-screen sticky top-0 border-r border-[#EFEFEF] bg-white py-6 px-4">
       {/* Logo */}
-      <a href={logoHref} className="font-serif text-xl text-[#111111] px-3 mb-8">
+      <Link href="/" className="font-serif text-xl text-[#111111] px-3 mb-8 no-underline">
         LIEN
-      </a>
+      </Link>
 
       {/* Nav items */}
       <nav className="flex flex-col gap-1 flex-1">

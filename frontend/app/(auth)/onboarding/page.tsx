@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuthStore } from '@/lib/store';
 import { api } from '@/lib/api';
 
@@ -37,7 +38,7 @@ export default function OnboardingPage() {
     <div className="flex min-h-screen flex-col px-5 py-6" style={{ background: 'var(--color-app-bg)' }}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <span className="font-serif text-2xl font-semibold tracking-wide text-[#111111]">LIEN</span>
+        <Link href="/" className="font-serif text-2xl font-semibold tracking-wide text-[#111111] no-underline">LIEN</Link>
         <a href="/dashboard" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">
           Passer
         </a>

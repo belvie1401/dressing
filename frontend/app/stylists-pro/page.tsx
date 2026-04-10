@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -81,7 +82,7 @@ export default function StylistsProPage() {
       {/* Navbar */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#EFEFEF]">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-          <a href="/" className="font-serif text-xl text-[#111111]">LIEN</a>
+          <Link href="/" className="font-serif text-xl text-[#111111] no-underline">LIEN</Link>
           <div className="hidden items-center gap-8 md:flex">
             <a href="/#how" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">Fonctionnalit&eacute;s</a>
             <a href="/stylists-pro" className="text-sm text-[#111111] font-medium">Pour les stylistes</a>
@@ -351,7 +352,7 @@ export default function StylistsProPage() {
       {/* Footer */}
       <footer className="bg-[#111111] border-t border-[#222] py-8 px-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:flex-row md:justify-between">
-          <a href="/" className="font-serif text-white">LIEN</a>
+          <Link href="/" className="font-serif text-white no-underline">LIEN</Link>
           <p className="text-sm text-[#8A8A8A]">
             &copy; {new Date().getFullYear()} Lien. Tous droits r&eacute;serv&eacute;s.
           </p>

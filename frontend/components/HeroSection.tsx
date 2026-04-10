@@ -9,7 +9,7 @@ export default function HeroSection() {
       <div className="mx-auto max-w-7xl px-6 py-20 lg:py-32">
         {/* Logo */}
         <div className="mb-16 lg:mb-24">
-          <h1 className="text-2xl font-bold tracking-tight">LIEN</h1>
+          <Link href="/" className="text-2xl font-bold tracking-tight no-underline text-[#111]">LIEN</Link>
         </div>
 
         {/* Main Content */}

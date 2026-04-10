@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 const inspirationImages = [
   'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=300&h=400&fit=crop',
@@ -121,7 +122,7 @@ export default function LandingPage() {
       {/* Navbar */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#EFEFEF]">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-          <span className="font-serif text-xl text-[#111111]">LIEN</span>
+          <Link href="/" className="font-serif text-xl text-[#111111] no-underline">LIEN</Link>
           <div className="hidden items-center gap-8 md:flex">
             <a href="#how" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">Fonctionnalit&eacute;s</a>
             <a href="/pour-les-stylistes" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">Pour les stylistes</a>
@@ -446,7 +447,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="bg-[#111111] border-t border-[#222] py-8 px-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:flex-row md:justify-between">
-          <span className="font-serif text-white">LIEN</span>
+          <Link href="/" className="font-serif text-white no-underline">LIEN</Link>
           <p className="text-sm text-[#8A8A8A]">
             &copy; {new Date().getFullYear()} Lien. Tous droits r&eacute;serv&eacute;s.
           </p>
