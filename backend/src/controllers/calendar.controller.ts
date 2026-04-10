@@ -29,7 +29,25 @@ export async function getEntries(req: Request, res: Response): Promise<void> {
       orderBy: { date: 'asc' },
     });
 
-    res.json({ success: true, data: entries });
+    // Hydrate client info for stylist events
+    const clientIds = entries
+      .map((e) => e.client_id)
+      .filter((id): id is string => !!id);
+
+    const clients = clientIds.length
+      ? await prisma.user.findMany({
+          where: { id: { in: Array.from(new Set(clientIds)) } },
+          select: { id: true, name: true, avatar_url: true },
+        })
+      : [];
+
+    const clientMap = new Map(clients.map((c) => [c.id, c]));
+    const hydrated = entries.map((e) => ({
+      ...e,
+      client: e.client_id ? clientMap.get(e.client_id) || null : null,
+    }));
+
+    res.json({ success: true, data: hydrated });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Erreur lors de la récupération du calendrier' });
   }
@@ -67,15 +85,35 @@ export async function getEntry(req: Request, res: Response): Promise<void> {
 
 export async function createEntry(req: Request, res: Response): Promise<void> {
   try {
-    const { outfit_id, date, weather_data, notes } = req.body;
+    const {
+      outfit_id,
+      date,
+      weather_data,
+      notes,
+      client_id,
+      event_type,
+      duration_min,
+      zoom_link,
+      title,
+    } = req.body;
+
+    if (!date) {
+      res.status(400).json({ success: false, error: 'La date est requise' });
+      return;
+    }
 
     const entry = await prisma.calendarEntry.create({
       data: {
         user_id: req.user!.userId,
-        outfit_id,
+        outfit_id: outfit_id || null,
         date: new Date(date),
         weather_data,
         notes,
+        client_id: client_id || null,
+        event_type: event_type || null,
+        duration_min: duration_min ? Number(duration_min) : null,
+        zoom_link: zoom_link || null,
+        title: title || null,
       },
       include: {
         outfit: {
@@ -90,6 +128,7 @@ export async function createEntry(req: Request, res: Response): Promise<void> {
 
     res.status(201).json({ success: true, data: entry });
   } catch (error) {
+    console.error('Create calendar entry error:', error);
     res.status(500).json({ success: false, error: 'Erreur lors de la création' });
   }
 }
@@ -106,15 +145,32 @@ export async function updateEntry(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const { outfit_id, date, weather_data, notes } = req.body;
+    const {
+      outfit_id,
+      date,
+      weather_data,
+      notes,
+      client_id,
+      event_type,
+      duration_min,
+      zoom_link,
+      title,
+    } = req.body;
 
     const updated = await prisma.calendarEntry.update({
       where: { id },
       data: {
-        ...(outfit_id && { outfit_id }),
+        ...(outfit_id !== undefined && { outfit_id: outfit_id || null }),
         ...(date && { date: new Date(date) }),
         ...(weather_data && { weather_data }),
         ...(notes !== undefined && { notes }),
+        ...(client_id !== undefined && { client_id: client_id || null }),
+        ...(event_type !== undefined && { event_type: event_type || null }),
+        ...(duration_min !== undefined && {
+          duration_min: duration_min ? Number(duration_min) : null,
+        }),
+        ...(zoom_link !== undefined && { zoom_link: zoom_link || null }),
+        ...(title !== undefined && { title: title || null }),
       },
       include: {
         outfit: {

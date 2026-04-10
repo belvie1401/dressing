@@ -1,6 +1,14 @@
 import { Request, Response } from 'express';
 import prisma from '../lib/prisma';
 
+function stripSensitiveProfile(
+  profile: Record<string, unknown> | null | undefined
+): Record<string, unknown> | null {
+  if (!profile || typeof profile !== 'object') return null;
+  const { password, ...safe } = profile as Record<string, unknown>;
+  return safe;
+}
+
 export async function listStylists(req: Request, res: Response): Promise<void> {
   try {
     const stylists = await prisma.user.findMany({
@@ -15,9 +23,89 @@ export async function listStylists(req: Request, res: Response): Promise<void> {
       },
     });
 
-    res.json({ success: true, data: stylists });
+    const safe = stylists.map((s) => ({
+      ...s,
+      style_profile: stripSensitiveProfile(s.style_profile as Record<string, unknown> | null),
+    }));
+
+    res.json({ success: true, data: safe });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Erreur lors de la récupération des stylistes' });
+  }
+}
+
+export async function getStylistById(req: Request, res: Response): Promise<void> {
+  try {
+    const { id } = req.params as { id: string };
+    const stylist = await prisma.user.findFirst({
+      where: { id, role: 'STYLIST' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        avatar_url: true,
+        style_profile: true,
+        location: true,
+      },
+    });
+
+    if (!stylist) {
+      res.status(404).json({ success: false, error: 'Styliste non trouvé' });
+      return;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        ...stylist,
+        style_profile: stripSensitiveProfile(stylist.style_profile as Record<string, unknown> | null),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Erreur serveur' });
+  }
+}
+
+/**
+ * PUT /api/stylists/services
+ * Body: { services: [{ name, description, duration_min, price }, ...] }
+ * Stores services array in the authenticated stylist's style_profile.
+ */
+export async function updateServices(req: Request, res: Response): Promise<void> {
+  try {
+    if (req.user!.role !== 'STYLIST') {
+      res.status(403).json({ success: false, error: 'Réservé aux stylistes' });
+      return;
+    }
+
+    const { services } = req.body as { services: unknown };
+    if (!Array.isArray(services)) {
+      res.status(400).json({ success: false, error: 'Le champ services doit être un tableau' });
+      return;
+    }
+
+    const existing = await prisma.user.findUnique({
+      where: { id: req.user!.userId },
+      select: { style_profile: true },
+    });
+    const profile = (existing?.style_profile as Record<string, unknown>) || {};
+
+    const updated = await prisma.user.update({
+      where: { id: req.user!.userId },
+      data: { style_profile: { ...profile, services } },
+      select: { style_profile: true },
+    });
+
+    res.json({
+      success: true,
+      data: {
+        services:
+          ((updated.style_profile as Record<string, unknown>)?.services as unknown[]) || [],
+      },
+    });
+  } catch (error) {
+    console.error('Update services error:', error);
+    res.status(500).json({ success: false, error: 'Erreur serveur' });
   }
 }
 

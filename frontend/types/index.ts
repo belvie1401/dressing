@@ -5,7 +5,7 @@ export type Season = 'SUMMER' | 'WINTER' | 'ALL';
 export type Occasion = 'CASUAL' | 'WORK' | 'EVENING' | 'SPORT';
 export type ConnectionStatus = 'PENDING' | 'ACTIVE' | 'ENDED';
 export type LookbookStatus = 'DRAFT' | 'SENT' | 'APPROVED' | 'REJECTED';
-export type MessageType = 'TEXT' | 'IMAGE' | 'LOOKBOOK' | 'OUTFIT';
+export type MessageType = 'TEXT' | 'IMAGE' | 'LOOKBOOK' | 'OUTFIT' | 'ZOOM_LINK';
 export type Plan = 'FREE' | 'CLIENT_PRO' | 'STYLIST_PRO';
 
 // Models
@@ -62,11 +62,18 @@ export interface OutfitItem {
 export interface CalendarEntry {
   id: string;
   user_id: string;
-  outfit_id: string;
-  outfit?: Outfit;
+  outfit_id?: string | null;
+  outfit?: Outfit | null;
   date: string;
   weather_data?: Record<string, unknown>;
   notes?: string;
+  // Stylist appointment fields
+  client_id?: string | null;
+  event_type?: string | null;
+  duration_min?: number | null;
+  zoom_link?: string | null;
+  title?: string | null;
+  client?: { id: string; name: string; avatar_url?: string | null } | null;
 }
 
 export interface StylistClient {

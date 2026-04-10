@@ -52,6 +52,7 @@ enum MessageType {
   IMAGE
   LOOKBOOK
   OUTFIT
+  ZOOM_LINK
 }
 
 enum Plan {
@@ -132,14 +133,20 @@ model OutfitItem {
 }
 
 model CalendarEntry {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   user_id      String
-  user         User     @relation(fields: [user_id], references: [id])
-  outfit_id    String
-  outfit       Outfit   @relation(fields: [outfit_id], references: [id])
+  user         User      @relation(fields: [user_id], references: [id])
+  outfit_id    String?
+  outfit       Outfit?   @relation(fields: [outfit_id], references: [id])
   date         DateTime
   weather_data Json?
   notes        String?
+  // Stylist appointment fields
+  client_id    String?
+  event_type   String?
+  duration_min Int?
+  zoom_link    String?
+  title        String?
 }
 
 model StylistClient {

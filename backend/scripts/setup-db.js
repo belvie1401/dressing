@@ -179,6 +179,24 @@ CREATE TABLE IF NOT EXISTS "MagicLinkToken" (
 CREATE UNIQUE INDEX IF NOT EXISTS "MagicLinkToken_token_key" ON "MagicLinkToken"("token");
 CREATE INDEX IF NOT EXISTS "MagicLinkToken_email_idx" ON "MagicLinkToken"("email");
 CREATE INDEX IF NOT EXISTS "MagicLinkToken_token_idx" ON "MagicLinkToken"("token");
+
+-- Migrations for stylist workspace
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_enum e
+    JOIN pg_type t ON e.enumtypid = t.oid
+    WHERE t.typname = 'MessageType' AND e.enumlabel = 'ZOOM_LINK'
+  ) THEN
+    ALTER TYPE "MessageType" ADD VALUE 'ZOOM_LINK';
+  END IF;
+END $$;
+
+ALTER TABLE "CalendarEntry" ALTER COLUMN "outfit_id" DROP NOT NULL;
+ALTER TABLE "CalendarEntry" ADD COLUMN IF NOT EXISTS "client_id" TEXT;
+ALTER TABLE "CalendarEntry" ADD COLUMN IF NOT EXISTS "event_type" TEXT;
+ALTER TABLE "CalendarEntry" ADD COLUMN IF NOT EXISTS "duration_min" INTEGER;
+ALTER TABLE "CalendarEntry" ADD COLUMN IF NOT EXISTS "zoom_link" TEXT;
+ALTER TABLE "CalendarEntry" ADD COLUMN IF NOT EXISTS "title" TEXT;
 `;
 
 // Try multiple connection strategies

@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import {
   listStylists,
+  getStylistById,
+  updateServices,
   invite,
   acceptInvite,
   rejectInvite,
@@ -15,9 +17,11 @@ router.use(authenticate);
 
 router.get('/', listStylists);
 router.get('/connections', getConnections);
+router.put('/services', updateServices);
 router.post('/invite', invite);
 router.post('/accept/:id', acceptInvite);
 router.post('/reject/:id', rejectInvite);
 router.get('/client/:clientId/wardrobe', getClientWardrobe);
+router.get('/:id', getStylistById);
 
 export default router;

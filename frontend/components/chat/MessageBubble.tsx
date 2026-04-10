@@ -10,6 +10,41 @@ interface MessageBubbleProps {
 }
 
 export default function MessageBubble({ message, isOwn }: MessageBubbleProps) {
+  // Zoom link — render as a special card, full-width-ish
+  if (message.type === 'ZOOM_LINK') {
+    const zoomUrl =
+      (message.metadata as Record<string, string> | undefined)?.zoom_url ||
+      message.content;
+    return (
+      <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+        <div
+          className="max-w-[85%] rounded-2xl p-4"
+          style={{ background: 'rgba(45, 140, 255, 0.1)' }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2D8CFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="23 7 16 12 23 17 23 7" />
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+            </svg>
+            <p className="font-semibold text-sm text-[#111111]">Rejoindre la visio</p>
+          </div>
+          <p className="text-xs text-[#8A8A8A] truncate mb-3">{zoomUrl}</p>
+          <button
+            type="button"
+            onClick={() => window.open(zoomUrl, '_blank', 'noopener,noreferrer')}
+            className="rounded-full px-4 py-2 text-xs font-medium text-white"
+            style={{ background: '#2D8CFF' }}
+          >
+            Ouvrir Zoom
+          </button>
+          <p className="text-[10px] text-[#8A8A8A] mt-2">
+            {format(new Date(message.created_at), 'HH:mm', { locale: fr })}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
       <div
