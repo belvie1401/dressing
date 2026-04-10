@@ -1,9 +1,12 @@
+import Link from 'next/link';
+
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
-      {/* Back to home */}
-      <div className="px-5 py-6">
-        <a href="/" className="flex items-center gap-2 text-sm text-[#8A8A8A] w-fit">
+    <div className="min-h-screen bg-[#F7F5F2] flex flex-col">
+      {/* Header with logo */}
+      <div className="px-5 py-6 flex items-center justify-between max-w-6xl w-full mx-auto">
+        <Link href="/" className="font-serif text-xl text-[#111111] no-underline">LIEN</Link>
+        <a href="/" className="flex items-center gap-2 text-sm text-[#8A8A8A] hover:text-[#111111]">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
@@ -85,9 +88,24 @@ export default function PricingPage() {
       </div>
 
       {/* Footer note */}
-      <p className="text-center text-sm text-[#8A8A8A] mt-8 pb-16">
+      <p className="text-center text-sm text-[#8A8A8A] mt-8 pb-16 flex-1">
         14 jours d&apos;essai gratuit. Sans engagement. R&eacute;siliable &agrave; tout moment.
       </p>
+
+      {/* Footer */}
+      <footer className="bg-[#111111] border-t border-[#222] py-8 px-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:flex-row md:justify-between">
+          <Link href="/" className="font-serif text-white no-underline">LIEN</Link>
+          <p className="text-sm text-[#8A8A8A]">
+            &copy; {new Date().getFullYear()} Lien. Tous droits r&eacute;serv&eacute;s.
+          </p>
+          <div className="flex items-center gap-6">
+            <a href="/pricing" className="text-sm text-[#8A8A8A] hover:text-white">Tarifs</a>
+            <a href="/cgv" className="text-sm text-[#8A8A8A] hover:text-white">CGV</a>
+            <a href="/confidentialite" className="text-sm text-[#8A8A8A] hover:text-white">Confidentialit&eacute;</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -357,9 +357,9 @@ export default function PourLesStylesPage() {
             &copy; {new Date().getFullYear()} Lien. Tous droits r&eacute;serv&eacute;s.
           </p>
           <div className="flex items-center gap-6">
-            <a href="/a-propos" className="text-sm text-[#8A8A8A] hover:text-white">&Agrave; propos</a>
             <a href="/pricing" className="text-sm text-[#8A8A8A] hover:text-white">Tarifs</a>
-            <a href="/pour-les-stylistes" className="text-sm text-[#8A8A8A] hover:text-white">Pour les stylistes</a>
+            <a href="/cgv" className="text-sm text-[#8A8A8A] hover:text-white">CGV</a>
+            <a href="/confidentialite" className="text-sm text-[#8A8A8A] hover:text-white">Confidentialit&eacute;</a>
           </div>
         </div>
       </footer>
