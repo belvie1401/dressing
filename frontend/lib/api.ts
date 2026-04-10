@@ -4,7 +4,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('token');
+  return localStorage.getItem('lien_token');
 }
 
 async function request<T>(
@@ -30,6 +30,16 @@ async function request<T>(
       ...options,
       headers,
     });
+
+    // Handle 401 — token expired or invalid
+    if (res.status === 401) {
+      localStorage.removeItem('lien_token');
+      // Only redirect if we're in the browser and not already on login
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login';
+      }
+      return { success: false, error: 'Session expir\u00e9e' };
+    }
 
     const data = await res.json();
 

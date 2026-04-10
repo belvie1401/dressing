@@ -6,7 +6,7 @@ let socket: Socket | null = null;
 
 export function getSocket(): Socket {
   if (!socket) {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('lien_token') : null;
 
     socket = io(SOCKET_URL, {
       auth: { token },
@@ -20,7 +20,7 @@ export function getSocket(): Socket {
 export function connectSocket(): void {
   const s = getSocket();
   if (!s.connected) {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('lien_token') : null;
     s.auth = { token };
     s.connect();
   }

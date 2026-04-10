@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { User, ClothingItem, Message, Conversation } from '@/types';
 import { api } from './api';
 
@@ -7,59 +8,78 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isLoading: boolean;
+  _hasHydrated: boolean;
+  _setHasHydrated: (v: boolean) => void;
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string, name: string, role?: string) => Promise<boolean>;
   logout: () => void;
   loadUser: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
-  isLoading: false,
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      token: null,
+      isLoading: false,
+      _hasHydrated: false,
+      _setHasHydrated: (v) => set({ _hasHydrated: v }),
 
-  login: async (email, password) => {
-    set({ isLoading: true });
-    const res = await api.post<{ user: User; token: string }>('/auth/login', { email, password });
-    if (res.success && res.data) {
-      localStorage.setItem('token', res.data.token);
-      set({ user: res.data.user, token: res.data.token, isLoading: false });
-      return true;
+      login: async (email, password) => {
+        set({ isLoading: true });
+        const res = await api.post<{ user: User; token: string }>('/auth/login', { email, password });
+        if (res.success && res.data) {
+          localStorage.setItem('lien_token', res.data.token);
+          set({ user: res.data.user, token: res.data.token, isLoading: false });
+          return true;
+        }
+        set({ isLoading: false });
+        return false;
+      },
+
+      register: async (email, password, name, role?) => {
+        set({ isLoading: true });
+        const res = await api.post<{ user: User; token: string }>('/auth/register', { email, password, name, role });
+        if (res.success && res.data) {
+          localStorage.setItem('lien_token', res.data.token);
+          set({ user: res.data.user, token: res.data.token, isLoading: false });
+          return true;
+        }
+        set({ isLoading: false });
+        return false;
+      },
+
+      logout: () => {
+        localStorage.removeItem('lien_token');
+        set({ user: null, token: null });
+      },
+
+      loadUser: async () => {
+        const { token } = get();
+        if (!token) return;
+        set({ isLoading: true });
+        const res = await api.get<User>('/auth/me');
+        if (res.success && res.data) {
+          set({ user: res.data, isLoading: false });
+        } else {
+          // Token is invalid or expired
+          localStorage.removeItem('lien_token');
+          set({ user: null, token: null, isLoading: false });
+        }
+      },
+    }),
+    {
+      name: 'lien-auth',
+      partialize: (state) => ({
+        token: state.token,
+        user: state.user,
+      }),
+      onRehydrateStorage: () => (state) => {
+        state?._setHasHydrated(true);
+      },
     }
-    set({ isLoading: false });
-    return false;
-  },
-
-  register: async (email, password, name, role?) => {
-    set({ isLoading: true });
-    const res = await api.post<{ user: User; token: string }>('/auth/register', { email, password, name, role });
-    if (res.success && res.data) {
-      localStorage.setItem('token', res.data.token);
-      set({ user: res.data.user, token: res.data.token, isLoading: false });
-      return true;
-    }
-    set({ isLoading: false });
-    return false;
-  },
-
-  logout: () => {
-    localStorage.removeItem('token');
-    set({ user: null, token: null });
-  },
-
-  loadUser: async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    set({ isLoading: true });
-    const res = await api.get<User>('/auth/me');
-    if (res.success && res.data) {
-      set({ user: res.data, token, isLoading: false });
-    } else {
-      localStorage.removeItem('token');
-      set({ user: null, token: null, isLoading: false });
-    }
-  },
-}));
+  )
+);
 
 // Wardrobe Store
 interface WardrobeState {
