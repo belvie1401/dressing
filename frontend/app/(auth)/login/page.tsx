@@ -34,7 +34,8 @@ function LoginForm() {
 
     const success = await login(email, password);
     if (success) {
-      router.push('/dashboard');
+      const role = useAuthStore.getState().user?.role;
+      router.push(role === 'STYLIST' ? '/stylist-dashboard' : '/dashboard');
     } else {
       setError('Email ou mot de passe incorrect');
     }

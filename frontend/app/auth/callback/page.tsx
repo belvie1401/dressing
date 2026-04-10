@@ -38,7 +38,9 @@ function CallbackHandler() {
           // Check if user needs onboarding
           const profile = data.data.style_profile;
           const needsOnboarding = !profile || (!profile.styles && !profile.budget);
-          router.push(needsOnboarding ? '/onboarding' : '/dashboard');
+          const isStylist = data.data.role === 'STYLIST';
+          const dashPath = isStylist ? '/stylist-dashboard' : '/dashboard';
+          router.push(needsOnboarding ? '/onboarding' : dashPath);
         } else {
           localStorage.removeItem('lien_token');
           router.push('/login?error=invalid_token');

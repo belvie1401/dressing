@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { connectSocket, disconnectSocket } from '@/lib/socket';
 import BottomNav from '@/components/ui/BottomNav';
@@ -10,6 +10,7 @@ import Sidebar from '@/components/ui/Sidebar';
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, token, _hasHydrated, loadUser } = useAuthStore();
   const router = useRouter();
+  const pathname = usePathname();
   const [authChecked, setAuthChecked] = useState(false);
 
   // Wait for Zustand to rehydrate from localStorage, then validate the token
@@ -29,6 +30,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       setAuthChecked(true);
     }
   }, [_hasHydrated, token, user]);
+
+  // Role-based dashboard redirect
+  useEffect(() => {
+    if (!authChecked || !user) return;
+    if (user.role === 'STYLIST' && pathname === '/dashboard') {
+      router.replace('/stylist-dashboard');
+    }
+    if (user.role === 'CLIENT' && pathname === '/stylist-dashboard') {
+      router.replace('/dashboard');
+    }
+  }, [authChecked, user, pathname]);
 
   // After auth check completes, if token was cleared by loadUser (invalid), redirect
   useEffect(() => {

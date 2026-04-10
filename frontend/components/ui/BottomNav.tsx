@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useAuthStore } from '@/lib/store';
 
 interface Tab {
   href: string;
@@ -8,7 +9,8 @@ interface Tab {
   icon: (active: boolean) => React.ReactNode;
 }
 
-const leftTabs: Tab[] = [
+// ---- CLIENT TABS ----
+const clientLeftTabs: Tab[] = [
   {
     href: '/dashboard',
     label: 'Accueil',
@@ -32,14 +34,13 @@ const leftTabs: Tab[] = [
   },
 ];
 
-const rightTabs: Tab[] = [
+const clientRightTabs: Tab[] = [
   {
-    href: '/stylists',
-    label: 'Styliste',
+    href: '/outfits',
+    label: 'Looks',
     icon: (active) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#111111' : 'none'} stroke={active ? '#111111' : '#8A8A8A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
+        <path d="M12 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z" />
       </svg>
     ),
   },
@@ -56,11 +57,67 @@ const rightTabs: Tab[] = [
   },
 ];
 
+// ---- STYLIST TABS ----
+const stylistLeftTabs: Tab[] = [
+  {
+    href: '/stylist-dashboard',
+    label: 'Accueil',
+    icon: (active) => (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#111111' : 'none'} stroke={active ? '#111111' : '#8A8A8A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        {!active && <polyline points="9 22 9 12 15 12 15 22" />}
+      </svg>
+    ),
+  },
+  {
+    href: '/my-clients',
+    label: 'Clientes',
+    icon: (active) => (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#111111' : '#8A8A8A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    ),
+  },
+];
+
+const stylistRightTabs: Tab[] = [
+  {
+    href: '/messages',
+    label: 'Messages',
+    icon: (active) => (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#111111' : 'none'} stroke={active ? '#111111' : '#8A8A8A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    ),
+  },
+  {
+    href: '/stylist-profile',
+    label: 'Profil',
+    icon: (active) => (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#111111' : '#8A8A8A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" fill={active ? '#111111' : 'none'} />
+        <path d="M12 14c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill={active ? 'white' : 'none'} stroke={active ? 'white' : '#8A8A8A'} />
+        <path d="M6 20.5c0-2.5 2.5-4.5 6-4.5s6 2 6 4.5" stroke={active ? 'white' : '#8A8A8A'} fill="none" />
+      </svg>
+    ),
+  },
+];
+
 export default function BottomNav() {
   const pathname = usePathname();
+  const user = useAuthStore((s) => s.user);
+  const isStylist = user?.role === 'STYLIST';
 
+  const leftTabs = isStylist ? stylistLeftTabs : clientLeftTabs;
+  const rightTabs = isStylist ? stylistRightTabs : clientRightTabs;
+  const centerHref = isStylist ? '/lookbooks/create' : '/wardrobe/add';
+
+  const exactMatches = new Set(['/dashboard', '/stylist-dashboard']);
   const checkActive = (href: string) =>
-    href === '/dashboard' ? pathname === '/dashboard' : pathname?.startsWith(href);
+    exactMatches.has(href) ? pathname === href : pathname?.startsWith(href);
 
   const renderTab = (tab: Tab) => {
     const active = checkActive(tab.href);
@@ -84,7 +141,7 @@ export default function BottomNav() {
 
         {/* Center plus button */}
         <a
-          href="/wardrobe/add"
+          href={centerHref}
           className="flex h-14 w-14 -translate-y-3 items-center justify-center rounded-full shadow-lg"
           style={{ background: 'linear-gradient(135deg, #a855f7, #3b82f6)' }}
         >
