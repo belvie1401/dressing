@@ -3,7 +3,15 @@ import prisma from '../lib/prisma';
 
 export async function getOutfits(req: Request, res: Response): Promise<void> {
   try {
-    const { occasion, season } = req.query;
+    const { occasion, season, limit, sort } = req.query;
+
+    const take = limit ? Math.max(1, Math.min(100, Number(limit))) : undefined;
+
+    // sort: 'recent' (default) or 'worn' (most worn first)
+    const orderBy =
+      sort === 'worn'
+        ? ({ worn_count: 'desc' } as const)
+        : ({ created_at: 'desc' } as const);
 
     const outfits = await prisma.outfit.findMany({
       where: {
@@ -16,12 +24,28 @@ export async function getOutfits(req: Request, res: Response): Promise<void> {
           include: { item: true },
         },
       },
-      orderBy: { created_at: 'desc' },
+      orderBy,
+      ...(take ? { take } : {}),
     });
 
     res.json({ success: true, data: outfits });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Erreur lors de la récupération des tenues' });
+  }
+}
+
+/**
+ * GET /api/outfits/count
+ * Returns the total number of outfits owned by the authenticated user.
+ */
+export async function getOutfitsCount(req: Request, res: Response): Promise<void> {
+  try {
+    const count = await prisma.outfit.count({
+      where: { user_id: req.user!.userId },
+    });
+    res.json({ success: true, data: { count } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Erreur lors du comptage' });
   }
 }
 

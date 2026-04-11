@@ -19,6 +19,7 @@ import weatherRoutes from './routes/weather.routes';
 import subscriptionsRoutes from './routes/subscriptions.routes';
 import walletRoutes from './routes/wallet.routes';
 import referralRoutes from './routes/referral.routes';
+import activityRoutes from './routes/activity.routes';
 
 dotenv.config();
 
@@ -59,6 +60,7 @@ app.use('/api/weather', weatherRoutes);
 app.use('/api/subscriptions', subscriptionsRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/referral', referralRoutes);
+app.use('/api/activity', activityRoutes);
 
 // Health check
 app.get('/api/health', (_req: any, res: any) => {

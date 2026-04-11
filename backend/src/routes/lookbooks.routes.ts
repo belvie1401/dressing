@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   getLookbooks,
   getLookbook,
+  getStylistPublicLookbooks,
   createLookbook,
   updateLookbook,
   deleteLookbook,
@@ -18,6 +19,7 @@ router.use(authenticate);
 
 router.post('/upload-photo', upload.single('photo'), uploadLookbookPhoto);
 router.get('/', getLookbooks);
+router.get('/stylist/:stylistId/public', getStylistPublicLookbooks);
 router.get('/:id', getLookbook);
 router.post('/', createLookbook);
 router.put('/:id', updateLookbook);

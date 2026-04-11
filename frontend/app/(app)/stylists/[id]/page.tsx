@@ -9,16 +9,17 @@ import { api } from '@/lib/api';
 export default function StylistDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [stylist, setStylist] = useState<User | null>(null);
-  const [lookbooks, setLookbooks] = useState<Lookbook[]>([]);
+  const [lookbooks, setLookbooks] = useState<Lookbook[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [inviting, setInviting] = useState(false);
   const [invited, setInvited] = useState(false);
 
   useEffect(() => {
     const load = async () => {
-      const [stylistsRes, connectionsRes] = await Promise.all([
+      const [stylistsRes, connectionsRes, lookbooksRes] = await Promise.all([
         api.get<User[]>('/stylists'),
         api.get<StylistClient[]>('/stylists/connections'),
+        api.get<Lookbook[]>(`/lookbooks/stylist/${id}/public?limit=8`),
       ]);
       if (stylistsRes.success && stylistsRes.data) {
         const found = stylistsRes.data.find((s) => s.id === id);
@@ -27,6 +28,7 @@ export default function StylistDetailPage() {
       if (connectionsRes.success && connectionsRes.data) {
         setInvited(connectionsRes.data.some((c) => c.stylist_id === id));
       }
+      setLookbooks(lookbooksRes.success && Array.isArray(lookbooksRes.data) ? lookbooksRes.data : []);
       setLoading(false);
     };
     load();
@@ -145,25 +147,47 @@ export default function StylistDetailPage() {
         <div className="mt-5">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-[#111111]">Looks r\u00e9cents</h3>
-            <span className="text-xs text-[#8A8A8A]">Voir tout</span>
           </div>
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="relative h-28 w-20 shrink-0 overflow-hidden rounded-xl"
-                style={{ background: 'var(--color-accent-light)' }}
-              >
-                <Image
-                  src={`https://images.unsplash.com/photo-${1509631179647 + i * 10000}-0177331693ae?w=200&h=280&fit=crop`}
-                  alt={`Look ${i}`}
-                  fill
-                  className="object-cover"
-                  sizes="80px"
+          {lookbooks === null ? (
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+              {[0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-28 w-20 shrink-0 rounded-xl bg-[#F0EDE8] animate-pulse"
                 />
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : lookbooks.length === 0 ? (
+            <p className="text-xs text-[#8A8A8A]">
+              Aucun look public pour l&apos;instant
+            </p>
+          ) : (
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+              {lookbooks.map((lb) => {
+                const firstPhoto =
+                  lb.photos?.[0] ||
+                  lb.outfits?.[0]?.outfit?.items?.[0]?.item?.bg_removed_url ||
+                  lb.outfits?.[0]?.outfit?.items?.[0]?.item?.photo_url ||
+                  null;
+                return (
+                  <div
+                    key={lb.id}
+                    className="relative h-28 w-20 shrink-0 overflow-hidden rounded-xl bg-[#EDE5DC]"
+                  >
+                    {firstPhoto ? (
+                      <Image
+                        src={firstPhoto}
+                        alt={lb.title}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* CTA */}

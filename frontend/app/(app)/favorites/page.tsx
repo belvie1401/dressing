@@ -1,50 +1,43 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { api } from '@/lib/api';
+import type { Outfit, User } from '@/types';
 
 type FavTab = 'looks' | 'stylistes';
 
-interface FavLook {
-  id: string;
-  name: string;
-  stylist: string;
-  image: string;
-}
-
-interface FavStylist {
-  id: string;
-  name: string;
-  location: string;
-  specialties: string[];
-  rating: number;
-  reviews: number;
-  price: string;
-}
-
-const initialLooks: FavLook[] = [
-  { id: '1', name: 'Look Casual Chic', stylist: 'Camille D.', image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400' },
-  { id: '2', name: '\u00c9l\u00e9gance du soir', stylist: 'L\u00e9a P.', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400' },
-  { id: '3', name: 'Style Minimal', stylist: 'Hugo B.', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400' },
-  { id: '4', name: 'Chic Parisien', stylist: 'Camille D.', image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400' },
-];
-
-const initialStylists: FavStylist[] = [
-  { id: 's1', name: 'Camille D.', location: 'Paris', specialties: ['Minimal', 'Chic'], rating: 4.9, reviews: 120, price: '\u00c0 partir de 49\u20ac' },
-  { id: 's2', name: 'L\u00e9a P.', location: 'Lyon', specialties: ['Chic', 'Audacieux'], rating: 4.9, reviews: 164, price: '\u00c0 partir de 59\u20ac' },
-];
-
 export default function FavoritesPage() {
   const [tab, setTab] = useState<FavTab>('looks');
-  const [savedLooks, setSavedLooks] = useState<FavLook[]>(initialLooks);
-  const [savedStylists, setSavedStylists] = useState<FavStylist[]>(initialStylists);
+  const [savedLooks, setSavedLooks] = useState<Outfit[] | null>(null);
+  const [savedStylists, setSavedStylists] = useState<User[] | null>(null);
 
-  const removeLook = (id: string) => {
-    setSavedLooks((prev) => prev.filter((l) => l.id !== id));
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      const [looksRes, stylistsRes] = await Promise.all([
+        api.get<Outfit[]>('/favorites/outfits'),
+        api.get<User[]>('/favorites/stylists'),
+      ]);
+      if (!mounted) return;
+      setSavedLooks(looksRes.success && Array.isArray(looksRes.data) ? looksRes.data : []);
+      setSavedStylists(stylistsRes.success && Array.isArray(stylistsRes.data) ? stylistsRes.data : []);
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const removeLook = async (id: string) => {
+    setSavedLooks((prev) => (prev ?? []).filter((l) => l.id !== id));
+    await api.delete(`/favorites/outfits/${id}`);
   };
 
-  const removeStylist = (id: string) => {
-    setSavedStylists((prev) => prev.filter((s) => s.id !== id));
+  const removeStylist = async (id: string) => {
+    setSavedStylists((prev) => (prev ?? []).filter((s) => s.id !== id));
+    await api.delete(`/favorites/stylists/${id}`);
   };
 
   return (
@@ -73,9 +66,15 @@ export default function FavoritesPage() {
       </div>
 
       {/* Tab content */}
-      <div className="mt-5">
+      <div className="mt-5 pb-24">
         {tab === 'looks' ? (
-          savedLooks.length === 0 ? (
+          savedLooks === null ? (
+            <div className="grid grid-cols-2 gap-3">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="aspect-[3/4] rounded-2xl bg-[#F0EDE8] animate-pulse" />
+              ))}
+            </div>
+          ) : savedLooks.length === 0 ? (
             /* Empty state — Looks */
             <div className="flex flex-col items-center py-20 text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#EDE5DC]">
@@ -85,47 +84,61 @@ export default function FavoritesPage() {
               </div>
               <p className="font-serif text-base font-semibold text-[#111111]">Aucun look sauvegard&eacute;</p>
               <p className="mt-1 text-sm text-[#8A8A8A]">Explorez les looks de nos stylistes</p>
-              <a
+              <Link
                 href="/stylists"
                 className="mt-4 rounded-full bg-[#111111] px-6 py-2.5 text-sm font-medium text-white"
               >
                 Voir les stylistes
-              </a>
+              </Link>
             </div>
           ) : (
             /* Looks grid */
             <div className="grid grid-cols-2 gap-3">
-              {savedLooks.map((look) => (
-                <div key={look.id} className="group relative aspect-[3/4] overflow-hidden rounded-2xl">
-                  <Image
-                    src={look.image}
-                    alt={look.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 50vw, 200px"
-                  />
-                  {/* Dark gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              {savedLooks.map((look) => {
+                const firstItem = look.items?.[0]?.item;
+                const cover = firstItem?.bg_removed_url || firstItem?.photo_url || null;
+                return (
+                  <div key={look.id} className="group relative aspect-[3/4] overflow-hidden rounded-2xl bg-[#F0EDE8]">
+                    {cover ? (
+                      <Image
+                        src={cover}
+                        alt={look.name}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 50vw, 200px"
+                      />
+                    ) : null}
+                    {/* Dark gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                  {/* Heart top-right */}
-                  <button
-                    onClick={() => removeLook(look.id)}
-                    className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#D4785C" stroke="#D4785C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                    </svg>
-                  </button>
+                    {/* Heart top-right */}
+                    <button
+                      onClick={() => removeLook(look.id)}
+                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="#D4785C" stroke="#D4785C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                      </svg>
+                    </button>
 
-                  {/* Bottom info */}
-                  <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <p className="text-[13px] font-bold text-white">{look.name}</p>
-                    <p className="text-[11px] text-white/70">{look.stylist}</p>
+                    {/* Bottom info */}
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      <p className="text-[13px] font-bold text-white">{look.name}</p>
+                      {look.occasion ? (
+                        <p className="text-[11px] text-white/70">{look.occasion.toLowerCase()}</p>
+                      ) : null}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )
+        ) : savedStylists === null ? (
+          <div className="space-y-3">
+            {[0, 1].map((i) => (
+              <div key={i} className="h-24 rounded-2xl bg-[#F0EDE8] animate-pulse" />
+            ))}
+          </div>
         ) : savedStylists.length === 0 ? (
           /* Empty state — Stylistes */
           <div className="flex flex-col items-center py-20 text-center">
@@ -137,12 +150,12 @@ export default function FavoritesPage() {
             </div>
             <p className="font-serif text-base font-semibold text-[#111111]">Aucun styliste sauvegard&eacute;</p>
             <p className="mt-1 text-sm text-[#8A8A8A]">D&eacute;couvrez nos stylistes professionnels</p>
-            <a
+            <Link
               href="/stylists"
               className="mt-4 rounded-full bg-[#111111] px-6 py-2.5 text-sm font-medium text-white"
             >
               Trouver un styliste
-            </a>
+            </Link>
           </div>
         ) : (
           /* Stylists list */
@@ -153,30 +166,22 @@ export default function FavoritesPage() {
                 className="relative flex items-center gap-3 rounded-2xl bg-white p-3.5 shadow-sm"
               >
                 {/* Avatar */}
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#EDE5DC]">
-                  <span className="text-lg font-semibold text-[#C6A47E]">{stylist.name.charAt(0)}</span>
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[#EDE5DC]">
+                  {stylist.avatar_url ? (
+                    <Image src={stylist.avatar_url} alt={stylist.name} fill className="object-cover" sizes="56px" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center">
+                      <span className="text-lg font-semibold text-[#C6A47E]">{stylist.name.charAt(0)}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Info */}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-[#111111]">{stylist.name}</p>
-                  <p className="text-xs text-[#8A8A8A]">{stylist.location}</p>
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {stylist.specialties.map((s) => (
-                      <span key={s} className="rounded-full bg-[#F0EDE8] px-2 py-0.5 text-[10px] font-medium text-[#111111]">
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-1 flex items-center gap-2">
-                    <span className="flex items-center gap-0.5 text-xs text-[#111111]">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="#F59E0B" stroke="none">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                      </svg>
-                      {stylist.rating} ({stylist.reviews})
-                    </span>
-                    <span className="text-xs text-[#8A8A8A]">{stylist.price}</span>
-                  </div>
+                  {stylist.email ? (
+                    <p className="text-xs text-[#8A8A8A]">{stylist.email}</p>
+                  ) : null}
                 </div>
 
                 {/* Heart */}

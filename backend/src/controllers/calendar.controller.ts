@@ -3,14 +3,31 @@ import prisma from '../lib/prisma';
 
 export async function getEntries(req: Request, res: Response): Promise<void> {
   try {
-    const { month, year } = req.query;
+    const { month, year, week, upcoming, limit } = req.query;
 
-    let dateFilter = {};
+    let dateFilter: Record<string, unknown> = {};
+
     if (month && year) {
       const start = new Date(Number(year), Number(month) - 1, 1);
       const end = new Date(Number(year), Number(month), 0, 23, 59, 59);
       dateFilter = { date: { gte: start, lte: end } };
+    } else if (week === 'current') {
+      // Monday → Sunday of the current week
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // 0 Sun - 6 Sat
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() + mondayOffset);
+      monday.setHours(0, 0, 0, 0);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      sunday.setHours(23, 59, 59, 999);
+      dateFilter = { date: { gte: monday, lte: sunday } };
+    } else if (upcoming === 'true') {
+      dateFilter = { date: { gte: new Date() } };
     }
+
+    const take = limit ? Math.max(1, Math.min(100, Number(limit))) : undefined;
 
     const entries = await prisma.calendarEntry.findMany({
       where: {
@@ -27,6 +44,7 @@ export async function getEntries(req: Request, res: Response): Promise<void> {
         },
       },
       orderBy: { date: 'asc' },
+      ...(take ? { take } : {}),
     });
 
     // Hydrate client info for stylist events
@@ -133,6 +151,74 @@ export async function createEntry(req: Request, res: Response): Promise<void> {
   }
 }
 
+/**
+ * POST /api/calendar/book
+ * Client books a session with a stylist.
+ * Creates mirrored entries on both sides.
+ */
+export async function bookSession(req: Request, res: Response): Promise<void> {
+  try {
+    const userId = req.user!.userId;
+    const { stylist_id, date, duration_min, price, notes } = req.body;
+
+    if (!stylist_id || !date || !duration_min) {
+      res.status(400).json({
+        success: false,
+        error: 'stylist_id, date et duration_min sont requis',
+      });
+      return;
+    }
+
+    const stylist = await prisma.user.findUnique({
+      where: { id: stylist_id },
+      select: { id: true, role: true, name: true },
+    });
+    if (!stylist) {
+      res.status(404).json({ success: false, error: 'Styliste non trouv\u00e9' });
+      return;
+    }
+
+    const client = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true },
+    });
+
+    const bookingDate = new Date(date);
+
+    // Client-side entry
+    const clientEntry = await prisma.calendarEntry.create({
+      data: {
+        user_id: userId,
+        date: bookingDate,
+        event_type: 'BOOKING',
+        duration_min: Number(duration_min),
+        title: `Session avec ${stylist.name}`,
+        notes: notes || null,
+      },
+    });
+
+    // Stylist-side entry
+    await prisma.calendarEntry.create({
+      data: {
+        user_id: stylist_id,
+        date: bookingDate,
+        event_type: 'BOOKING',
+        duration_min: Number(duration_min),
+        client_id: userId,
+        title: `Session avec ${client?.name ?? 'Client'}`,
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      data: { ...clientEntry, price: price ?? null },
+    });
+  } catch (error) {
+    console.error('Book session error:', error);
+    res.status(500).json({ success: false, error: 'Erreur lors de la r\u00e9servation' });
+  }
+}
+
 export async function updateEntry(req: Request, res: Response): Promise<void> {
   try {
     const { id } = req.params as { id: string };
@@ -206,5 +292,74 @@ export async function deleteEntry(req: Request, res: Response): Promise<void> {
     res.json({ success: true, data: { message: 'Entrée supprimée' } });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Erreur lors de la suppression' });
+  }
+}
+
+/**
+ * GET /api/calendar/agenda-stats
+ * Planning stats for stylists:
+ *  - occupation_rate: % of 8-hour workdays filled this month with appointments
+ *  - average_duration_min: avg duration_min across this month's appointments
+ *  - cancellation_rate: % of deleted (past) slots (placeholder: 0 for new accounts)
+ *  - pending_count: pending appointments (upcoming, no outfit linked → considered waiting)
+ */
+export async function getAgendaStats(req: Request, res: Response): Promise<void> {
+  try {
+    const userId = req.user!.userId;
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+    const entries = await prisma.calendarEntry.findMany({
+      where: {
+        user_id: userId,
+        date: { gte: startOfMonth, lte: endOfMonth },
+      },
+      select: { duration_min: true, date: true },
+    });
+
+    const totalMinutes = entries.reduce(
+      (acc, e) => acc + (e.duration_min ?? 0),
+      0
+    );
+
+    const averageDuration = entries.length > 0
+      ? Math.round(totalMinutes / entries.length)
+      : 0;
+
+    // Occupation: total booked minutes / (workdays in month * 8h * 60)
+    const daysInMonth = endOfMonth.getDate();
+    let workDays = 0;
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dow = new Date(now.getFullYear(), now.getMonth(), d).getDay();
+      if (dow !== 0 && dow !== 6) workDays++;
+    }
+    const workCapacityMin = workDays * 8 * 60;
+    const occupationRate = workCapacityMin > 0
+      ? Math.min(100, Math.round((totalMinutes / workCapacityMin) * 100))
+      : 0;
+
+    // Pending requests = upcoming entries without linked outfit/title
+    const pendingCount = await prisma.calendarEntry.count({
+      where: {
+        user_id: userId,
+        date: { gte: now },
+      },
+    });
+
+    res.json({
+      success: true,
+      data: {
+        occupation_rate: occupationRate,
+        average_duration_min: averageDuration,
+        cancellation_rate: 0,
+        pending_count: pendingCount,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors du calcul des statistiques agenda',
+    });
   }
 }

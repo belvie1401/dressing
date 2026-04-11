@@ -28,65 +28,6 @@ interface ClientRow {
   lastActivity?: string;
 }
 
-const FALLBACK_CLIENTS: ClientRow[] = [
-  {
-    connectionId: 'mock-1',
-    client: {
-      id: 'mock-1',
-      email: 'sophie@example.com',
-      name: 'Sophie M.',
-      avatar_url: 'https://i.pravatar.cc/160?img=47',
-      role: 'CLIENT',
-      created_at: '',
-    },
-    status: 'ACTIVE',
-    wardrobeCount: 47,
-    lastActivity: 'Active il y a 2 h',
-  },
-  {
-    connectionId: 'mock-2',
-    client: {
-      id: 'mock-2',
-      email: 'marie@example.com',
-      name: 'Marie L.',
-      avatar_url: 'https://i.pravatar.cc/160?img=32',
-      role: 'CLIENT',
-      created_at: '',
-    },
-    status: 'ACTIVE',
-    wardrobeCount: 62,
-    lastActivity: 'Hier',
-  },
-  {
-    connectionId: 'mock-3',
-    client: {
-      id: 'mock-3',
-      email: 'lucie@example.com',
-      name: 'Lucie B.',
-      avatar_url: 'https://i.pravatar.cc/160?img=48',
-      role: 'CLIENT',
-      created_at: '',
-    },
-    status: 'PENDING',
-    wardrobeCount: 0,
-    lastActivity: 'Demande re\u00e7ue il y a 3 j',
-  },
-  {
-    connectionId: 'mock-4',
-    client: {
-      id: 'mock-4',
-      email: 'julie@example.com',
-      name: 'Julie R.',
-      avatar_url: 'https://i.pravatar.cc/160?img=44',
-      role: 'CLIENT',
-      created_at: '',
-    },
-    status: 'ENDED',
-    wardrobeCount: 38,
-    lastActivity: 'Session termin\u00e9e',
-  },
-];
-
 export default function MyClientsPage() {
   const [tab, setTab] = useState<TabKey>('ACTIVE');
   const [search, setSearch] = useState('');
@@ -94,32 +35,32 @@ export default function MyClientsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
     const load = async () => {
-      try {
-        const res = await api.get<StylistClient[]>('/stylists/connections');
-        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-          const mapped: ClientRow[] = res.data
-            .filter((c) => !!c.client)
-            .map((c) => ({
-              connectionId: c.id,
-              client: c.client as User,
-              status: c.status,
-              wardrobeCount: undefined,
-              lastActivity: c.started_at
-                ? `Connect\u00e9e depuis ${new Date(c.started_at).toLocaleDateString('fr-FR')}`
-                : 'Nouvelle demande',
-            }));
-          setRows(mapped);
-        } else {
-          setRows(FALLBACK_CLIENTS);
-        }
-      } catch {
-        setRows(FALLBACK_CLIENTS);
-      } finally {
-        setLoading(false);
+      const res = await api.get<StylistClient[]>('/stylists/connections');
+      if (!mounted) return;
+      if (res.success && Array.isArray(res.data)) {
+        const mapped: ClientRow[] = res.data
+          .filter((c) => !!c.client)
+          .map((c) => ({
+            connectionId: c.id,
+            client: c.client as User,
+            status: c.status,
+            wardrobeCount: undefined,
+            lastActivity: c.started_at
+              ? `Connect\u00e9e depuis ${new Date(c.started_at).toLocaleDateString('fr-FR')}`
+              : 'Nouvelle demande',
+          }));
+        setRows(mapped);
+      } else {
+        setRows([]);
       }
+      setLoading(false);
     };
     load();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const filtered = useMemo(() => {

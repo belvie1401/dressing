@@ -54,6 +54,35 @@ export async function getLookbooks(req: Request, res: Response): Promise<void> {
   }
 }
 
+export async function getStylistPublicLookbooks(req: Request, res: Response): Promise<void> {
+  try {
+    const { stylistId } = req.params as { stylistId: string };
+    const limitRaw = typeof req.query.limit === 'string' ? Number(req.query.limit) : undefined;
+    const take = limitRaw && Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 24) : undefined;
+
+    const lookbooks = await prisma.lookbook.findMany({
+      where: { stylist_id: stylistId, is_public: true },
+      orderBy: { created_at: 'desc' },
+      take,
+      include: {
+        outfits: {
+          include: {
+            outfit: {
+              include: {
+                items: { include: { item: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    res.json({ success: true, data: lookbooks });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Erreur serveur' });
+  }
+}
+
 export async function getLookbook(req: Request, res: Response): Promise<void> {
   try {
     const userId = req.user!.userId;

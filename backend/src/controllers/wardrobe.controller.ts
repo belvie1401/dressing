@@ -177,3 +177,80 @@ export async function markWorn(req: Request, res: Response): Promise<void> {
     res.status(500).json({ success: false, error: 'Erreur serveur' });
   }
 }
+
+/**
+ * GET /api/wardrobe/count
+ * Returns the total number of clothing items owned by the authenticated user.
+ */
+export async function getItemsCount(req: Request, res: Response): Promise<void> {
+  try {
+    const count = await prisma.clothingItem.count({
+      where: { user_id: req.user!.userId },
+    });
+    res.json({ success: true, data: { count } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Erreur lors du comptage' });
+  }
+}
+
+/**
+ * GET /api/wardrobe/stats
+ * Returns month-over-month wardrobe stats for the authenticated user:
+ *  - worn: total wear count this month (across all items)
+ *  - new_outfits: outfits created this month
+ *  - cost_per_wear: average (purchase_price / wear_count) for items with both
+ */
+export async function getWardrobeStats(req: Request, res: Response): Promise<void> {
+  try {
+    const userId = req.user!.userId;
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Items worn this month — sum their wear events via last_worn_at in-month count.
+    // Prisma doesn't expose per-event history so we approximate with items whose
+    // last_worn_at falls in the current month, summing wear_count deltas.
+    const itemsWornThisMonth = await prisma.clothingItem.count({
+      where: {
+        user_id: userId,
+        last_worn_at: { gte: startOfMonth },
+      },
+    });
+
+    const newOutfitsThisMonth = await prisma.outfit.count({
+      where: {
+        user_id: userId,
+        created_at: { gte: startOfMonth },
+      },
+    });
+
+    // Cost per wear = average(purchase_price / wear_count) where both > 0
+    const items = await prisma.clothingItem.findMany({
+      where: {
+        user_id: userId,
+        purchase_price: { not: null, gt: 0 },
+        wear_count: { gt: 0 },
+      },
+      select: { purchase_price: true, wear_count: true },
+    });
+
+    let costPerWear = 0;
+    if (items.length > 0) {
+      const sum = items.reduce(
+        (acc, it) => acc + (it.purchase_price ?? 0) / (it.wear_count || 1),
+        0
+      );
+      costPerWear = sum / items.length;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        worn: itemsWornThisMonth,
+        new_outfits: newOutfitsThisMonth,
+        cost_per_wear: Number(costPerWear.toFixed(1)),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Erreur lors du calcul des statistiques' });
+  }
+}

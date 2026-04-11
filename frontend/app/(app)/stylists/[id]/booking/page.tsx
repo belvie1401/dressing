@@ -1,14 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
+import { api } from '@/lib/api';
+import type { User } from '@/types';
 
 /* ── Duration options ── */
 const durations = [
-  { label: '30 min', price: 49 },
-  { label: '60 min', price: 79 },
-  { label: '90 min', price: 99 },
+  { label: '30 min', price: 49, minutes: 30 },
+  { label: '60 min', price: 79, minutes: 60 },
+  { label: '90 min', price: 99, minutes: 90 },
 ];
 
 /* ── Time slots ── */
@@ -42,6 +45,7 @@ export default function BookingPage() {
   const { id } = useParams<{ id: string }>();
   const today = new Date();
 
+  const [stylist, setStylist] = useState<User | null>(null);
   const [selectedDuration, setSelectedDuration] = useState(1); // index, default 60 min
   const [calMonth, setCalMonth] = useState(today.getMonth());
   const [calYear, setCalYear] = useState(today.getFullYear());
@@ -49,6 +53,23 @@ export default function BookingPage() {
   const [selectedSlot, setSelectedSlot] = useState<string>('15:00');
   const [toast, setToast] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      const res = await api.get<User[]>('/stylists');
+      if (!mounted) return;
+      if (res.success && res.data) {
+        const found = res.data.find((s) => s.id === id);
+        if (found) setStylist(found);
+      }
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [id]);
 
   const calDays = getCalendarDays(calYear, calMonth);
 
@@ -71,55 +92,88 @@ export default function BookingPage() {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!selectedDate || !selectedSlot) {
       setToast('Veuillez s\u00e9lectionner une date et un cr\u00e9neau');
       setTimeout(() => setToast(''), 3000);
       return;
     }
-    setShowConfirm(true);
+    setSubmitting(true);
+    const [hh, mm] = selectedSlot.split(':').map(Number);
+    const dt = new Date(selectedDate);
+    dt.setHours(hh, mm, 0, 0);
+    const res = await api.post('/calendar/book', {
+      stylist_id: id,
+      date: dt.toISOString(),
+      duration_min: dur.minutes,
+      price: dur.price,
+    });
+    setSubmitting(false);
+    if (res.success) {
+      setShowConfirm(true);
+    } else {
+      setToast(res.error || 'Erreur lors de la r\u00e9servation');
+      setTimeout(() => setToast(''), 3000);
+    }
   };
 
   const dur = durations[selectedDuration];
   const formattedDate = selectedDate
     ? `${selectedDate.getDate()} ${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`
     : '';
+  const rating = (stylist?.style_profile as Record<string, unknown> | undefined)?.rating as number | undefined;
+  const reviews = (stylist?.style_profile as Record<string, unknown> | undefined)?.reviews as number | undefined;
 
   return (
     <div className="pb-36">
       {/* Header */}
       <div className="flex items-center gap-3 px-5 pt-4 mb-5">
-        <a
+        <Link
           href={`/stylists/${id}`}
           className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
-        </a>
+        </Link>
         <h1 className="font-serif text-[18px] font-semibold text-[#111111]">R&eacute;server une session</h1>
       </div>
 
       {/* Stylist summary card */}
       <div className="mx-5 mb-6 flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm">
         <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-[#EDE5DC]">
-          <Image
-            src="https://i.pravatar.cc/150?img=32"
-            alt="Camille D."
-            fill
-            className="object-cover"
-            sizes="48px"
-          />
+          {stylist?.avatar_url ? (
+            <Image
+              src={stylist.avatar_url}
+              alt={stylist.name}
+              fill
+              className="object-cover"
+              sizes="48px"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <span className="font-semibold text-[#C6A47E]">
+                {stylist?.name?.charAt(0) ?? ''}
+              </span>
+            </div>
+          )}
         </div>
         <div>
-          <p className="text-[16px] font-bold text-[#111111]">Camille D.</p>
+          <p className="text-[16px] font-bold text-[#111111]">
+            {stylist?.name ?? ''}
+          </p>
           <p className="text-[12px] text-[#8A8A8A]">Styliste</p>
-          <div className="mt-0.5 flex items-center gap-1">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="#C6A47E" stroke="none">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
-            <span className="text-[12px] text-[#C6A47E]">4.9 (120 avis)</span>
-          </div>
+          {rating != null ? (
+            <div className="mt-0.5 flex items-center gap-1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="#C6A47E" stroke="none">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+              <span className="text-[12px] text-[#C6A47E]">
+                {rating}
+                {reviews != null ? ` (${reviews} avis)` : ''}
+              </span>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -226,10 +280,11 @@ export default function BookingPage() {
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#F0EDE8] px-5 py-4" style={{ background: '#F7F5F2' }}>
         <button
           onClick={handleContinue}
-          className="w-full rounded-full py-4 text-base font-semibold text-white"
+          disabled={submitting}
+          className="w-full rounded-full py-4 text-base font-semibold text-white disabled:opacity-60"
           style={{ background: '#D4785C' }}
         >
-          Continuer
+          {submitting ? 'R\u00e9servation...' : 'Continuer'}
         </button>
         <div className="mt-2 flex items-center justify-center gap-1">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -259,7 +314,7 @@ export default function BookingPage() {
             <h2 className="font-serif text-xl font-semibold text-[#111111]">Session confirm&eacute;e !</h2>
             <div className="mt-4 space-y-2 text-sm text-[#8A8A8A]">
               <p>
-                <span className="font-medium text-[#111111]">Styliste :</span> Camille D.
+                <span className="font-medium text-[#111111]">Styliste :</span> {stylist?.name ?? ''}
               </p>
               <p>
                 <span className="font-medium text-[#111111]">Date :</span> {formattedDate}
@@ -274,12 +329,12 @@ export default function BookingPage() {
                 <span className="font-medium text-[#111111]">Prix :</span> {dur.price}&euro;
               </p>
             </div>
-            <a
+            <Link
               href="/messages"
               className="mt-6 inline-block w-full rounded-full bg-[#111111] py-3.5 text-sm font-semibold text-white"
             >
               Acc&eacute;der au chat
-            </a>
+            </Link>
             <button
               onClick={() => setShowConfirm(false)}
               className="mt-2 w-full py-2 text-sm text-[#8A8A8A]"
