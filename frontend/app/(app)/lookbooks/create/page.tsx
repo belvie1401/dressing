@@ -420,7 +420,9 @@ export default function CreateLookbookPage() {
         </section>
 
         {error && (
-          <div className="rounded-2xl bg-red-50 p-3 text-sm text-red-600">{error}</div>
+          <div className="rounded-2xl border border-[#D4785C]/20 bg-[#FFF8F6] px-4 py-3 text-sm text-[#D4785C]">
+            {error}
+          </div>
         )}
       </div>
 

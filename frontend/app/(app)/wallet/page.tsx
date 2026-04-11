@@ -460,7 +460,7 @@ function WithdrawModal({
         )}
 
         {error && (
-          <p className="mt-3 text-xs text-red-500 text-center">{error}</p>
+          <p className="mt-3 text-xs text-[#D4785C] text-center">{error}</p>
         )}
 
         <button

@@ -273,7 +273,7 @@ export default function LookbookDetailPage() {
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="text-sm text-red-400 px-2 disabled:opacity-50"
+            className="text-sm text-[#E53E3E] px-2 disabled:opacity-50"
           >
             {deleting ? 'Suppression...' : 'Supprimer'}
           </button>

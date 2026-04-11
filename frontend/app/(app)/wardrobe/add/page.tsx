@@ -603,7 +603,7 @@ export default function WardrobeAddPage() {
 
       {/* ============ ERROR ============ */}
       {error && (
-        <div className="mt-6 rounded-xl bg-[#FEE2E2] px-4 py-3 text-sm text-[#991B1B]">
+        <div className="mt-6 rounded-xl border border-[#D4785C]/20 bg-[#FFF8F6] px-4 py-3 text-sm text-[#D4785C]">
           {error}
         </div>
       )}
