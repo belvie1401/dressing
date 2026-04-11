@@ -1,297 +1,564 @@
 'use client';
 
-import { useEffect } from 'react';
 import Image from 'next/image';
-import { useAuthStore, useWardrobeStore } from '@/lib/store';
+import Link from 'next/link';
+import { useAuthStore } from '@/lib/store';
 
-const lookCards = [
-  { title: 'Look pour le bureau', pieces: 4, image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&h=560&fit=crop' },
-  { title: 'Look d\u00e9contract\u00e9', pieces: 5, image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=560&fit=crop' },
-  { title: 'Look minimaliste', pieces: 3, image: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&h=560&fit=crop' },
-  { title: 'Look soir\u00e9e', pieces: 4, image: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400&h=560&fit=crop' },
+const LOOK_DU_JOUR_IMAGES = [
+  'https://images.unsplash.com/photo-1551232864-3f0890e580d9?w=200&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=200&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?w=200&h=300&fit=crop',
 ];
 
-const activities = [
-  { type: 'item', text: 'Veste en laine ajout\u00e9e', time: 'Il y a 2 jours', image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=80&h=80&fit=crop' },
-  { type: 'stylist', text: 'Chlo\u00e9 vous a envoy\u00e9 3 looks', time: 'Il y a 3 jours', image: 'https://i.pravatar.cc/80?img=32' },
-  { type: 'fav', text: 'Look soir\u00e9e ajout\u00e9 aux favoris', time: 'Il y a 5 jours', image: null },
+type WeekDay = {
+  label: string;
+  date: number;
+  today: boolean;
+  img: string | null;
+};
+
+const WEEK_DAYS: WeekDay[] = [
+  { label: 'LUN', date: 19, today: false, img: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=120&h=120&fit=crop' },
+  { label: 'MAR', date: 20, today: false, img: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=120&h=120&fit=crop' },
+  { label: 'MER', date: 21, today: true, img: 'https://images.unsplash.com/photo-1520975916090-3105956dac38?w=120&h=120&fit=crop' },
+  { label: 'JEU', date: 22, today: false, img: null },
+  { label: 'VEN', date: 23, today: false, img: null },
+  { label: 'SAM', date: 24, today: false, img: null },
+  { label: 'DIM', date: 25, today: false, img: null },
+];
+
+const LOOKS = [
+  {
+    name: 'Look pour le bureau',
+    pieces: 4,
+    img: 'https://images.unsplash.com/photo-1594938298603-c8148c4b4057?w=300&h=400&fit=crop',
+  },
+  {
+    name: 'Look d\u00e9contract\u00e9',
+    pieces: 5,
+    img: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&h=400&fit=crop',
+  },
+  {
+    name: 'Look minimaliste',
+    pieces: 3,
+    img: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=300&h=400&fit=crop',
+  },
+  {
+    name: 'Look soir\u00e9e',
+    pieces: 4,
+    img: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=300&h=400&fit=crop',
+  },
+];
+
+const STYLIST_AVATARS = [
+  'https://i.pravatar.cc/60?img=32',
+  'https://i.pravatar.cc/60?img=44',
+  'https://i.pravatar.cc/60?img=29',
+];
+
+type Activity = {
+  type: 'message' | 'heart';
+  text: string;
+  time: string;
+  avatar: string | null;
+};
+
+const ACTIVITIES: Activity[] = [
+  {
+    type: 'message',
+    text: 'Chlo\u00e9 vous a envoy\u00e9 3 looks',
+    time: 'Il y a 3 jours',
+    avatar: 'https://i.pravatar.cc/80?img=32',
+  },
+  {
+    type: 'heart',
+    text: 'Look soir\u00e9e ajout\u00e9 aux favoris',
+    time: 'Il y a 5 jours',
+    avatar: null,
+  },
 ];
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
-  const { items, loadItems } = useWardrobeStore();
-
-  useEffect(() => { loadItems(); }, []);
-
   const firstName = user?.name?.split(' ')[0] || 'Camille';
+  const initials = (user?.name || 'Camille').charAt(0).toUpperCase();
 
   return (
-    <div className="pb-24">
-      {/* ===== TOP BAR ===== */}
-      <div className="flex items-center gap-3 px-5 pt-5 mb-8">
-        {/* Search */}
-        <div className="flex flex-1 items-center gap-2 rounded-full bg-white border border-[#EFEFEF] px-4 py-2.5">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-          <span className="text-sm text-[#8A8A8A]">Rechercher (v&ecirc;tements, looks, stylistes...)</span>
-        </div>
-        {/* Bell */}
-        <a href="/messages" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white border border-[#EFEFEF]">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-          </svg>
-        </a>
-        {/* Add button */}
-        <a href="/wardrobe/add" className="hidden sm:flex shrink-0 items-center gap-2 rounded-full bg-[#111111] px-5 py-2.5 text-sm font-medium text-white">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          Ajouter un v&ecirc;tement
-        </a>
-      </div>
+    <div className="min-h-screen bg-[#F7F5F2] pb-24">
+      <div className="mx-auto max-w-md lg:max-w-6xl lg:px-6">
+        <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-x-6 lg:gap-y-5">
 
-      {/* ===== GREETING ===== */}
-      <div className="px-5 mb-8">
-        <h1 className="font-serif text-[32px] text-[#111111] leading-tight">
-          Bonjour {firstName} <span className="inline-block">&#128075;</span>
-        </h1>
-        <p className="mt-1 text-sm text-[#8A8A8A]">
-          Votre dressing, vos stylistes, votre style. Tout est connect&eacute;.
-        </p>
-      </div>
-
-      {/* ===== MAIN GRID (2 columns on desktop) ===== */}
-      <div className="px-5 flex flex-col lg:flex-row gap-6">
-
-        {/* LEFT COLUMN */}
-        <div className="flex-1 min-w-0">
-
-          {/* Quick stats row */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
-            {/* Mon dressing */}
-            <a href="/wardrobe" className="flex items-center justify-between rounded-2xl bg-white p-4 border border-[#EFEFEF]">
-              <div>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="1.5"><path d="M12 2C12 2 8 2 8 6H4l1 14h14l1-14h-4c0-4-4-4-4-4z" /></svg>
-                  <span className="text-xs text-[#8A8A8A]">Mon dressing</span>
-                </div>
-                <p className="text-3xl font-bold text-[#111111]">{items.length || 82}</p>
-                <p className="text-xs text-[#8A8A8A]">v&ecirc;tements</p>
-                <span className="mt-2 inline-flex items-center gap-1 text-xs text-[#8A8A8A]">Voir tout <span>&rarr;</span></span>
+          {/* ===== ROW 1: HEADER ===== */}
+          <header className="flex justify-between items-center px-5 pt-8 pb-4 lg:px-0 lg:col-span-3">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-full overflow-hidden bg-[#EDE5DC] flex items-center justify-center shrink-0">
+                {user?.avatar_url ? (
+                  <Image
+                    src={user.avatar_url}
+                    alt={firstName}
+                    width={44}
+                    height={44}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-[#C6A47E] font-serif text-lg">{initials}</span>
+                )}
               </div>
-              <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl">
-                <Image src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=200&h=260&fit=crop" alt="" fill className="object-cover" sizes="64px" />
+              <div className="flex flex-col">
+                <span className="text-xs text-[#8A8A8A] leading-none">Bonjour,</span>
+                <span className="font-serif text-xl text-[#111111] leading-tight">
+                  {firstName}
+                </span>
               </div>
-            </a>
+            </div>
+            <Link
+              href="/messages"
+              aria-label="Notifications"
+              className="flex items-start gap-0.5 py-1"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#111111"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <span className="w-2 h-2 bg-[#D4785C] rounded-full -mt-0.5" />
+            </Link>
+          </header>
 
-            {/* Mes looks */}
-            <a href="/outfits" className="flex items-center justify-between rounded-2xl bg-white p-4 border border-[#EFEFEF]">
-              <div>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
-                  <span className="text-xs text-[#8A8A8A]">Mes looks</span>
-                </div>
-                <p className="text-3xl font-bold text-[#111111]">24</p>
-                <p className="text-xs text-[#8A8A8A]">cr&eacute;&eacute;s</p>
-                <span className="mt-2 inline-flex items-center gap-1 text-xs text-[#8A8A8A]">Voir tout <span>&rarr;</span></span>
+          {/* ===== ROW 2: WEATHER ===== */}
+          <section className="px-5 mb-5 lg:px-0 lg:mb-0 lg:col-start-3 lg:row-start-2">
+            <div className="bg-white rounded-2xl px-4 py-3 shadow-sm flex justify-between items-center">
+              <div className="flex items-center gap-2 min-w-0">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#C6A47E"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="shrink-0"
+                >
+                  <circle cx="12" cy="12" r="5" />
+                  <line x1="12" y1="1" x2="12" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="23" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                  <line x1="1" y1="12" x2="3" y2="12" />
+                  <line x1="21" y1="12" x2="23" y2="12" />
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+                <span className="font-semibold text-[#111111] text-base">22&deg;</span>
+                <span className="text-sm text-[#8A8A8A] truncate">Marseille</span>
               </div>
-              <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl">
-                <Image src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=200&h=260&fit=crop" alt="" fill className="object-cover" sizes="64px" />
-              </div>
-            </a>
+              <Link
+                href="/outfits"
+                className="font-serif text-sm text-[#111111] shrink-0 ml-2"
+              >
+                Tenue du jour &rarr;
+              </Link>
+            </div>
+          </section>
 
-            {/* Sessions */}
-            <a href="/stylists" className="flex items-center justify-between rounded-2xl bg-white p-4 border border-[#EFEFEF] col-span-2 sm:col-span-1">
-              <div>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>
-                  <span className="text-xs text-[#8A8A8A]">Sessions</span>
-                </div>
-                <p className="text-3xl font-bold text-[#111111]">3</p>
-                <p className="text-xs text-[#8A8A8A]">en cours</p>
-                <span className="mt-2 inline-flex items-center gap-1 text-xs text-[#8A8A8A]">Voir mes sessions <span>&rarr;</span></span>
-              </div>
-              <div className="flex -space-x-2 shrink-0">
-                {[32, 44, 29].map((i) => (
-                  <div key={i} className="relative h-9 w-9 overflow-hidden rounded-full border-2 border-white">
-                    <Image src={`https://i.pravatar.cc/80?img=${i}`} alt="" fill className="object-cover" sizes="36px" />
+          {/* ===== ROW 3: LOOK DU JOUR ===== */}
+          <section className="px-5 mb-5 lg:px-0 lg:mb-0 lg:col-span-2 lg:col-start-1 lg:row-start-2">
+            <div className="flex justify-between items-baseline mb-3">
+              <h2 className="font-serif text-base text-[#111111]">Look du jour</h2>
+              <Link href="/outfits" className="text-xs text-[#8A8A8A]">
+                Modifier &rarr;
+              </Link>
+            </div>
+            <div className="rounded-3xl overflow-hidden h-[200px] bg-[#1a1a1a] relative">
+              <div className="absolute inset-0 flex items-center justify-center gap-3 px-6 pt-4">
+                {LOOK_DU_JOUR_IMAGES.map((src, i) => (
+                  <div
+                    key={i}
+                    className="w-[80px] h-[120px] rounded-xl overflow-hidden flex-shrink-0 bg-[#2a2a2a]"
+                  >
+                    <Image
+                      src={src}
+                      alt={`Pi\u00e8ce ${i + 1}`}
+                      width={80}
+                      height={120}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 ))}
-                <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-[#F0EDE8] text-[10px] font-medium text-[#8A8A8A]">+1</div>
               </div>
-            </a>
-          </div>
-
-          {/* Recommandations pour vous */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-1">
-              <h2 className="font-serif text-xl text-[#111111]">Recommandations pour vous</h2>
-              <a href="/outfits" className="hidden sm:inline-flex items-center gap-1 rounded-full border border-[#EFEFEF] bg-white px-4 py-2 text-xs text-[#111111]">
-                Voir tous les looks
-              </a>
+              <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/80 to-transparent flex justify-between items-end px-4 pb-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-white text-xs font-semibold truncate">
+                    Look Casual Chic
+                  </p>
+                  <span className="inline-block bg-white/20 text-white text-[10px] rounded-full px-2 py-0.5 mt-1 w-fit">
+                    Casual
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="bg-white text-[#111111] text-[10px] font-medium rounded-full px-3 py-1.5 shrink-0 ml-2"
+                >
+                  Porter aujourd&apos;hui
+                </button>
+              </div>
             </div>
-            <p className="text-xs text-[#8A8A8A] mb-4">Des inspirations s&eacute;lectionn&eacute;es par votre styliste</p>
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-              {lookCards.map((look, i) => (
-                <a key={i} href="/outfits" className="group w-[180px] shrink-0">
-                  <div className="relative h-[240px] w-full overflow-hidden rounded-2xl">
-                    <Image src={look.image} alt={look.title} fill className="object-cover" sizes="180px" />
-                    {/* Heart */}
-                    <button className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                      </svg>
-                    </button>
-                    {/* Gradient */}
-                    <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-3">
-                      <p className="text-sm font-semibold text-white">{look.title}</p>
-                      <p className="text-xs text-white/70">{look.pieces} pi&egrave;ces</p>
+          </section>
+
+          {/* ===== ROW 4: CETTE SEMAINE ===== */}
+          <section className="mb-5 lg:mb-0 lg:col-span-2 lg:col-start-1 lg:row-start-3">
+            <div className="flex justify-between items-baseline mb-3 px-5 lg:px-0">
+              <h2 className="font-serif text-base text-[#111111]">Cette semaine</h2>
+              <Link href="/calendar" className="text-xs text-[#8A8A8A]">
+                Agenda &rarr;
+              </Link>
+            </div>
+            <div className="overflow-x-auto scrollbar-hide">
+              <div className="flex gap-2 px-5 lg:px-0">
+                {WEEK_DAYS.map((day) => (
+                  <div
+                    key={`${day.label}-${day.date}`}
+                    className="w-[64px] flex-shrink-0 flex flex-col items-center gap-1"
+                  >
+                    <span className="text-[9px] text-[#8A8A8A] uppercase tracking-wide">
+                      {day.label}
+                    </span>
+                    <div
+                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
+                        day.today
+                          ? 'bg-[#111111] text-white'
+                          : 'bg-transparent text-[#111111]'
+                      }`}
+                    >
+                      {day.date}
                     </div>
+                    {day.img ? (
+                      <div className="w-[52px] h-[52px] rounded-xl overflow-hidden flex-shrink-0">
+                        <Image
+                          src={day.img}
+                          alt=""
+                          width={52}
+                          height={52}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-[52px] h-[52px] rounded-xl flex-shrink-0 border border-dashed border-[#CFCFCF] flex items-center justify-center">
+                        <span className="text-[#CFCFCF] text-base">+</span>
+                      </div>
+                    )}
                   </div>
-                </a>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          </section>
 
-          {/* Bottom row: Inspiration + Défi */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-            {/* Besoin d'inspiration */}
-            <div className="flex items-center justify-between rounded-2xl bg-white p-5 border border-[#EFEFEF]">
-              <div className="flex-1">
-                <h3 className="font-serif text-base text-[#111111] mb-2">Besoin d&apos;inspiration ?</h3>
-                <p className="text-xs text-[#8A8A8A] mb-3 leading-relaxed">
-                  Parlez &agrave; un styliste et recevez des looks adapt&eacute;s &agrave; votre style et &agrave; vos envies.
+          {/* ===== ROW 5: LOOKS CAROUSEL ===== */}
+          <section className="mb-5 lg:mb-0 lg:col-span-2 lg:col-start-1 lg:row-start-4">
+            <div className="flex justify-between items-baseline mb-3 px-5 lg:px-0">
+              <h2 className="font-serif text-base text-[#111111]">Mes looks</h2>
+              <Link href="/outfits" className="text-xs text-[#8A8A8A]">
+                Tout voir &rarr;
+              </Link>
+            </div>
+            <div className="overflow-x-auto scrollbar-hide">
+              <div className="flex gap-3 px-5 lg:px-0">
+                {LOOKS.map((look, i) => (
+                  <Link
+                    key={i}
+                    href="/outfits"
+                    className="w-[140px] flex-shrink-0 rounded-2xl overflow-hidden shadow-sm bg-white"
+                  >
+                    <div className="relative w-full h-[160px] bg-[#EDE5DC]">
+                      <Image
+                        src={look.img}
+                        alt={look.name}
+                        fill
+                        className="object-cover"
+                        sizes="140px"
+                      />
+                    </div>
+                    <div className="p-2.5">
+                      <p className="text-xs font-semibold text-[#111111] truncate">
+                        {look.name}
+                      </p>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <span className="text-[10px] text-[#8A8A8A]">
+                          &middot; {look.pieces} pi&egrave;ces
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ===== ROW 6: TWO CARDS SIDE BY SIDE ===== */}
+          <section className="px-5 mb-5 lg:px-0 lg:mb-0 lg:col-span-2 lg:col-start-1 lg:row-start-5">
+            <div className="grid grid-cols-2 gap-3">
+              {/* Besoin d'inspiration */}
+              <div className="bg-white rounded-3xl p-4 relative overflow-hidden min-h-[160px]">
+                <h3 className="font-serif text-sm text-[#111111] leading-snug">
+                  Besoin d&apos;inspiration ?
+                </h3>
+                <p className="text-[11px] text-[#8A8A8A] mt-2 leading-relaxed">
+                  Parlez &agrave; un styliste et recevez des looks adapt&eacute;s &agrave; votre style.
                 </p>
-                <div className="flex -space-x-2 mb-3">
-                  {[32, 44, 29].map((i) => (
-                    <div key={i} className="relative h-7 w-7 overflow-hidden rounded-full border-2 border-white">
-                      <Image src={`https://i.pravatar.cc/60?img=${i}`} alt="" fill className="object-cover" sizes="28px" />
+                <div className="flex -space-x-2 mt-3">
+                  {STYLIST_AVATARS.map((src, i) => (
+                    <div
+                      key={i}
+                      className="w-7 h-7 rounded-full ring-2 ring-white bg-[#EDE5DC] overflow-hidden"
+                    >
+                      <Image
+                        src={src}
+                        alt=""
+                        width={28}
+                        height={28}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   ))}
                 </div>
-                <a href="/stylists" className="inline-block rounded-full bg-[#111111] px-4 py-2 text-xs font-medium text-white">
+                <Link
+                  href="/stylists"
+                  className="inline-block bg-[#111111] text-white text-[10px] font-medium rounded-full px-3 py-1.5 w-fit mt-3"
+                >
                   Trouver un styliste
-                </a>
+                </Link>
               </div>
-              <div className="relative h-24 w-20 shrink-0 ml-3 overflow-hidden rounded-xl">
-                <Image src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=200&h=260&fit=crop" alt="" fill className="object-cover" sizes="80px" />
-              </div>
-            </div>
 
-            {/* Défi du mois */}
-            <div className="flex items-center justify-between rounded-2xl bg-white p-5 border border-[#EFEFEF]">
-              <div className="flex-1">
-                <h3 className="font-serif text-base text-[#111111] mb-2">D&eacute;fi du mois</h3>
-                <p className="text-xs text-[#8A8A8A] mb-3 leading-relaxed">
+              {/* D\u00e9fi du mois */}
+              <div className="bg-white rounded-3xl p-4 min-h-[160px]">
+                <div className="flex justify-between items-start">
+                  <h3 className="font-serif text-sm text-[#111111]">
+                    D&eacute;fi du mois
+                  </h3>
+                  <div className="w-8 h-8 rounded-full bg-[#C6A47E]/10 p-1.5 flex items-center justify-center shrink-0">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#C6A47E"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polygon points="12 2 15 9 22 9 17 14 18 21 12 17 6 21 7 14 2 9 9 9 12 2" />
+                    </svg>
+                  </div>
+                </div>
+                <p className="text-[11px] text-[#8A8A8A] mt-2 leading-relaxed">
                   Cr&eacute;ez 5 looks avec vos pi&egrave;ces les moins port&eacute;es.
                 </p>
-                {/* Progress bar */}
-                <div className="h-1.5 w-full rounded-full bg-[#F0EDE8] mb-1">
-                  <div className="h-1.5 rounded-full bg-[#111111]" style={{ width: '40%' }} />
+                <div className="bg-[#F0EDE8] rounded-full h-1.5 w-full mt-4">
+                  <div
+                    className="bg-[#111111] rounded-full h-full"
+                    style={{ width: '40%' }}
+                  />
                 </div>
-                <p className="text-xs text-[#8A8A8A]"><span className="font-semibold text-[#111111]">2 / 5</span> looks cr&eacute;&eacute;s</p>
-              </div>
-              <div className="flex h-16 w-16 shrink-0 ml-3 items-center justify-center rounded-2xl bg-[#F0EDE8]">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z" />
-                </svg>
+                <p className="text-[10px] text-[#8A8A8A] mt-2">2 / 5 looks cr&eacute;&eacute;s</p>
               </div>
             </div>
-          </div>
-        </div>
+          </section>
 
-        {/* RIGHT COLUMN (desktop only) */}
-        <div className="hidden lg:flex flex-col gap-6 w-[320px] shrink-0">
-
-          {/* Prochaine session */}
-          <div className="relative overflow-hidden rounded-2xl bg-[#111111] p-5">
-            <p className="text-xs text-[#8A8A8A] mb-1 flex items-center gap-1.5">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              Prochaine session
-            </p>
-            <h3 className="font-serif text-2xl text-white leading-tight">Vendredi 24 mai</h3>
-            <p className="text-sm text-[#CFCFCF] mt-1">16:00 avec Chlo&eacute;</p>
-            <a href="/stylists" className="mt-4 inline-block rounded-full border border-white/30 px-4 py-2 text-xs font-medium text-white">
-              Voir les d&eacute;tails
-            </a>
-            <div className="absolute -right-2 -bottom-2 h-24 w-24 overflow-hidden rounded-full">
-              <Image src="https://i.pravatar.cc/150?img=32" alt="Chlo\u00e9" fill className="object-cover" sizes="96px" />
+          {/* ===== ROW 7: STATS ===== */}
+          <section className="px-5 mb-5 lg:px-0 lg:mb-0 lg:col-start-3 lg:row-start-3">
+            <div className="flex justify-between items-baseline mb-3">
+              <h2 className="font-serif text-base text-[#111111]">
+                Statistiques dressing
+              </h2>
+              <span className="text-xs text-[#8A8A8A]">Ce mois-ci</span>
             </div>
-          </div>
+            <div className="bg-white rounded-3xl p-5">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                {/* Port\u00e9s */}
+                <div>
+                  <div className="w-10 h-10 rounded-full bg-[#F0EDE8] flex items-center justify-center mx-auto">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#111111"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </div>
+                  <p className="font-serif text-2xl text-[#111111] mt-2 leading-none">18</p>
+                  <p className="text-[10px] text-[#8A8A8A] mt-1">port&eacute;s</p>
+                </div>
 
-          {/* Activité récente */}
-          <div className="rounded-2xl bg-white p-5 border border-[#EFEFEF]">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-serif text-base text-[#111111]">Activit&eacute; r&eacute;cente</h3>
-              <a href="/wardrobe" className="text-xs text-[#8A8A8A]">Voir tout</a>
+                {/* Nouveaux looks */}
+                <div>
+                  <div className="w-10 h-10 rounded-full bg-[#F0EDE8] flex items-center justify-center mx-auto">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#111111"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polygon points="12 2 15 9 22 9 17 14 18 21 12 17 6 21 7 14 2 9 9 9 12 2" />
+                    </svg>
+                  </div>
+                  <p className="font-serif text-2xl text-[#111111] mt-2 leading-none">7</p>
+                  <p className="text-[10px] text-[#8A8A8A] mt-1">nouveaux looks</p>
+                </div>
+
+                {/* Co\u00fbt par port */}
+                <div>
+                  <div className="w-10 h-10 rounded-full bg-[#F0EDE8] flex items-center justify-center mx-auto">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#111111"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                  </div>
+                  <p className="font-serif text-2xl text-[#111111] mt-2 leading-none">4,2</p>
+                  <p className="text-[10px] text-[#8A8A8A] mt-1">co&ucirc;t par port</p>
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col gap-4">
-              {activities.map((a, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  {a.type === 'fav' ? (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F0EDE8]">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="#D4785C" stroke="#D4785C" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+          </section>
+
+          {/* ===== ROW 8: ACTIVITY FEED ===== */}
+          <section className="px-5 mb-5 lg:px-0 lg:mb-0 lg:col-start-3 lg:row-start-4">
+            <h2 className="font-serif text-base text-[#111111] mb-3">
+              Activit&eacute; r&eacute;cente
+            </h2>
+            <div className="bg-white rounded-3xl overflow-hidden divide-y divide-[#F7F5F2]">
+              {ACTIVITIES.map((a, i) => (
+                <div key={i} className="px-4 py-3 flex items-center gap-3">
+                  {a.type === 'heart' ? (
+                    <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="#F87171"
+                        stroke="#F87171"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                      </svg>
+                    </div>
+                  ) : a.avatar ? (
+                    <div className="w-9 h-9 rounded-full overflow-hidden shrink-0">
+                      <Image
+                        src={a.avatar}
+                        alt=""
+                        width={36}
+                        height={36}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   ) : (
-                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                      <Image src={a.image!} alt="" fill className="object-cover" sizes="40px" />
+                    <div className="w-9 h-9 rounded-full bg-[#EDE5DC] flex items-center justify-center shrink-0">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#C6A47E"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                      </svg>
                     </div>
                   )}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm text-[#111111] truncate">{a.text}</p>
-                    <p className="text-xs text-[#8A8A8A]">{a.time}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-[#111111] font-medium truncate">
+                      {a.text}
+                    </p>
+                    <p className="text-xs text-[#8A8A8A] mt-0.5">{a.time}</p>
                   </div>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#CFCFCF"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="shrink-0"
+                  >
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
 
-          {/* Statistiques dressing */}
-          <div className="rounded-2xl bg-white p-5 border border-[#EFEFEF]">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-serif text-base text-[#111111]">Statistiques dressing</h3>
-              <span className="text-xs text-[#8A8A8A]">Ce mois-ci</span>
+          {/* ===== ROW 9: UPGRADE BANNER ===== */}
+          <section className="px-5 mb-6 lg:px-0 lg:mb-0 lg:col-start-3 lg:row-start-5">
+            <div className="bg-[#111111] rounded-3xl p-5 flex justify-between items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-serif text-base text-white leading-snug">
+                  Upgradez votre exp&eacute;rience
+                </h3>
+                <p className="text-xs text-[#CFCFCF] mt-2 leading-relaxed">
+                  Acc&eacute;dez &agrave; des fonctionnalit&eacute;s exclusives et collaborez
+                  avec des stylistes experts.
+                </p>
+                <Link
+                  href="/pricing"
+                  className="inline-block text-[#C6A47E] text-sm font-medium mt-4"
+                >
+                  D&eacute;couvrir &rarr;
+                </Link>
+              </div>
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#C6A47E"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="shrink-0 mt-1"
+              >
+                <path d="M12 3l1.9 5.8L20 10l-5.1 3.7L17 20l-5-3.8L7 20l2.1-6.3L4 10l6.1-1.2z" />
+                <path d="M19 3v4" />
+                <path d="M21 5h-4" />
+                <path d="M5 17v2" />
+                <path d="M6 18H4" />
+              </svg>
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="text-center">
-                <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-[#F0EDE8]">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                </div>
-                <p className="text-xl font-bold text-[#111111]">18</p>
-                <p className="text-[10px] text-[#8A8A8A]">port&eacute;s</p>
-              </div>
-              <div className="text-center">
-                <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-[#F0EDE8]">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z" /></svg>
-                </div>
-                <p className="text-xl font-bold text-[#111111]">7</p>
-                <p className="text-[10px] text-[#8A8A8A]">nouveaux looks</p>
-              </div>
-              <div className="text-center">
-                <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-[#F0EDE8]">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                </div>
-                <p className="text-xl font-bold text-[#111111]">4,2</p>
-                <p className="text-[10px] text-[#8A8A8A]">co&ucirc;t par port</p>
-              </div>
-            </div>
-          </div>
+          </section>
 
-          {/* Upgrade CTA */}
-          <div className="rounded-2xl bg-[#111111] p-5">
-            <h3 className="font-serif text-base text-white mb-2">Upgradez votre exp&eacute;rience</h3>
-            <p className="text-xs text-[#CFCFCF] leading-relaxed mb-3">
-              Acc&eacute;dez &agrave; des fonctionnalit&eacute;s exclusives et collaborez avec des stylistes experts.
-            </p>
-            <a href="/pricing" className="inline-flex items-center gap-1 text-sm text-[#C6A47E]">
-              D&eacute;couvrir <span>&rarr;</span>
-            </a>
-          </div>
         </div>
       </div>
     </div>
