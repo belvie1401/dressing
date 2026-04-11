@@ -103,7 +103,9 @@ model ClothingItem {
   id             String    @id @default(cuid())
   user_id        String
   user           User      @relation(fields: [user_id], references: [id])
+  name           String?
   photo_url      String
+  photo_hash     String?
   bg_removed_url String?
   category       Category
   colors         String[]
@@ -119,6 +121,8 @@ model ClothingItem {
   created_at     DateTime  @default(now())
 
   outfit_items OutfitItem[]
+
+  @@index([user_id, photo_hash])
 }
 
 model Outfit {

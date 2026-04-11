@@ -44,7 +44,14 @@ async function request<T>(
     const data = await res.json();
 
     if (!res.ok) {
-      return { success: false, error: data.error || 'Erreur serveur' };
+      // Forward the full response body so callers can read extra fields
+      // (e.g. `existing_item` on a 409 duplicate, `message`, etc.)
+      return {
+        ...data,
+        success: false,
+        error: data.error || 'Erreur serveur',
+        status: res.status,
+      };
     }
 
     return data;

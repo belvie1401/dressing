@@ -257,6 +257,11 @@ ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "referral_count" INTEGER NOT NULL DE
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "free_months_earned" INTEGER NOT NULL DEFAULT 0;
 CREATE UNIQUE INDEX IF NOT EXISTS "User_referral_code_key" ON "User"("referral_code");
 UPDATE "User" SET "referral_code" = 'LIEN-' || UPPER(SUBSTRING("id", 1, 6)) WHERE "referral_code" IS NULL;
+
+-- Clothing item: name + photo dedup
+ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "name" TEXT;
+ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "photo_hash" TEXT;
+CREATE INDEX IF NOT EXISTS "ClothingItem_user_id_photo_hash_idx" ON "ClothingItem"("user_id", "photo_hash");
 `;
 
 // Try multiple connection strategies

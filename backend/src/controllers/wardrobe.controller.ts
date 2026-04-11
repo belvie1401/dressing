@@ -51,7 +51,41 @@ export async function getItem(req: Request, res: Response): Promise<void> {
 
 export async function createItem(req: Request, res: Response): Promise<void> {
   try {
-    const { category, colors, material, season, occasion, brand, purchase_price, purchase_date, ai_tags, remove_bg } = req.body;
+    const {
+      name,
+      category,
+      colors,
+      material,
+      season,
+      occasion,
+      brand,
+      purchase_price,
+      purchase_date,
+      ai_tags,
+      remove_bg,
+      photo_hash,
+      duplicate_confirmed,
+    } = req.body;
+
+    const userId = req.user!.userId;
+
+    // ── Photo deduplication check ──
+    // If the client computed a SHA-256 of the image, reject duplicates
+    // unless the user has confirmed they want to add it anyway.
+    if (photo_hash && duplicate_confirmed !== '1') {
+      const existing = await prisma.clothingItem.findFirst({
+        where: { user_id: userId, photo_hash },
+      });
+      if (existing) {
+        res.status(409).json({
+          success: false,
+          error: 'DUPLICATE',
+          message: 'Ce vêtement existe déjà dans votre dressing',
+          existing_item: existing,
+        });
+        return;
+      }
+    }
 
     let photo_url = '';
     let bg_removed_url: string | undefined;
@@ -75,8 +109,10 @@ export async function createItem(req: Request, res: Response): Promise<void> {
 
     const item = await prisma.clothingItem.create({
       data: {
-        user_id: req.user!.userId,
+        user_id: userId,
+        name: name || null,
         photo_url,
+        photo_hash: photo_hash || null,
         bg_removed_url,
         category: category || 'TOP',
         colors: parsedColors,
@@ -92,6 +128,7 @@ export async function createItem(req: Request, res: Response): Promise<void> {
 
     res.status(201).json({ success: true, data: item });
   } catch (error) {
+    console.error('Create clothing item error:', error);
     res.status(500).json({ success: false, error: 'Erreur lors de l\'ajout du vêtement' });
   }
 }
@@ -108,11 +145,12 @@ export async function updateItem(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const { category, colors, material, season, occasion, brand, purchase_price, purchase_date, ai_tags } = req.body;
+    const { name, category, colors, material, season, occasion, brand, purchase_price, purchase_date, ai_tags } = req.body;
 
     const updated = await prisma.clothingItem.update({
       where: { id },
       data: {
+        ...(name !== undefined && { name: name || null }),
         ...(category && { category }),
         ...(colors && { colors }),
         ...(material !== undefined && { material }),

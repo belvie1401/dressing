@@ -22,16 +22,29 @@ export async function scanClothing(imageBase64: string): Promise<Record<string, 
           },
           {
             type: 'text',
-            text: `Analyze this clothing item photo. Return ONLY a JSON object with no additional text:
+            text: `Tu es un expert styliste. Analyse cette photo de vêtement et retourne UNIQUEMENT un objet JSON (aucun texte supplémentaire, aucun markdown) avec ce schéma exact :
+
 {
+  "name": "string (nom court et descriptif en français, max 4 mots, ex: 'Chemise blanche oversize', 'Jean slim noir', 'Bottines camel')",
   "category": "TOP|BOTTOM|DRESS|JACKET|SHOES|ACCESSORY",
-  "primary_color": "string",
-  "secondary_colors": ["string"],
-  "material_guess": "string",
-  "occasion_tags": ["CASUAL|WORK|EVENING|SPORT"],
-  "season_tags": ["SUMMER|WINTER|ALL"],
-  "style_tags": ["string"]
-}`,
+  "primary_color": "string (UNE couleur en français parmi: Blanc, Noir, Gris, Beige, Marron, Rouge, Rose, Orange, Jaune, Vert, Bleu, Bleu marine, Violet, Camel, Kaki, Multicolore)",
+  "colors": ["string (mêmes valeurs que primary_color, inclure primary_color en première position)"],
+  "color_hexes": ["string (code hex #RRGGBB correspondant à chaque couleur)"],
+  "material": "string (matière détectée en français, ex: Coton, Lin, Laine, Cuir, Jean, Soie, Polyester, Cachemire — une seule valeur)",
+  "season": "SUMMER|WINTER|ALL (ALL = toutes saisons ou mi-saison)",
+  "occasion": "CASUAL|WORK|EVENING|SPORT",
+  "brand": "string ou null (marque visible sur l'étiquette/logo si identifiable, sinon null)",
+  "style_tags": ["string (3-5 tags de style en français, ex: 'minimaliste', 'chic', 'décontracté')"],
+  "confidence": 0
+}
+
+Règles strictes :
+- "confidence" = nombre entre 0 et 100 représentant ta certitude globale
+- Toujours choisir UNE seule valeur pour category/season/occasion
+- "colors" doit contenir au minimum primary_color
+- "color_hexes" doit avoir exactement la même longueur que "colors"
+- Si tu ne peux pas identifier la marque avec certitude, mets null
+- Réponds UNIQUEMENT avec le JSON, rien d'autre.`,
           },
         ],
       },
@@ -43,7 +56,9 @@ export async function scanClothing(imageBase64: string): Promise<Record<string, 
     throw new Error('No text response from AI');
   }
 
-  return JSON.parse(textBlock.text);
+  // Strip potential markdown fences just in case
+  const raw = textBlock.text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+  return JSON.parse(raw);
 }
 
 export async function generateOutfits(

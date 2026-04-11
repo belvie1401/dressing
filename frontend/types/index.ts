@@ -28,7 +28,9 @@ export interface User {
 export interface ClothingItem {
   id: string;
   user_id: string;
+  name?: string | null;
   photo_url: string;
+  photo_hash?: string | null;
   bg_removed_url?: string;
   category: Category;
   colors: string[];
