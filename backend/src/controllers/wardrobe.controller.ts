@@ -89,7 +89,23 @@ function getUploadedFile(
 
 export async function getItems(req: Request, res: Response): Promise<void> {
   try {
-    const { category, season, occasion, color } = req.query;
+    const { category, season, occasion, color, search, limit } = req.query;
+
+    const take = limit ? Math.max(1, Math.min(100, Number(limit))) : undefined;
+
+    // Build full-text-ish search across the user's wardrobe.
+    // Prisma string `contains` with `mode: 'insensitive'` is supported on Postgres.
+    const q = typeof search === 'string' ? search.trim() : '';
+    const searchFilter = q
+      ? {
+          OR: [
+            { name: { contains: q, mode: 'insensitive' as const } },
+            { brand: { contains: q, mode: 'insensitive' as const } },
+            { material: { contains: q, mode: 'insensitive' as const } },
+            { colors: { has: q.toLowerCase() } },
+          ],
+        }
+      : {};
 
     const items = await prisma.clothingItem.findMany({
       where: {
@@ -98,8 +114,10 @@ export async function getItems(req: Request, res: Response): Promise<void> {
         ...(season && { season: season as any }),
         ...(occasion && { occasion: occasion as any }),
         ...(color && { colors: { has: color as string } }),
+        ...searchFilter,
       },
       orderBy: { created_at: 'desc' },
+      ...(take ? { take } : {}),
     });
 
     res.json({ success: true, data: items });

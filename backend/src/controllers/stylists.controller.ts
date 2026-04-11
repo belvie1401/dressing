@@ -11,8 +11,22 @@ function stripSensitiveProfile(
 
 export async function listStylists(req: Request, res: Response): Promise<void> {
   try {
+    const { search, limit } = req.query;
+    const take = limit ? Math.max(1, Math.min(100, Number(limit))) : undefined;
+    const q = typeof search === 'string' ? search.trim() : '';
+
+    const searchFilter = q
+      ? {
+          OR: [
+            { name: { contains: q, mode: 'insensitive' as const } },
+            { email: { contains: q, mode: 'insensitive' as const } },
+            { location: { contains: q, mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
+
     const stylists = await prisma.user.findMany({
-      where: { role: 'STYLIST' },
+      where: { role: 'STYLIST', ...searchFilter },
       select: {
         id: true,
         name: true,
@@ -21,6 +35,7 @@ export async function listStylists(req: Request, res: Response): Promise<void> {
         style_profile: true,
         location: true,
       },
+      ...(take ? { take } : {}),
     });
 
     const safe = stylists.map((s) => ({
@@ -565,6 +580,100 @@ export async function getMyPublicStats(req: Request, res: Response): Promise<voi
     });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Erreur serveur' });
+  }
+}
+
+/**
+ * GET /api/stylists/search?q=...
+ * Search across this stylist's ACTIVE clients (name + location) and their
+ * wardrobe items (item name, brand). Returns a small grouped result set.
+ */
+export async function searchStylistScope(req: Request, res: Response): Promise<void> {
+  try {
+    if (req.user!.role !== 'STYLIST') {
+      res.status(403).json({ success: false, error: 'Réservé aux stylistes' });
+      return;
+    }
+
+    const stylistId = req.user!.userId;
+    const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+
+    if (!q || q.length < 2) {
+      res.json({ success: true, data: { clients: [], items: [] } });
+      return;
+    }
+
+    // Active client IDs for this stylist
+    const connections = await prisma.stylistClient.findMany({
+      where: { stylist_id: stylistId, status: 'ACTIVE' },
+      select: { client_id: true },
+    });
+    const clientIds = connections.map((c) => c.client_id);
+
+    if (clientIds.length === 0) {
+      res.json({ success: true, data: { clients: [], items: [] } });
+      return;
+    }
+
+    const [clients, items] = await Promise.all([
+      prisma.user.findMany({
+        where: {
+          id: { in: clientIds },
+          OR: [
+            { name: { contains: q, mode: 'insensitive' } },
+            { email: { contains: q, mode: 'insensitive' } },
+            { location: { contains: q, mode: 'insensitive' } },
+          ],
+        },
+        select: {
+          id: true,
+          name: true,
+          avatar_url: true,
+          email: true,
+          location: true,
+        },
+        take: 8,
+      }),
+      prisma.clothingItem.findMany({
+        where: {
+          user_id: { in: clientIds },
+          OR: [
+            { name: { contains: q, mode: 'insensitive' } },
+            { brand: { contains: q, mode: 'insensitive' } },
+          ],
+        },
+        select: {
+          id: true,
+          user_id: true,
+          name: true,
+          brand: true,
+          category: true,
+          photo_url: true,
+          bg_removed_url: true,
+        },
+        take: 8,
+        orderBy: { created_at: 'desc' },
+      }),
+    ]);
+
+    // Hydrate item.client name so the dropdown can show it
+    const ownerMap = new Map(clientIds.map((id) => [id, '']));
+    if (items.length > 0) {
+      const owners = await prisma.user.findMany({
+        where: { id: { in: items.map((i) => i.user_id) } },
+        select: { id: true, name: true },
+      });
+      for (const o of owners) ownerMap.set(o.id, o.name);
+    }
+
+    const itemsHydrated = items.map((i) => ({
+      ...i,
+      client_name: ownerMap.get(i.user_id) || '',
+    }));
+
+    res.json({ success: true, data: { clients, items: itemsHydrated } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Erreur lors de la recherche' });
   }
 }
 

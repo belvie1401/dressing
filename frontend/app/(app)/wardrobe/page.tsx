@@ -11,6 +11,13 @@ const categoryLabels: Record<string, string> = {
   TOP: 'Haut', BOTTOM: 'Bas', DRESS: 'Robe', JACKET: 'Veste', SHOES: 'Chaussures', ACCESSORY: 'Accessoire',
 };
 
+const occasionLabels: Record<string, string> = {
+  CASUAL: 'décontracté',
+  WORK: 'travail',
+  EVENING: 'soirée',
+  SPORT: 'sport',
+};
+
 type WardrobeTab = 'clothes' | 'looks' | 'favorites';
 
 const TABS: Array<{ key: WardrobeTab; label: string }> = [
@@ -40,13 +47,18 @@ export default function WardrobePage() {
     setTimeout(() => setToast(''), 2500);
   };
 
+  const trimmedSearch = search.trim();
+  const hasSearch = trimmedSearch.length > 0;
+
   const filteredItems = items.filter((item) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
+    if (!hasSearch) return true;
+    const q = trimmedSearch.toLowerCase();
     return (
       item.name?.toLowerCase().includes(q) ||
       item.brand?.toLowerCase().includes(q) ||
+      item.material?.toLowerCase().includes(q) ||
       categoryLabels[item.category]?.toLowerCase().includes(q) ||
+      occasionLabels[item.occasion]?.toLowerCase().includes(q) ||
       item.colors.some((c) => c.toLowerCase().includes(q))
     );
   });
@@ -112,6 +124,17 @@ export default function WardrobePage() {
               placeholder="Rechercher..."
               className="flex-1 bg-transparent text-sm text-[#111111] placeholder-[#8A8A8A] outline-none"
             />
+            {hasSearch ? (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="flex cursor-pointer items-center gap-1 rounded-full px-2 py-0.5 text-xs text-[#8A8A8A] transition-colors hover:bg-white hover:text-[#111111]"
+                aria-label="Effacer la recherche"
+              >
+                <span aria-hidden="true">&times;</span>
+                Effacer
+              </button>
+            ) : null}
           </div>
           <button
             type="button"
@@ -140,7 +163,40 @@ export default function WardrobePage() {
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#111111] border-t-transparent" />
           </div>
         ) : tab === 'clothes' ? (
-          filteredItems.length === 0 ? (
+          hasSearch ? (
+            // ─── SEARCH MODE ───────────────────────────────────────────
+            filteredItems.length === 0 ? (
+              <div className="flex flex-col items-center py-16 text-center">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#EDE5DC]">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </div>
+                <p className="font-serif text-base text-[#111111] mt-3">
+                  Aucun résultat pour &laquo;{trimmedSearch}&raquo;
+                </p>
+                <p className="text-xs text-[#8A8A8A] mt-1">Essayez un autre mot-clé</p>
+              </div>
+            ) : (
+              <>
+                <p className="px-4 py-2 text-xs text-[#8A8A8A]">
+                  {filteredItems.length} résultat{filteredItems.length > 1 ? 's' : ''} pour &laquo;{trimmedSearch}&raquo;
+                </p>
+                <div className="grid grid-cols-3 gap-3">
+                  {filteredItems.map((item) => (
+                    <ClothingCard
+                      key={item.id}
+                      item={item}
+                      onToast={showToast}
+                      searchQuery={trimmedSearch}
+                    />
+                  ))}
+                </div>
+              </>
+            )
+          ) : items.length === 0 ? (
+            // ─── EMPTY DRESSING ────────────────────────────────────────
             <div className="flex flex-col items-center py-16 text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#EDE5DC]">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="1.5">
@@ -158,6 +214,7 @@ export default function WardrobePage() {
               </a>
             </div>
           ) : (
+            // ─── DEFAULT GRID + ADD BUTTON ─────────────────────────────
             <>
               <div className="grid grid-cols-3 gap-3">
                 {filteredItems.map((item) => (

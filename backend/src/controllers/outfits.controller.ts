@@ -3,7 +3,7 @@ import prisma from '../lib/prisma';
 
 export async function getOutfits(req: Request, res: Response): Promise<void> {
   try {
-    const { occasion, season, limit, sort } = req.query;
+    const { occasion, season, limit, sort, search } = req.query;
 
     const take = limit ? Math.max(1, Math.min(100, Number(limit))) : undefined;
 
@@ -13,11 +13,17 @@ export async function getOutfits(req: Request, res: Response): Promise<void> {
         ? ({ worn_count: 'desc' } as const)
         : ({ created_at: 'desc' } as const);
 
+    const q = typeof search === 'string' ? search.trim() : '';
+    const searchFilter = q
+      ? { name: { contains: q, mode: 'insensitive' as const } }
+      : {};
+
     const outfits = await prisma.outfit.findMany({
       where: {
         user_id: req.user!.userId,
         ...(occasion && { occasion: occasion as any }),
         ...(season && { season: season as any }),
+        ...searchFilter,
       },
       include: {
         items: {

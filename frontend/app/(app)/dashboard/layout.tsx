@@ -11,6 +11,7 @@ import RoleSwitcher from '@/components/ui/RoleSwitcher';
 import ShareModal from '@/components/ui/ShareModal';
 import BottomNav from '@/components/ui/BottomNav';
 import NotificationBell from '@/components/ui/NotificationBell';
+import { useGlobalSearch } from '@/components/ui/GlobalSearch';
 
 // ============ SIDEBAR NAV ITEMS ============
 type NavItem = {
@@ -371,20 +372,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </svg>
           </button>
 
-          <div className="hidden max-w-[540px] flex-1 items-center gap-3 rounded-full border border-[#EFEFEF] bg-white px-5 py-3 shadow-sm lg:flex">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Rechercher (vêtements, looks, stylistes...)"
-              className="flex-1 bg-transparent text-sm text-[#111111] outline-none placeholder:text-[#8A8A8A]"
-            />
-            <span className="flex items-center gap-1 rounded-md border border-[#EFEFEF] bg-[#F7F5F2] px-2 py-0.5 text-[10px] font-medium text-[#8A8A8A]">
-              &#8984; K
-            </span>
-          </div>
+          <SearchTrigger />
 
           <div className="flex-1 lg:hidden" />
 
@@ -755,5 +743,31 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       {showShare && <ShareModal onClose={() => setShowShare(false)} />}
     </div>
+  );
+}
+
+// ─── Top-bar search trigger ───────────────────────────────────────────────
+// A button styled like the previous input that opens the global search modal.
+// ⌘K still works because the provider has a window-level listener.
+function SearchTrigger() {
+  const { open } = useGlobalSearch();
+  return (
+    <button
+      type="button"
+      onClick={open}
+      aria-label="Ouvrir la recherche"
+      className="hidden max-w-[540px] flex-1 cursor-pointer items-center gap-3 rounded-full border border-[#EFEFEF] bg-white px-5 py-3 text-left shadow-sm transition-colors hover:bg-[#F7F5F2] lg:flex"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+      <span className="flex-1 text-sm text-[#8A8A8A]">
+        Rechercher (v&ecirc;tements, looks, stylistes...)
+      </span>
+      <span className="flex items-center gap-1 rounded-md border border-[#EFEFEF] bg-[#F7F5F2] px-2 py-0.5 text-[10px] font-medium text-[#8A8A8A]">
+        &#8984; K
+      </span>
+    </button>
   );
 }

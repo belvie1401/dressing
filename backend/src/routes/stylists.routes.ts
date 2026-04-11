@@ -15,6 +15,7 @@ import {
   getStylistObjectives,
   getMyReviews,
   getMyPublicStats,
+  searchStylistScope,
 } from '../controllers/stylists.controller';
 import { authenticate } from '../middleware/auth.middleware';
 
@@ -23,6 +24,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/', listStylists);
+router.get('/search', searchStylistScope);
 router.get('/connections', getConnections);
 router.get('/stats', getStylistStats);
 router.get('/clients', getStylistClients);

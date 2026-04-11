@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { ClothingItem } from '@/types';
 import { api } from '@/lib/api';
 import { useWardrobeStore } from '@/lib/store';
+import { highlight } from '@/lib/highlight';
 
 const categoryAbbrev: Record<string, string> = {
   TOP: 'Haut',
@@ -18,6 +19,8 @@ const categoryAbbrev: Record<string, string> = {
 interface ClothingCardProps {
   item: ClothingItem;
   onToast?: (msg: string) => void;
+  /** When set, matches inside the card name are wrapped in <mark>. */
+  searchQuery?: string;
 }
 
 /**
@@ -29,7 +32,7 @@ interface ClothingCardProps {
  *    (40px threshold) without triggering navigation
  *  - Desktop hover reveals a quick-action bar (Voir / Favori / Porter)
  */
-export default function ClothingCard({ item, onToast }: ClothingCardProps) {
+export default function ClothingCard({ item, onToast, searchQuery }: ClothingCardProps) {
   const router = useRouter();
   const markWornInStore = useWardrobeStore((s) => s.markWorn);
 
@@ -225,7 +228,9 @@ export default function ClothingCard({ item, onToast }: ClothingCardProps) {
 
       {/* Bottom info overlay (hidden on hover to reveal action bar) */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/50 to-transparent p-2.5 pb-3 transition-opacity duration-200 group-hover:opacity-0">
-        <p className="truncate text-xs font-medium text-white">{displayName}</p>
+        <p className="truncate text-xs font-medium text-white">
+          {searchQuery ? highlight(displayName, searchQuery) : displayName}
+        </p>
         <div className="mt-0.5 flex items-center gap-1">
           <span
             className={`h-1.5 w-1.5 rounded-full ${

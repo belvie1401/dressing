@@ -10,6 +10,7 @@ import RoleSwitcher from '@/components/ui/RoleSwitcher';
 import ShareModal from '@/components/ui/ShareModal';
 import BottomNav from '@/components/ui/BottomNav';
 import NotificationBell from '@/components/ui/NotificationBell';
+import StylistScopedSearch from '@/components/ui/StylistScopedSearch';
 
 type NavItem = {
   href: string;
@@ -262,32 +263,7 @@ export default function StylistDashboardLayout({ children }: { children: ReactNo
             </svg>
           </button>
 
-          <div className="hidden flex-1 max-w-md md:block">
-            <label className="relative block">
-              <svg
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#8A8A8A"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Rechercher une cliente, un vêtement..."
-                className="w-full rounded-full bg-[#F7F5F2] py-2 pl-9 pr-16 text-sm text-[#111111] placeholder:text-[#8A8A8A] outline-none focus:ring-1 focus:ring-[#111111]/10"
-              />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded border border-[#EFEFEF] bg-white px-1.5 py-0.5 font-mono text-[10px] text-[#8A8A8A]">
-                &#8984; K
-              </span>
-            </label>
-          </div>
+          <StylistScopedSearch />
 
           <div className="ml-auto flex items-center gap-2 md:ml-4">
             <button

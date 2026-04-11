@@ -6,6 +6,7 @@ import { useAuthStore } from '@/lib/store';
 import { connectSocket, disconnectSocket } from '@/lib/socket';
 import BottomNav from '@/components/ui/BottomNav';
 import Sidebar from '@/components/ui/Sidebar';
+import { GlobalSearchProvider } from '@/components/ui/GlobalSearch';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, token, _hasHydrated, loadUser } = useAuthStore();
@@ -76,7 +77,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // /dashboard and /stylist-dashboard have their own dedicated layouts
   // (sidebar + main + right panel/top bar + mobile nav fallback)
   if (pathname === '/dashboard' || pathname === '/stylist-dashboard') {
-    return <>{children}</>;
+    return <GlobalSearchProvider>{children}</GlobalSearchProvider>;
   }
 
   // Other stylist-facing routes reuse the client shell but skip the mobile bottom nav
@@ -89,17 +90,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     pathname?.startsWith('/lookbooks');
 
   return (
-    <div className="flex min-h-screen" style={{ background: 'var(--color-app-bg)' }}>
-      {/* Desktop sidebar — hidden on mobile */}
-      <Sidebar />
+    <GlobalSearchProvider>
+      <div className="flex min-h-screen" style={{ background: 'var(--color-app-bg)' }}>
+        {/* Desktop sidebar — hidden on mobile */}
+        <Sidebar />
 
-      {/* Main content */}
-      <main className="flex-1 min-w-0 pb-24 lg:pb-8">
-        {children}
-      </main>
+        {/* Main content */}
+        <main className="flex-1 min-w-0 pb-24 lg:pb-8">
+          {children}
+        </main>
 
-      {/* Mobile bottom nav — hidden on desktop; skipped entirely on stylist desktop routes */}
-      {!isStylistRoute && <BottomNav />}
-    </div>
+        {/* Mobile bottom nav — hidden on desktop; skipped entirely on stylist desktop routes */}
+        {!isStylistRoute && <BottomNav />}
+      </div>
+    </GlobalSearchProvider>
   );
 }
