@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     rootDir: backend
-    buildCommand: npm install && npm run build
+    buildCommand: npm install && npm run build && npm run db:push
     startCommand: npm start
     envVars:
       # Neon pooled URL (PgBouncer) — set in dashboard
@@ -21,3 +21,13 @@ services:
         value: production
       - key: PORT
         value: 4000
+      # Cloudinary (photo upload + background removal) — set in dashboard
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      # Anthropic (AI clothing scan) — set in dashboard
+      - key: ANTHROPIC_API_KEY
+        sync: false
