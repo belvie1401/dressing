@@ -95,8 +95,56 @@ function readDataUrl(file: File): Promise<string> {
   });
 }
 
-function fileToBase64(file: File): Promise<string> {
-  return readDataUrl(file).then((dataUrl) => dataUrl.split(',')[1] ?? '');
+/**
+ * Compress + transcode a user-supplied image to a small JPEG and return its
+ * base64 payload (without the data: prefix). Used for the AI scan call so the
+ * request body stays well under the Express JSON limit and the server-side
+ * `media_type: 'image/jpeg'` matches the actual bytes — even for source PNGs
+ * or HEIC files.
+ */
+async function compressImageToBase64(
+  file: File,
+  maxDim = 1024,
+  quality = 0.85
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new window.Image();
+    img.onload = () => {
+      try {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width >= height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Canvas non disponible'));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl.split(',')[1] ?? '');
+      } catch (err) {
+        reject(err);
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Image illisible'));
+    };
+    img.src = objectUrl;
+  });
 }
 
 function normalizeColor(raw: string): string | null {
@@ -182,67 +230,91 @@ export default function BulkUploadFlow() {
     setError(null);
   };
 
+  // ─── Per-photo AI scan (used by both the loop and single-item retry) ─────
+  const analyzeOne = useCallback(async (photoId: string): Promise<boolean> => {
+    setPhotos((prev) =>
+      prev.map((p) => (p.id === photoId ? { ...p, status: 'analyzing' } : p))
+    );
+
+    // Snapshot the current file from the latest state to avoid stale closures
+    const currentFile = await new Promise<File | null>((resolve) => {
+      setPhotos((prev) => {
+        const found = prev.find((p) => p.id === photoId);
+        resolve(found?.file ?? null);
+        return prev;
+      });
+    });
+    if (!currentFile) return false;
+
+    try {
+      // Compress + transcode to JPEG so the payload stays small AND matches
+      // the hardcoded media_type the backend AI service sends to Anthropic.
+      const base64 = await compressImageToBase64(currentFile);
+      const res = await api.post<AIScan>('/ai/scan-clothing', {
+        image_base64: base64,
+      });
+
+      if (res.success && res.data) {
+        const ai = res.data;
+        const aiColors = (ai.colors ?? (ai.primary_color ? [ai.primary_color] : []))
+          .filter((c): c is string => typeof c === 'string')
+          .map(normalizeColor)
+          .filter((c): c is string => c !== null);
+
+        setPhotos((prev) =>
+          prev.map((p) =>
+            p.id === photoId
+              ? {
+                  ...p,
+                  status: 'done',
+                  ai,
+                  name: ai.name ?? p.name,
+                  category: ai.category ?? p.category,
+                  colors: aiColors.length > 0 ? Array.from(new Set(aiColors)) : p.colors,
+                  material: ai.material ?? p.material,
+                  season: ai.season ?? p.season,
+                  occasion: ai.occasion ?? p.occasion,
+                  brand: ai.brand ?? p.brand,
+                }
+              : p
+          )
+        );
+        return true;
+      }
+
+      setPhotos((prev) =>
+        prev.map((p) => (p.id === photoId ? { ...p, status: 'error' } : p))
+      );
+      return false;
+    } catch {
+      setPhotos((prev) =>
+        prev.map((p) => (p.id === photoId ? { ...p, status: 'error' } : p))
+      );
+      return false;
+    }
+  }, []);
+
   // ─── Analysis loop ───────────────────────────────────────────────────────
   const startAnalysis = async () => {
     if (photos.length === 0) return;
     setPhase('analyzing');
     setError(null);
 
-    for (let i = 0; i < photos.length; i++) {
+    // Snapshot ids up-front so removing a photo mid-loop doesn't shift indexes
+    const ids = photos.map((p) => p.id);
+    for (let i = 0; i < ids.length; i++) {
       setAnalyzeIndex(i);
-      const photo = photos[i];
-
-      setPhotos((prev) =>
-        prev.map((p, idx) => (idx === i ? { ...p, status: 'analyzing' } : p))
-      );
-
-      try {
-        const base64 = await fileToBase64(photo.file);
-        const res = await api.post<AIScan>('/ai/scan-clothing', {
-          image_base64: base64,
-        });
-
-        if (res.success && res.data) {
-          const ai = res.data;
-          const aiColors = (ai.colors ?? (ai.primary_color ? [ai.primary_color] : []))
-            .filter((c): c is string => typeof c === 'string')
-            .map(normalizeColor)
-            .filter((c): c is string => c !== null);
-
-          setPhotos((prev) =>
-            prev.map((p, idx) =>
-              idx === i
-                ? {
-                    ...p,
-                    status: 'done',
-                    ai,
-                    name: ai.name ?? p.name,
-                    category: ai.category ?? p.category,
-                    colors: aiColors.length > 0 ? Array.from(new Set(aiColors)) : p.colors,
-                    material: ai.material ?? p.material,
-                    season: ai.season ?? p.season,
-                    occasion: ai.occasion ?? p.occasion,
-                    brand: ai.brand ?? p.brand,
-                  }
-                : p
-            )
-          );
-        } else {
-          setPhotos((prev) =>
-            prev.map((p, idx) => (idx === i ? { ...p, status: 'error' } : p))
-          );
-        }
-      } catch {
-        setPhotos((prev) =>
-          prev.map((p, idx) => (idx === i ? { ...p, status: 'error' } : p))
-        );
-      }
-
+      await analyzeOne(ids[i]);
       // Small delay between requests
       await new Promise((r) => setTimeout(r, ANALYSIS_DELAY_MS));
     }
 
     setPhase('review');
+  };
+
+  // ─── Retry a single failed item from the review screen ──────────────────
+  const retryOne = async (id: string) => {
+    await analyzeOne(id);
   };
 
   // ─── Review-screen edits ─────────────────────────────────────────────────
@@ -320,10 +392,20 @@ export default function BulkUploadFlow() {
     }
   };
 
+  // ─── Retry every failed item at once ─────────────────────────────────────
+  const retryAllErrors = async () => {
+    const erroredIds = photos.filter((p) => p.status === 'error').map((p) => p.id);
+    for (const id of erroredIds) {
+      await analyzeOne(id);
+      await new Promise((r) => setTimeout(r, ANALYSIS_DELAY_MS));
+    }
+  };
+
   // ─────────────────────────────────────────────────────────────────────────
   // RENDER
   // ─────────────────────────────────────────────────────────────────────────
   const eligibleCount = photos.filter((p) => p.status !== 'error').length;
+  const errorCount = photos.filter((p) => p.status === 'error').length;
 
   return (
     <div className="pb-32">
@@ -579,6 +661,45 @@ export default function BulkUploadFlow() {
             </p>
           </div>
 
+          {/* Errors banner — visible only if at least one photo failed analysis */}
+          {errorCount > 0 && (
+            <div className="mb-3 flex items-start gap-3 rounded-2xl border border-[#D4785C]/20 bg-[#FFF8F6] p-3">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#D4785C"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mt-0.5 flex-shrink-0"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-[#D4785C]">
+                  {errorCount} photo{errorCount > 1 ? 's' : ''} n&rsquo;
+                  {errorCount > 1 ? 'ont' : 'a'} pas pu être analysée
+                  {errorCount > 1 ? 's' : ''}
+                </p>
+                <p className="mt-0.5 text-[11px] text-[#8A8A8A]">
+                  Vérifiez votre connexion puis réessayez. Vous pouvez aussi retirer
+                  ces photos pour continuer.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={retryAllErrors}
+                className="flex-shrink-0 cursor-pointer rounded-full bg-[#D4785C] px-3 py-1.5 text-[11px] font-semibold text-white"
+              >
+                Tout réessayer
+              </button>
+            </div>
+          )}
+
           {photos.map((photo) => {
             const expanded = expandedId === photo.id;
             const errored = photo.status === 'error';
@@ -631,7 +752,59 @@ export default function BulkUploadFlow() {
                   {/* Right cluster */}
                   <div className="ml-2 flex items-center gap-2">
                     {errored ? (
-                      <span className="text-xs text-[#D4785C]">Erreur</span>
+                      photo.status === 'analyzing' ? (
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#D4785C"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          className="animate-spin"
+                        >
+                          <circle cx="12" cy="12" r="10" opacity="0.3" />
+                          <path d="M22 12a10 10 0 0 1-10 10" />
+                        </svg>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            retryOne(photo.id);
+                          }}
+                          className="flex cursor-pointer items-center gap-1 rounded-full bg-[#D4785C] px-2.5 py-1 text-[10px] font-semibold text-white"
+                        >
+                          <svg
+                            width="11"
+                            height="11"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="23 4 23 10 17 10" />
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                          </svg>
+                          Réessayer
+                        </button>
+                      )
+                    ) : photo.status === 'analyzing' ? (
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#8A8A8A"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        className="animate-spin"
+                      >
+                        <circle cx="12" cy="12" r="10" opacity="0.3" />
+                        <path d="M22 12a10 10 0 0 1-10 10" />
+                      </svg>
                     ) : (
                       <svg
                         width="16"
