@@ -196,3 +196,31 @@ export interface ApiResponse<T> {
   data?: T;
   error?: string;
 }
+
+// Wallet
+export type TransactionStatus = 'PENDING' | 'COMPLETED' | 'REFUNDED' | 'WITHDRAWN';
+
+export interface Wallet {
+  balance: number;
+  pending_balance: number;
+  total_earned: number;
+  this_month: number;
+  stripe_account_id?: string | null;
+  platform_fee_percent: number;
+}
+
+export interface Transaction {
+  id: string;
+  stylist_id: string;
+  client_id?: string | null;
+  session_id?: string | null;
+  gross_amount: number;
+  platform_fee: number;
+  net_amount: number;
+  status: TransactionStatus;
+  stripe_payment_intent_id?: string | null;
+  description?: string | null;
+  created_at: string;
+  completed_at?: string | null;
+  client?: { id: string; name: string; avatar_url?: string | null } | null;
+}

@@ -208,6 +208,42 @@ ALTER TABLE "Lookbook" ADD COLUMN IF NOT EXISTS "after_photos" TEXT[] DEFAULT '{
 ALTER TABLE "Lookbook" ADD COLUMN IF NOT EXISTS "tags" TEXT[] DEFAULT '{}';
 ALTER TABLE "Lookbook" ADD COLUMN IF NOT EXISTS "is_public" BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE "Lookbook" ADD COLUMN IF NOT EXISTS "favorite_count" INTEGER NOT NULL DEFAULT 0;
+
+-- Wallet + Transactions
+DO $$ BEGIN CREATE TYPE "TransactionStatus" AS ENUM ('PENDING', 'COMPLETED', 'REFUNDED', 'WITHDRAWN'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+CREATE TABLE IF NOT EXISTS "StylistWallet" (
+  "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
+  "stylist_id" TEXT NOT NULL,
+  "balance" DOUBLE PRECISION NOT NULL DEFAULT 0,
+  "pending_balance" DOUBLE PRECISION NOT NULL DEFAULT 0,
+  "total_earned" DOUBLE PRECISION NOT NULL DEFAULT 0,
+  "stripe_account_id" TEXT,
+  "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "StylistWallet_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "StylistWallet_stylist_id_fkey" FOREIGN KEY ("stylist_id") REFERENCES "User"("id") ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "StylistWallet_stylist_id_key" ON "StylistWallet"("stylist_id");
+
+CREATE TABLE IF NOT EXISTS "Transaction" (
+  "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
+  "stylist_id" TEXT NOT NULL,
+  "client_id" TEXT,
+  "session_id" TEXT,
+  "gross_amount" DOUBLE PRECISION NOT NULL,
+  "platform_fee" DOUBLE PRECISION NOT NULL,
+  "net_amount" DOUBLE PRECISION NOT NULL,
+  "status" "TransactionStatus" NOT NULL DEFAULT 'PENDING',
+  "stripe_payment_intent_id" TEXT,
+  "description" TEXT,
+  "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "completed_at" TIMESTAMP(3),
+  CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "Transaction_stylist_id_fkey" FOREIGN KEY ("stylist_id") REFERENCES "User"("id") ON DELETE CASCADE,
+  CONSTRAINT "Transaction_client_id_fkey" FOREIGN KEY ("client_id") REFERENCES "User"("id") ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS "Transaction_stylist_id_idx" ON "Transaction"("stylist_id");
+CREATE INDEX IF NOT EXISTS "Transaction_status_idx" ON "Transaction"("status");
 `;
 
 // Try multiple connection strategies

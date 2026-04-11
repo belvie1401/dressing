@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useAuthStore } from '@/lib/store';
 import { api } from '@/lib/api';
 
@@ -219,8 +220,11 @@ export default function StylistDashboardPage() {
             <p className="text-xs text-[#8A8A8A] mt-1">Satisfaction</p>
           </div>
 
-          {/* Card 4 — Revenus */}
-          <div className="w-[140px] flex-shrink-0 bg-white rounded-3xl p-5 shadow-sm">
+          {/* Card 4 — Revenus (links to wallet) */}
+          <Link
+            href="/wallet"
+            className="w-[140px] flex-shrink-0 bg-white rounded-3xl p-5 shadow-sm"
+          >
             <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'rgba(17, 17, 17, 0.05)' }}>
               <svg
                 width="18"
@@ -241,8 +245,8 @@ export default function StylistDashboardPage() {
               <span className="font-serif text-3xl text-[#111111]">1&nbsp;240</span>
               <span className="text-sm text-[#8A8A8A] ml-1">euros</span>
             </p>
-            <p className="text-xs text-[#8A8A8A] mt-1">Revenus ce mois</p>
-          </div>
+            <p className="text-xs text-[#8A8A8A] mt-1">Portefeuille</p>
+          </Link>
         </div>
       </section>
 
