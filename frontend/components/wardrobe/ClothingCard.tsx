@@ -168,8 +168,10 @@ export default function ClothingCard({ item, onToast, searchQuery }: ClothingCar
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
-      className="group relative aspect-[3/4] cursor-pointer select-none overflow-hidden rounded-2xl bg-white shadow-sm"
+      className="group relative cursor-pointer select-none overflow-hidden rounded-xl bg-white shadow-sm"
       style={{
+        height: '180px',
+        width: '100%',
         touchAction: has360 ? 'pan-y' : undefined,
         cursor: isDragging ? 'grabbing' : 'pointer',
       }}
@@ -183,16 +185,32 @@ export default function ClothingCard({ item, onToast, searchQuery }: ClothingCar
               src={frontUrl}
               alt={`${displayName} — face`}
               draggable={false}
-              className="absolute inset-0 h-full w-full object-cover transition-opacity duration-200"
-              style={{ opacity: showBack ? 0 : 1 }}
+              className="absolute inset-0 transition-opacity duration-200"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center 15%',
+                transform: 'scale(1.1)',
+                transformOrigin: 'center 20%',
+                opacity: showBack ? 0 : 1,
+              }}
             />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={backUrl}
               alt={`${displayName} — dos`}
               draggable={false}
-              className="absolute inset-0 h-full w-full object-cover transition-opacity duration-200"
-              style={{ opacity: showBack ? 1 : 0 }}
+              className="absolute inset-0 transition-opacity duration-200"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center 15%',
+                transform: 'scale(1.1)',
+                transformOrigin: 'center 20%',
+                opacity: showBack ? 1 : 0,
+              }}
             />
           </>
         ) : frontUrl ? (
@@ -201,7 +219,15 @@ export default function ClothingCard({ item, onToast, searchQuery }: ClothingCar
             src={frontUrl}
             alt={displayName}
             draggable={false}
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center 15%',
+              transform: 'scale(1.1)',
+              transformOrigin: 'center 20%',
+            }}
           />
         ) : (
           <div className="flex h-full items-center justify-center text-[#CFCFCF]">
@@ -216,28 +242,43 @@ export default function ClothingCard({ item, onToast, searchQuery }: ClothingCar
 
       {/* 360° badge (top-left) */}
       {has360 && (
-        <span className="pointer-events-none absolute left-2 top-2 z-10 rounded-full bg-[#111111]/70 px-2 py-0.5 text-[9px] font-medium text-white backdrop-blur-sm">
+        <span
+          className="pointer-events-none absolute z-10 rounded-full bg-[#111111]/70 font-medium text-white backdrop-blur-sm"
+          style={{ top: '6px', left: '6px', fontSize: '9px', padding: '1px 6px' }}
+        >
           360°
         </span>
       )}
 
       {/* Category badge (top-right) */}
-      <span className="pointer-events-none absolute right-2 top-2 z-10 rounded-full bg-white/80 px-2 py-0.5 text-[9px] font-medium text-[#111111] backdrop-blur-sm">
+      <span
+        className="pointer-events-none absolute z-10 rounded-full bg-white/80 font-medium text-[#111111] backdrop-blur-sm"
+        style={{ top: '6px', right: '6px', fontSize: '9px', padding: '1px 6px' }}
+      >
         {categoryAbbrev[item.category] || item.category}
       </span>
 
       {/* Bottom info overlay (hidden on hover to reveal action bar) */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/50 to-transparent p-2.5 pb-3 transition-opacity duration-200 group-hover:opacity-0">
-        <p className="truncate text-xs font-medium text-white">
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 transition-opacity duration-200 group-hover:opacity-0"
+        style={{
+          background: 'linear-gradient(transparent, rgba(0,0,0,0.6))',
+          padding: '4px 8px 6px',
+        }}
+      >
+        <p
+          className="truncate font-medium text-white"
+          style={{ fontSize: '11px', lineHeight: '14px' }}
+        >
           {searchQuery ? highlight(displayName, searchQuery) : displayName}
         </p>
         <div className="mt-0.5 flex items-center gap-1">
           <span
-            className={`h-1.5 w-1.5 rounded-full ${
+            className={`h-1 w-1 rounded-full ${
               item.wear_count === 0 ? 'bg-[#CFCFCF]' : 'bg-[#4ade80]'
             }`}
           />
-          <span className="text-[10px] text-white/70">
+          <span className="text-white/70" style={{ fontSize: '9px' }}>
             {item.wear_count === 0
               ? 'Jamais porté'
               : `Porté ${item.wear_count}×`}
@@ -246,14 +287,18 @@ export default function ClothingCard({ item, onToast, searchQuery }: ClothingCar
       </div>
 
       {/* Hover quick-action bar (desktop only) */}
-      <div className="absolute inset-x-0 bottom-0 z-20 flex translate-y-full items-center justify-around bg-white py-2 transition-transform duration-200 group-hover:translate-y-0">
+      <div
+        className="absolute inset-x-0 bottom-0 z-20 flex translate-y-full items-center justify-around bg-white transition-transform duration-200 group-hover:translate-y-0"
+        style={{ height: '36px' }}
+      >
         <button
           type="button"
           onClick={handleView}
           aria-label="Voir"
-          className="flex cursor-pointer flex-col items-center gap-0.5 px-2 text-[10px] font-medium text-[#111111]"
+          className="flex cursor-pointer items-center gap-1 px-1 font-medium text-[#111111]"
+          style={{ fontSize: '10px' }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
             <circle cx="12" cy="12" r="3" />
           </svg>
@@ -263,9 +308,10 @@ export default function ClothingCard({ item, onToast, searchQuery }: ClothingCar
           type="button"
           onClick={handleFavorite}
           aria-label="Favori"
-          className="flex cursor-pointer flex-col items-center gap-0.5 px-2 text-[10px] font-medium text-[#111111]"
+          className="flex cursor-pointer items-center gap-1 px-1 font-medium text-[#111111]"
+          style={{ fontSize: '10px' }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
           Favori
@@ -274,9 +320,10 @@ export default function ClothingCard({ item, onToast, searchQuery }: ClothingCar
           type="button"
           onClick={handleWear}
           aria-label="Porter"
-          className="flex cursor-pointer flex-col items-center gap-0.5 px-2 text-[10px] font-medium text-[#111111]"
+          className="flex cursor-pointer items-center gap-1 px-1 font-medium text-[#111111]"
+          style={{ fontSize: '10px' }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
           </svg>
           Porter

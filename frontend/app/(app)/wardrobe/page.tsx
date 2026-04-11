@@ -19,6 +19,7 @@ const occasionLabels: Record<string, string> = {
 };
 
 type WardrobeTab = 'clothes' | 'looks' | 'favorites';
+type CategoryFilter = 'ALL' | 'TOP' | 'BOTTOM' | 'DRESS' | 'JACKET' | 'SHOES' | 'ACCESSORY';
 
 const TABS: Array<{ key: WardrobeTab; label: string }> = [
   { key: 'clothes', label: 'Vêtements' },
@@ -26,10 +27,21 @@ const TABS: Array<{ key: WardrobeTab; label: string }> = [
   { key: 'favorites', label: 'Favoris' },
 ];
 
+const CATEGORY_PILLS: Array<{ key: CategoryFilter; label: string }> = [
+  { key: 'ALL', label: 'Tout' },
+  { key: 'TOP', label: 'Hauts' },
+  { key: 'BOTTOM', label: 'Bas' },
+  { key: 'DRESS', label: 'Robes' },
+  { key: 'JACKET', label: 'Vestes' },
+  { key: 'SHOES', label: 'Chaussures' },
+  { key: 'ACCESSORY', label: 'Accessoires' },
+];
+
 export default function WardrobePage() {
   const { items, isLoading, loadItems } = useWardrobeStore();
   const [tab, setTab] = useState<WardrobeTab>('clothes');
   const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('ALL');
   const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [toast, setToast] = useState('');
 
@@ -51,6 +63,7 @@ export default function WardrobePage() {
   const hasSearch = trimmedSearch.length > 0;
 
   const filteredItems = items.filter((item) => {
+    if (categoryFilter !== 'ALL' && item.category !== categoryFilter) return false;
     if (!hasSearch) return true;
     const q = trimmedSearch.toLowerCase();
     return (
@@ -154,6 +167,29 @@ export default function WardrobePage() {
             </svg>
           </button>
         </div>
+
+        {/* Category filter pills */}
+        {tab === 'clothes' && (
+          <div className="flex gap-2 overflow-x-auto px-4 pb-3 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
+            {CATEGORY_PILLS.map((pill) => {
+              const active = categoryFilter === pill.key;
+              return (
+                <button
+                  key={pill.key}
+                  type="button"
+                  onClick={() => setCategoryFilter(pill.key)}
+                  className={`flex-shrink-0 cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                    active
+                      ? 'bg-[#111111] text-white'
+                      : 'bg-[#F0EDE8] text-[#8A8A8A] hover:text-[#111111]'
+                  }`}
+                >
+                  {pill.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* ============ SCROLLABLE CONTENT ============ */}
@@ -180,10 +216,13 @@ export default function WardrobePage() {
               </div>
             ) : (
               <>
-                <p className="px-4 py-2 text-xs text-[#8A8A8A]">
+                <p className="py-2 text-xs text-[#8A8A8A]">
                   {filteredItems.length} résultat{filteredItems.length > 1 ? 's' : ''} pour &laquo;{trimmedSearch}&raquo;
                 </p>
-                <div className="grid grid-cols-3 gap-3">
+                <div
+                  className="grid gap-2"
+                  style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}
+                >
                   {filteredItems.map((item) => (
                     <ClothingCard
                       key={item.id}
@@ -216,11 +255,27 @@ export default function WardrobePage() {
           ) : (
             // ─── DEFAULT GRID + ADD BUTTON ─────────────────────────────
             <>
-              <div className="grid grid-cols-3 gap-3">
-                {filteredItems.map((item) => (
-                  <ClothingCard key={item.id} item={item} onToast={showToast} />
-                ))}
-              </div>
+              {filteredItems.length === 0 ? (
+                <div className="flex flex-col items-center py-16 text-center">
+                  <p className="text-sm text-[#8A8A8A]">Aucun vêtement dans cette catégorie</p>
+                  <button
+                    type="button"
+                    onClick={() => setCategoryFilter('ALL')}
+                    className="mt-3 cursor-pointer rounded-full bg-[#F0EDE8] px-4 py-2 text-xs font-medium text-[#111111] hover:bg-[#EDE5DC]"
+                  >
+                    Voir tout
+                  </button>
+                </div>
+              ) : (
+                <div
+                  className="grid gap-2"
+                  style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}
+                >
+                  {filteredItems.map((item) => (
+                    <ClothingCard key={item.id} item={item} onToast={showToast} />
+                  ))}
+                </div>
+              )}
 
               {/* + Ajouter button */}
               <a
