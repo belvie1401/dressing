@@ -15,9 +15,14 @@ type ChallengeState = {
   current: number;
 };
 
+function capitalize(name: string): string {
+  if (!name) return '';
+  return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+}
+
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
-  const firstName = user?.name?.split(' ')[0] ?? '';
+  const firstName = capitalize(user?.name?.split(' ')[0] ?? '');
 
   // Top stat cards — each a separate independent count
   const [wardrobeCount, setWardrobeCount] = useState<number | null>(null);
@@ -221,7 +226,7 @@ export default function DashboardPage() {
       {/* ============ D. TWO BOTTOM CARDS ============ */}
       <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* ----- Besoin d'inspiration ----- */}
-        <div className="relative overflow-hidden rounded-2xl border border-[#EFEFEF] bg-white p-6">
+        <div className="relative overflow-hidden rounded-2xl bg-[#EDE5DC] p-6">
           <div className="relative z-10">
             <h3 className="font-serif text-lg text-[#111111]">
               Besoin d&rsquo;inspiration&nbsp;?
@@ -240,7 +245,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ----- Défi du mois ----- */}
-        <div className="rounded-2xl border border-[#EFEFEF] bg-white p-6">
+        <div className="rounded-2xl bg-[#F0EDE8] p-6">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <h3 className="font-serif text-lg text-[#111111]">
