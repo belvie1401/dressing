@@ -11,15 +11,15 @@ type TabKey = 'ALL' | 'BEFORE_AFTER' | 'THEME' | 'CLIENT';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'ALL', label: 'Tous' },
-  { key: 'BEFORE_AFTER', label: 'Avant/Apr\u00e8s' },
-  { key: 'THEME', label: 'Th\u00e9matiques' },
+  { key: 'BEFORE_AFTER', label: 'Avant/Après' },
+  { key: 'THEME', label: 'Thématiques' },
   { key: 'CLIENT', label: 'Clients' },
 ];
 
 const TYPE_LABEL: Record<string, string> = {
-  BEFORE_AFTER: 'Avant/Apr\u00e8s',
+  BEFORE_AFTER: 'Avant/Après',
   COMPLETE_LOOK: 'Look complet',
-  THEME: 'Th\u00e9matique',
+  THEME: 'Thématique',
   STYLE_ADVICE: 'Conseil style',
 };
 
@@ -72,7 +72,7 @@ export default function LookbooksPage() {
           <p className="text-sm text-[#8A8A8A] mt-1">
             {isStylist
               ? 'Votre vitrine professionnelle'
-              : 'Vos cr\u00e9ations personnalis\u00e9es'}
+              : 'Vos créations personnalisées'}
           </p>
         </div>
         {isStylist && (
@@ -124,7 +124,7 @@ export default function LookbooksPage() {
             </p>
             <p className="text-xs text-[#8A8A8A] mt-1">
               {isStylist
-                ? 'Cr\u00e9ez votre premi\u00e8re prestation'
+                ? 'Créez votre première prestation'
                 : 'Vos stylistes partageront vos lookbooks ici'}
             </p>
             {isStylist && (

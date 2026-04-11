@@ -7,8 +7,8 @@ import { useAuthStore } from '@/lib/store';
 import { api } from '@/lib/api';
 
 const styles = ['Minimal', 'Chic', 'Casual', 'Street', 'Romantique', 'Audacieux'];
-const budgets = ['50\u20ac - 150\u20ac', '150\u20ac - 300\u20ac', '+300\u20ac'];
-const objectives = ['Quotidien', 'Travail', 'Soir\u00e9e', '\u00c9v\u00e9nements'];
+const budgets = ['50€ - 150€', '150€ - 300€', '+300€'];
+const objectives = ['Quotidien', 'Travail', 'Soirée', 'Événements'];
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -74,7 +74,7 @@ export default function OnboardingPage() {
 
         {/* Budget selection */}
         <div className="mt-8">
-          <h2 className="text-sm font-semibold text-[#111111]">Quel est votre budget moyen par pi\u00e8ce ?</h2>
+          <h2 className="text-sm font-semibold text-[#111111]">Quel est votre budget moyen par pièce ?</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {budgets.map((b) => (
               <button

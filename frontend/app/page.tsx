@@ -52,7 +52,7 @@ const steps = [
 const values = [
   {
     title: 'Consommer moins',
-    description: "Valoriser ce que vous poss\u00e9dez avant d\u2019acheter du neuf.",
+    description: "Valoriser ce que vous possédez avant d’acheter du neuf.",
     icon: (
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M11 20A7 7 0 0 1 4 13c0-3.87 3.13-7 7-7 3.87 0 7 3.13 7 7 0 4.42-3.58 8-8 8" />
@@ -62,7 +62,7 @@ const values = [
   },
   {
     title: 'Connexion humaine',
-    description: "L\u2019expertise d\u2019un vrai styliste, accessible \u00e0 toutes.",
+    description: "L’expertise d’un vrai styliste, accessible à toutes.",
     icon: (
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
@@ -83,7 +83,7 @@ const values = [
 
 const testimonials = [
   {
-    quote: "J\u2019avais un placard plein et rien \u00e0 me mettre. Avec LIEN, ma styliste a compos\u00e9 12 looks avec ce que j\u2019avais d\u00e9j\u00e0. Je n\u2019ai pas achet\u00e9 une seule pi\u00e8ce.",
+    quote: "J’avais un placard plein et rien à me mettre. Avec LIEN, ma styliste a composé 12 looks avec ce que j’avais déjà. Je n’ai pas acheté une seule pièce.",
     name: 'Sophie M.',
     role: 'Cliente, Paris',
     avatar: 'https://i.pravatar.cc/120?img=47',
@@ -95,7 +95,7 @@ const testimonials = [
     avatar: 'https://i.pravatar.cc/120?img=32',
   },
   {
-    quote: "J\u2019ai doubl\u00e9 mon nombre de clients en 3 mois. Le format digital me permet de travailler avec des clientes partout en France.",
+    quote: "J’ai doublé mon nombre de clients en 3 mois. Le format digital me permet de travailler avec des clientes partout en France.",
     name: 'Hugo B.',
     role: 'Styliste Street & Casual, Lyon',
     avatar: 'https://i.pravatar.cc/120?img=12',

@@ -145,7 +145,7 @@ function formatRelative(iso: string): string {
   const then = new Date(iso).getTime();
   const now = Date.now();
   const diffMin = Math.round((now - then) / 60000);
-  if (diffMin < 1) return 'À l\u2019instant';
+  if (diffMin < 1) return 'À l’instant';
   if (diffMin < 60) return `Il y a ${diffMin} min`;
   const diffH = Math.round(diffMin / 60);
   if (diffH < 24) return `Il y a ${diffH} h`;
@@ -190,7 +190,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       ? `${firstName} ${lastInitial}.`
       : firstName
     : user?.email ?? '';
-  const initial = firstName.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || '\u00b7';
+  const initial = firstName.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || '·';
 
   const isActive = (href: string) =>
     href === '/dashboard' ? pathname === href : pathname?.startsWith(href);
@@ -322,7 +322,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-semibold text-[#111111]">
-                {fullDisplay || '\u2014'}
+                {fullDisplay || '—'}
               </p>
               <p className="truncate text-[10px] text-[#8A8A8A]">Voir mon profil</p>
             </div>
@@ -356,7 +356,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </svg>
             <input
               type="text"
-              placeholder="Rechercher (v\u00eatements, looks, stylistes...)"
+              placeholder="Rechercher (vêtements, looks, stylistes...)"
               className="flex-1 bg-transparent text-sm text-[#111111] outline-none placeholder:text-[#8A8A8A]"
             />
             <span className="flex items-center gap-1 rounded-md border border-[#EFEFEF] bg-[#F7F5F2] px-2 py-0.5 text-[10px] font-medium text-[#8A8A8A]">
@@ -480,7 +480,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                         ) : (
                           <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-[#EDE5DC] ring-2 ring-[#C6A47E] ring-offset-2 ring-offset-[#111111]">
                             <span className="font-serif text-lg text-[#C6A47E]">
-                              {counterpartName.charAt(0) || '\u00b7'}
+                              {counterpartName.charAt(0) || '·'}
                             </span>
                           </div>
                         )}

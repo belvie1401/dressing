@@ -20,8 +20,8 @@ const slots = ['10:00', '11:00', '14:00', '15:00', '16:00', '17:00'];
 /* ── Calendar helpers ── */
 const dayHeaders = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 const monthNames = [
-  'Janvier', 'F\u00e9vrier', 'Mars', 'Avril', 'Mai', 'Juin',
-  'Juillet', 'Ao\u00fbt', 'Septembre', 'Octobre', 'Novembre', 'D\u00e9cembre',
+  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
 ];
 
 function isSameDay(a: Date, b: Date) {
@@ -94,7 +94,7 @@ export default function BookingPage() {
 
   const handleContinue = async () => {
     if (!selectedDate || !selectedSlot) {
-      setToast('Veuillez s\u00e9lectionner une date et un cr\u00e9neau');
+      setToast('Veuillez sélectionner une date et un créneau');
       setTimeout(() => setToast(''), 3000);
       return;
     }
@@ -112,7 +112,7 @@ export default function BookingPage() {
     if (res.success) {
       setShowConfirm(true);
     } else {
-      setToast(res.error || 'Erreur lors de la r\u00e9servation');
+      setToast(res.error || 'Erreur lors de la réservation');
       setTimeout(() => setToast(''), 3000);
     }
   };
@@ -177,7 +177,7 @@ export default function BookingPage() {
         </div>
       </div>
 
-      {/* ── SECTION 1: Dur\u00e9e ── */}
+      {/* ── SECTION 1: Durée ── */}
       <div className="mx-5 mb-6">
         <h2 className="font-serif text-[16px] font-semibold text-[#111111] mb-3">Choisissez une dur&eacute;e</h2>
         <div className="grid grid-cols-3 gap-3">
@@ -254,7 +254,7 @@ export default function BookingPage() {
         </div>
       </div>
 
-      {/* ── SECTION 3: Cr\u00e9neaux ── */}
+      {/* ── SECTION 3: Créneaux ── */}
       {selectedDate && (
         <div className="mx-5 mb-6">
           <h2 className="font-serif text-[16px] font-semibold text-[#111111] mb-3">Cr&eacute;neaux disponibles</h2>
@@ -284,7 +284,7 @@ export default function BookingPage() {
           className="w-full rounded-full py-4 text-base font-semibold text-white disabled:opacity-60"
           style={{ background: '#D4785C' }}
         >
-          {submitting ? 'R\u00e9servation...' : 'Continuer'}
+          {submitting ? 'Réservation...' : 'Continuer'}
         </button>
         <div className="mt-2 flex items-center justify-center gap-1">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

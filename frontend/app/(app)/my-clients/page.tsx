@@ -11,7 +11,7 @@ type TabKey = 'ACTIVE' | 'PENDING' | 'ENDED';
 const STATUS_LABEL: Record<ConnectionStatus, string> = {
   ACTIVE: 'Active',
   PENDING: 'En attente',
-  ENDED: 'Archiv\u00e9e',
+  ENDED: 'Archivée',
 };
 
 const STATUS_CLASS: Record<ConnectionStatus, string> = {
@@ -48,7 +48,7 @@ export default function MyClientsPage() {
             status: c.status,
             wardrobeCount: undefined,
             lastActivity: c.started_at
-              ? `Connect\u00e9e depuis ${new Date(c.started_at).toLocaleDateString('fr-FR')}`
+              ? `Connectée depuis ${new Date(c.started_at).toLocaleDateString('fr-FR')}`
               : 'Nouvelle demande',
           }));
         setRows(mapped);
@@ -121,7 +121,7 @@ export default function MyClientsPage() {
             onClick={() => setTab('PENDING')}
           />
           <TabPill
-            label="Archiv\u00e9es"
+            label="Archivées"
             count={counts.ENDED}
             active={tab === 'ENDED'}
             onClick={() => setTab('ENDED')}
@@ -144,10 +144,10 @@ export default function MyClientsPage() {
               </svg>
             </div>
             <p className="text-sm font-medium text-[#111111]">
-              Aucune cliente {tab === 'ACTIVE' ? 'active' : tab === 'PENDING' ? 'en attente' : 'archiv\u00e9e'}
+              Aucune cliente {tab === 'ACTIVE' ? 'active' : tab === 'PENDING' ? 'en attente' : 'archivée'}
             </p>
             <p className="text-xs text-[#8A8A8A] mt-1">
-              Vos clientes appara\u00eetront ici
+              Vos clientes apparaîtront ici
             </p>
           </div>
         ) : (

@@ -508,7 +508,7 @@ export async function getStylistObjectives(req: Request, res: Response): Promise
 export async function getMyReviews(req: Request, res: Response): Promise<void> {
   try {
     if (req.user!.role !== 'STYLIST') {
-      res.status(403).json({ success: false, error: 'R\u00e9serv\u00e9 aux stylistes' });
+      res.status(403).json({ success: false, error: 'Réservé aux stylistes' });
       return;
     }
     // No Review model in schema yet — return empty until implemented.
@@ -528,7 +528,7 @@ export async function getMyReviews(req: Request, res: Response): Promise<void> {
 export async function getMyPublicStats(req: Request, res: Response): Promise<void> {
   try {
     if (req.user!.role !== 'STYLIST') {
-      res.status(403).json({ success: false, error: 'R\u00e9serv\u00e9 aux stylistes' });
+      res.status(403).json({ success: false, error: 'Réservé aux stylistes' });
       return;
     }
     const userId = req.user!.userId;

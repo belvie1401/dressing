@@ -35,7 +35,7 @@ export default function ShareModal({ onClose }: Props) {
   }, []);
 
   const referralUrl = `${APP_URL}/register?ref=${stats.referral_code}`;
-  const shareText = `D\u00e9couvrez LIEN, l\u2019app qui connecte votre dressing \u00e0 des stylistes pro\u00a0! Inscrivez-vous avec mon code\u00a0: ${stats.referral_code} \u2192 ${referralUrl}`;
+  const shareText = `Découvrez LIEN, l’app qui connecte votre dressing à des stylistes pro ! Inscrivez-vous avec mon code : ${stats.referral_code} → ${referralUrl}`;
 
   const copyCode = async () => {
     await navigator.clipboard.writeText(stats.referral_code);
@@ -61,7 +61,7 @@ export default function ShareModal({ onClose }: Props) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'LIEN \u2014 Votre dressing connect\u00e9',
+          title: 'LIEN — Votre dressing connecté',
           text: shareText,
           url: referralUrl,
         });
@@ -116,7 +116,7 @@ export default function ShareModal({ onClose }: Props) {
               onClick={copyCode}
               className="bg-[#111111] text-white rounded-full px-4 py-2 text-xs font-medium shrink-0 transition-all"
             >
-              {copied ? 'Copi\u00e9 \u2713' : 'Copier'}
+              {copied ? 'Copié ✓' : 'Copier'}
             </button>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function ShareModal({ onClose }: Props) {
                 </svg>
               </span>
               <span className="text-[10px] text-[#8A8A8A]">
-                {copiedLink ? 'Copi\u00e9\u00a0\u2713' : 'Lien'}
+                {copiedLink ? 'Copié ✓' : 'Lien'}
               </span>
             </button>
 

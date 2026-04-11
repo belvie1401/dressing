@@ -9,9 +9,9 @@ import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 
 const TYPE_LABEL: Record<string, string> = {
-  BEFORE_AFTER: 'Avant / Apr\u00e8s',
+  BEFORE_AFTER: 'Avant / Après',
   COMPLETE_LOOK: 'Look complet',
-  THEME: 'Th\u00e9matique',
+  THEME: 'Thématique',
   STYLE_ADVICE: 'Conseil style',
 };
 
@@ -55,7 +55,7 @@ export default function LookbookDetailPage() {
 
   const handleDelete = async () => {
     if (!lookbook) return;
-    if (!confirm('Supprimer d\u00e9finitivement cette prestation ?')) return;
+    if (!confirm('Supprimer définitivement cette prestation ?')) return;
     setDeleting(true);
     try {
       const res = await api.delete(`/lookbooks/${lookbook.id}`);
@@ -128,7 +128,7 @@ export default function LookbookDetailPage() {
             {lookbook.after_photos && lookbook.after_photos[0] ? (
               <Image
                 src={lookbook.after_photos[0]}
-                alt="Apr\u00e8s"
+                alt="Après"
                 fill
                 className="object-cover"
                 sizes="50vw"

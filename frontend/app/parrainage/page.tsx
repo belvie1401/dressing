@@ -8,17 +8,17 @@ const steps = [
   {
     num: '1',
     title: 'Partagez votre code',
-    desc: 'Envoyez votre code de parrainage unique \u00e0 vos amis via WhatsApp, SMS ou tout autre canal.',
+    desc: 'Envoyez votre code de parrainage unique à vos amis via WhatsApp, SMS ou tout autre canal.',
   },
   {
     num: '2',
-    title: 'Ils s\u2019inscrivent',
-    desc: 'Vos amis cr\u00e9ent leur compte LIEN en utilisant votre code. C\u2019est gratuit et sans engagement.',
+    title: 'Ils s’inscrivent',
+    desc: 'Vos amis créent leur compte LIEN en utilisant votre code. C’est gratuit et sans engagement.',
   },
   {
     num: '3',
     title: 'Vous gagnez 1 mois',
-    desc: 'D\u00e8s que votre ami valide son inscription, vous recevez automatiquement 1 mois gratuit sur votre abonnement.',
+    desc: 'Dès que votre ami valide son inscription, vous recevez automatiquement 1 mois gratuit sur votre abonnement.',
   },
 ];
 

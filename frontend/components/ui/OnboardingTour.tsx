@@ -34,7 +34,7 @@ const STEPS: TourStep[] = [
     side: 'right',
     title: 'Votre garde-robe digitale',
     description:
-      "Photographiez vos v\u00eatements et cr\u00e9ez votre dressing virtuel. L\u2019IA analyse chaque pi\u00e8ce automatiquement.",
+      "Photographiez vos vêtements et créez votre dressing virtuel. L’IA analyse chaque pièce automatiquement.",
   },
   // Step 3 — Mes looks section
   {
@@ -42,7 +42,7 @@ const STEPS: TourStep[] = [
     side: 'below',
     title: 'Composez vos looks',
     description:
-      "Assemblez vos pi\u00e8ces pour cr\u00e9er des tenues compl\u00e8tes. Planifiez votre semaine en avance.",
+      "Assemblez vos pièces pour créer des tenues complètes. Planifiez votre semaine en avance.",
   },
   // Step 4 — Stylistes nav
   {
@@ -50,7 +50,7 @@ const STEPS: TourStep[] = [
     side: 'right',
     title: 'Votre styliste personnel',
     description:
-      "Connectez-vous \u00e0 un styliste pro qui acc\u00e8de \u00e0 votre dressing et compose des looks sur mesure pour vous.",
+      "Connectez-vous à un styliste pro qui accède à votre dressing et compose des looks sur mesure pour vous.",
   },
   // Step 5 — Calendrier nav
   {
@@ -58,7 +58,7 @@ const STEPS: TourStep[] = [
     side: 'right',
     title: 'Planifiez votre semaine',
     description:
-      "Assignez une tenue \u00e0 chaque jour. Ne perdez plus de temps le matin \u00e0 choisir quoi porter.",
+      "Assignez une tenue à chaque jour. Ne perdez plus de temps le matin à choisir quoi porter.",
   },
   // Step 6 — Done modal
   { selector: null, side: 'center', title: '__done__' },
@@ -352,7 +352,7 @@ export default function OnboardingTour({ onComplete }: { onComplete: () => void 
             onClick={advance}
             className="cursor-pointer rounded-full bg-[#111111] px-4 py-2 text-xs font-medium text-white"
           >
-            {isLast ? 'Commencer\u00a0!' : 'Suivant \u2192'}
+            {isLast ? 'Commencer !' : 'Suivant →'}
           </button>
         </div>
       </div>

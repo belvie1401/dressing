@@ -47,7 +47,7 @@ export default function WardrobeItemPage() {
     if (res.success && res.data) {
       setItem(res.data);
       markWornInStore(id);
-      setToast('\u2713 Enregistr\u00e9 !');
+      setToast('✓ Enregistré !');
       setTimeout(() => setToast(''), 3000);
     }
   };
@@ -63,7 +63,7 @@ export default function WardrobeItemPage() {
     const res = await api.put<ClothingItem>(`/wardrobe/${id}`, body);
     if (res.success && res.data) {
       setItem(res.data);
-      setToast('\u2713 Vue 360° activée !');
+      setToast('✓ Vue 360° activée !');
       setTimeout(() => setToast(''), 3000);
     } else {
       setToast("Échec de l'ajout de la photo dos");

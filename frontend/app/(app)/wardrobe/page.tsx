@@ -14,7 +14,7 @@ const categoryLabels: Record<string, string> = {
 type WardrobeTab = 'clothes' | 'looks' | 'favorites';
 
 const TABS: Array<{ key: WardrobeTab; label: string }> = [
-  { key: 'clothes', label: 'V\u00eatements' },
+  { key: 'clothes', label: 'Vêtements' },
   { key: 'looks', label: 'Looks' },
   { key: 'favorites', label: 'Favoris' },
 ];
@@ -149,12 +149,12 @@ export default function WardrobePage() {
                 </svg>
               </div>
               <p className="text-sm font-medium text-[#111111]">Votre dressing est vide</p>
-              <p className="mt-1 text-xs text-[#8A8A8A]">Ajoutez votre premier v\u00eatement</p>
+              <p className="mt-1 text-xs text-[#8A8A8A]">Ajoutez votre premier vêtement</p>
               <a
                 href="/wardrobe/add"
                 className="mt-4 rounded-full bg-[#111111] px-5 py-2.5 text-xs font-semibold text-white"
               >
-                Ajouter un v\u00eatement
+                Ajouter un vêtement
               </a>
             </div>
           ) : (
@@ -181,9 +181,9 @@ export default function WardrobePage() {
         ) : tab === 'looks' ? (
           outfits.length === 0 ? (
             <div className="flex flex-col items-center py-16 text-center">
-              <p className="text-sm text-[#8A8A8A]">Aucun look cr\u00e9\u00e9 pour le moment</p>
+              <p className="text-sm text-[#8A8A8A]">Aucun look créé pour le moment</p>
               <a href="/outfits/create" className="mt-3 rounded-full bg-[#111111] px-5 py-2.5 text-sm font-medium text-white">
-                Cr\u00e9er un look
+                Créer un look
               </a>
             </div>
           ) : (
@@ -208,7 +208,7 @@ export default function WardrobePage() {
                   </div>
                   <div className="p-2.5">
                     <p className="truncate text-sm font-medium text-[#111111]">{outfit.name}</p>
-                    <p className="text-xs text-[#8A8A8A]">{outfit.items?.length || 0} pi\u00e8ces</p>
+                    <p className="text-xs text-[#8A8A8A]">{outfit.items?.length || 0} pièces</p>
                   </div>
                 </a>
               ))}
@@ -219,7 +219,7 @@ export default function WardrobePage() {
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
-            <p className="mt-3 text-sm text-[#8A8A8A]">Vos favoris appara\u00eetront ici</p>
+            <p className="mt-3 text-sm text-[#8A8A8A]">Vos favoris apparaîtront ici</p>
           </div>
         )}
       </div>

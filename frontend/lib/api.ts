@@ -38,7 +38,7 @@ async function request<T>(
       if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
         window.location.href = '/login';
       }
-      return { success: false, error: 'Session expir\u00e9e' };
+      return { success: false, error: 'Session expirée' };
     }
 
     const data = await res.json();

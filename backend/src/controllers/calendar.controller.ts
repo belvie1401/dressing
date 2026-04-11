@@ -174,7 +174,7 @@ export async function bookSession(req: Request, res: Response): Promise<void> {
       select: { id: true, role: true, name: true },
     });
     if (!stylist) {
-      res.status(404).json({ success: false, error: 'Styliste non trouv\u00e9' });
+      res.status(404).json({ success: false, error: 'Styliste non trouvé' });
       return;
     }
 
@@ -215,7 +215,7 @@ export async function bookSession(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Book session error:', error);
-    res.status(500).json({ success: false, error: 'Erreur lors de la r\u00e9servation' });
+    res.status(500).json({ success: false, error: 'Erreur lors de la réservation' });
   }
 }
 

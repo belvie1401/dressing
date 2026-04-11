@@ -148,7 +148,7 @@ export default function ChatWindow({ recipientId, recipientName, isOnline }: Cha
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="\u00c9crire un message..."
+            placeholder="Écrire un message..."
             className="flex-1 rounded-full border border-[#E5E5E5] bg-white px-4 py-2 text-sm text-[#0D0D0D] placeholder-[#8A8A8A] focus:border-[#0D0D0D] focus:outline-none"
           />
           <button
@@ -227,7 +227,7 @@ export default function ChatWindow({ recipientId, recipientName, isOnline }: Cha
                         Partager un lookbook
                       </p>
                       <p className="text-xs text-[#8A8A8A]">
-                        Envoyez une cr\u00e9ation
+                        Envoyez une création
                       </p>
                     </div>
                   </a>
@@ -284,7 +284,7 @@ export default function ChatWindow({ recipientId, recipientName, isOnline }: Cha
                 </div>
 
                 <label className="text-xs text-[#8A8A8A] uppercase tracking-wide block mb-1">
-                  Lien de la r\u00e9union
+                  Lien de la réunion
                 </label>
                 <input
                   type="url"

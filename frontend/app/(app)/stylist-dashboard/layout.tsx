@@ -97,7 +97,7 @@ export default function StylistDashboardLayout({ children }: { children: ReactNo
   const [unreadMessages, setUnreadMessages] = useState<number>(0);
 
   const displayName = user?.name ?? user?.email ?? '';
-  const firstLetter = (displayName.charAt(0) || '\u00b7').toUpperCase();
+  const firstLetter = (displayName.charAt(0) || '·').toUpperCase();
 
   const isActive = (href: string) =>
     href === '/stylist-dashboard' ? pathname === href : pathname?.startsWith(href);
@@ -216,7 +216,7 @@ export default function StylistDashboardLayout({ children }: { children: ReactNo
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-[#111111]">
-              {displayName || '\u2014'}
+              {displayName || '—'}
             </p>
             <p className="text-[11px] text-[#8A8A8A]">Styliste pro</p>
           </div>
@@ -257,7 +257,7 @@ export default function StylistDashboardLayout({ children }: { children: ReactNo
               </svg>
               <input
                 type="text"
-                placeholder="Rechercher une cliente, un v\u00eatement..."
+                placeholder="Rechercher une cliente, un vêtement..."
                 className="w-full rounded-full bg-[#F7F5F2] py-2 pl-9 pr-16 text-sm text-[#111111] placeholder:text-[#8A8A8A] outline-none focus:ring-1 focus:ring-[#111111]/10"
               />
               <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded border border-[#EFEFEF] bg-white px-1.5 py-0.5 font-mono text-[10px] text-[#8A8A8A]">

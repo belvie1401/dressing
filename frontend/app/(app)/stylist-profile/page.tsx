@@ -218,7 +218,7 @@ export default function StylistProfilePage() {
               </svg>
             </div>
             <p className="text-sm text-[#CFCFCF] mt-0.5">
-              Styliste{location ? ` \u00b7 ${location}` : ''}
+              Styliste{location ? ` · ${location}` : ''}
             </p>
           </div>
         </div>
@@ -229,7 +229,7 @@ export default function StylistProfilePage() {
         <div className="bg-white rounded-2xl p-4 flex justify-around shadow-sm">
           <StatBlock
             value={stats === null ? null : String(stats.looks_created)}
-            label="Looks cr\u00e9\u00e9s"
+            label="Looks créés"
           />
           <div className="w-px bg-[#EFEFEF]" />
           <StatBlock
@@ -238,7 +238,7 @@ export default function StylistProfilePage() {
                 ? null
                 : stats.satisfaction_percent != null
                   ? `${stats.satisfaction_percent}%`
-                  : '\u2013'
+                  : '–'
             }
             label="Satisfaction"
             gold
@@ -250,9 +250,9 @@ export default function StylistProfilePage() {
                 ? null
                 : stats.experience_years != null
                   ? `${stats.experience_years} an${stats.experience_years > 1 ? 's' : ''}`
-                  : '\u2013'
+                  : '–'
             }
-            label="Exp\u00e9rience"
+            label="Expérience"
           />
         </div>
       </section>
@@ -355,7 +355,7 @@ export default function StylistProfilePage() {
                 bio ? 'text-[#111111]' : 'text-[#CFCFCF]'
               }`}
             >
-              {bio || 'Appuyez pour \u00e9crire votre bio.'}
+              {bio || 'Appuyez pour écrire votre bio.'}
             </p>
             <p className="text-[10px] text-[#C6A47E] mt-2">Modifier</p>
           </button>

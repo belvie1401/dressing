@@ -83,10 +83,10 @@ function StatIcon({ name }: { name: 'users' | 'wardrobe' | 'calendar' }) {
 }
 
 function formatLastUpdate(iso: string | null): string {
-  if (!iso) return 'Aucune mise \u00e0 jour';
+  if (!iso) return 'Aucune mise à jour';
   const then = new Date(iso).getTime();
   const diffD = Math.floor((Date.now() - then) / 86400000);
-  if (diffD === 0) return 'MAJ aujourd\u2019hui';
+  if (diffD === 0) return 'MAJ aujourd’hui';
   if (diffD === 1) return 'MAJ hier';
   if (diffD < 7) return `MAJ il y a ${diffD}j`;
   const diffW = Math.floor(diffD / 7);
@@ -251,7 +251,7 @@ export default function StylistDashboardPage() {
           trend={
             stats
               ? stats.active_clients_delta > 0
-                ? `\u2191 +${stats.active_clients_delta} ce mois`
+                ? `↑ +${stats.active_clients_delta} ce mois`
                 : 'Ce mois'
               : null
           }
@@ -259,12 +259,12 @@ export default function StylistDashboardPage() {
         />
         <StatsCard
           icon="wardrobe"
-          label="Dressings g\u00e9r\u00e9s"
+          label="Dressings gérés"
           value={stats?.managed_pieces ?? null}
           trend={
             stats
               ? stats.managed_pieces_delta > 0
-                ? `\u2191 +${stats.managed_pieces_delta} pi\u00e8ces`
+                ? `↑ +${stats.managed_pieces_delta} pièces`
                 : 'Ce mois'
               : null
           }
@@ -328,7 +328,7 @@ export default function StylistDashboardPage() {
                   color="#C6A47E"
                 />
                 <ObjectiveRow
-                  label="Lookbooks cr\u00e9\u00e9s"
+                  label="Lookbooks créés"
                   current={objectives.lookbooks.current}
                   target={objectives.lookbooks.target}
                   color="#C6A47E"
@@ -337,7 +337,7 @@ export default function StylistDashboardPage() {
                   label="Revenus"
                   current={objectives.revenue.current}
                   target={objectives.revenue.target}
-                  suffix=" \u20ac"
+                  suffix=" €"
                   color="#D4785C"
                 />
               </div>

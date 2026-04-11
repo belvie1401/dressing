@@ -14,7 +14,7 @@ interface TypeOption {
 const TYPE_OPTIONS: TypeOption[] = [
   {
     value: 'BEFORE_AFTER',
-    label: 'Avant / Apr\u00e8s',
+    label: 'Avant / Après',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="4" width="9" height="16" rx="1" />
@@ -36,7 +36,7 @@ const TYPE_OPTIONS: TypeOption[] = [
   },
   {
     value: 'THEME',
-    label: 'Th\u00e9matique',
+    label: 'Thématique',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -61,11 +61,11 @@ const PRESET_TAGS = [
   'Chic',
   'Casual',
   'Street',
-  'Soir\u00e9e',
+  'Soirée',
   'Travail',
   'Capsule',
   'Printemps',
-  '\u00c9t\u00e9',
+  'Été',
   'Automne',
   'Hiver',
 ];
@@ -115,7 +115,7 @@ export default function CreateLookbookPage() {
       const urls: string[] = [];
       for (const file of Array.from(files)) {
         if (file.size > 10 * 1024 * 1024) {
-          setError(`${file.name} d\u00e9passe 10 Mo`);
+          setError(`${file.name} dépasse 10 Mo`);
           continue;
         }
         const form = new FormData();
@@ -188,7 +188,7 @@ export default function CreateLookbookPage() {
       if (res.success) {
         router.push('/lookbooks');
       } else {
-        setError(res.error || 'Erreur lors de la cr\u00e9ation');
+        setError(res.error || 'Erreur lors de la création');
       }
     } finally {
       setSubmitting(false);
@@ -265,7 +265,7 @@ export default function CreateLookbookPage() {
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value.slice(0, 500))}
-                placeholder="Description (objectif, contexte, r\u00e9sultat)"
+                placeholder="Description (objectif, contexte, résultat)"
                 className="w-full min-h-[120px] bg-transparent px-4 py-3 text-sm text-[#111111] placeholder:text-[#CFCFCF] focus:outline-none resize-none"
               />
               <div className="px-4 pb-2 text-right">
@@ -307,7 +307,7 @@ export default function CreateLookbookPage() {
                 uploading={uploading}
               />
               <BeforeAfterZone
-                label="Apr\u00e8s"
+                label="Après"
                 photos={afterPhotos}
                 onUpload={(files) => uploadFiles(files, 'after')}
                 onRemove={(idx) => removePhoto('after', idx)}
@@ -391,14 +391,14 @@ export default function CreateLookbookPage() {
             Cliente concern&eacute;e
           </h2>
           <p className="text-sm text-[#8A8A8A] mb-2">
-            Associez cette prestation \u00e0 une cliente (optionnel)
+            Associez cette prestation à une cliente (optionnel)
           </p>
           <select
             value={clientId}
             onChange={(e) => setClientId(e.target.value)}
             className="w-full bg-white border border-[#EFEFEF] rounded-2xl px-4 py-3 text-sm text-[#111111] focus:outline-none focus:border-[#111111]"
           >
-            <option value="">Aucune cliente sp\u00e9cifique</option>
+            <option value="">Aucune cliente spécifique</option>
             {clients.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}

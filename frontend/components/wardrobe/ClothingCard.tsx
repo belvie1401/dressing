@@ -136,11 +136,11 @@ export default function ClothingCard({ item, onToast }: ClothingCardProps) {
     e.stopPropagation();
     try {
       await markWornInStore(item.id);
-      onToast?.('Porté aujourd\u2019hui !');
+      onToast?.('Porté aujourd’hui !');
     } catch {
       // Fallback direct call
       const res = await api.post<ClothingItem>(`/wardrobe/${item.id}/wear`);
-      if (res.success) onToast?.('Porté aujourd\u2019hui !');
+      if (res.success) onToast?.('Porté aujourd’hui !');
     }
   };
 
@@ -235,7 +235,7 @@ export default function ClothingCard({ item, onToast }: ClothingCardProps) {
           <span className="text-[10px] text-white/70">
             {item.wear_count === 0
               ? 'Jamais porté'
-              : `Porté ${item.wear_count}\u00d7`}
+              : `Porté ${item.wear_count}×`}
           </span>
         </div>
       </div>

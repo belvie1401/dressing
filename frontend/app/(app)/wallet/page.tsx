@@ -11,7 +11,7 @@ type FilterKey = 'ALL' | 'COMPLETED' | 'PENDING' | 'WITHDRAWN';
 
 const FILTERS: { key: FilterKey; label: string }[] = [
   { key: 'ALL', label: 'Tout' },
-  { key: 'COMPLETED', label: 'Compl\u00e9t\u00e9es' },
+  { key: 'COMPLETED', label: 'Complétées' },
   { key: 'PENDING', label: 'En attente' },
   { key: 'WITHDRAWN', label: 'Retraits' },
 ];
@@ -256,7 +256,7 @@ function statusMeta(status: TransactionStatus): {
   switch (status) {
     case 'COMPLETED':
       return {
-        label: 'Compl\u00e9t\u00e9e',
+        label: 'Complétée',
         color: '#2E7D32',
         bg: '#E8F5E9',
         icon: (
@@ -291,7 +291,7 @@ function statusMeta(status: TransactionStatus): {
       };
     case 'REFUNDED':
       return {
-        label: 'Rembours\u00e9e',
+        label: 'Remboursée',
         color: '#B00020',
         bg: '#FDECEA',
         icon: (

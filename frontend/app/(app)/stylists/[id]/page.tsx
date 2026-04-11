@@ -50,7 +50,7 @@ export default function StylistDetailPage() {
   }
 
   if (!stylist) {
-    return <div className="py-16 text-center text-sm text-[#8A8A8A]">Styliste non trouv\u00e9</div>;
+    return <div className="py-16 text-center text-sm text-[#8A8A8A]">Styliste non trouvé</div>;
   }
 
   const specs = (stylist.style_profile as Record<string, unknown>)?.specialties as string[] | undefined;
@@ -98,7 +98,7 @@ export default function StylistDetailPage() {
             <polyline points="9 12 11 14 15 10" />
           </svg>
         </div>
-        <p className="text-sm text-[#8A8A8A]">Styliste {stylist.location ? `\u00b7 ${stylist.location}` : ''}</p>
+        <p className="text-sm text-[#8A8A8A]">Styliste {stylist.location ? `· ${stylist.location}` : ''}</p>
 
         {/* Rating */}
         {rating && (
@@ -131,7 +131,7 @@ export default function StylistDetailPage() {
         <div className="mt-5 grid grid-cols-3 gap-3">
           <div className="text-center">
             <p className="text-lg font-bold text-[#111111]">{looksCount || 0}</p>
-            <p className="text-[11px] text-[#8A8A8A]">looks cr\u00e9\u00e9s</p>
+            <p className="text-[11px] text-[#8A8A8A]">looks créés</p>
           </div>
           <div className="text-center">
             <p className="text-lg font-bold text-[#111111]">{satisfaction || 0}%</p>
@@ -139,14 +139,14 @@ export default function StylistDetailPage() {
           </div>
           <div className="text-center">
             <p className="text-lg font-bold text-[#111111]">{experience || '0'}</p>
-            <p className="text-[11px] text-[#8A8A8A]">ans d&apos;exp\u00e9rience</p>
+            <p className="text-[11px] text-[#8A8A8A]">ans d&apos;expérience</p>
           </div>
         </div>
 
-        {/* Looks r\u00e9cents */}
+        {/* Looks récents */}
         <div className="mt-5">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-[#111111]">Looks r\u00e9cents</h3>
+            <h3 className="text-sm font-semibold text-[#111111]">Looks récents</h3>
           </div>
           {lookbooks === null ? (
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">

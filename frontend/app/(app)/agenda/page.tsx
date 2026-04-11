@@ -198,7 +198,7 @@ export default function AgendaPage() {
               type="button"
               onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
               className="w-9 h-9 rounded-full bg-[#F0EDE8] flex items-center justify-center"
-              aria-label="Mois pr\u00e9c\u00e9dent"
+              aria-label="Mois précédent"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6" />
@@ -297,7 +297,7 @@ export default function AgendaPage() {
           {upcoming.length === 0 ? (
             <div className="bg-white rounded-2xl p-8 text-center shadow-sm">
               <p className="text-sm font-medium text-[#111111]">
-                Aucun rendez-vous \u00e0 venir
+                Aucun rendez-vous à venir
               </p>
               <p className="text-xs text-[#8A8A8A] mt-1">
                 Ajoutez votre premier rendez-vous
@@ -326,7 +326,7 @@ export default function AgendaPage() {
                       </p>
                       <p className="text-xs text-[#8A8A8A] mt-0.5">
                         {format(d, 'HH:mm')}{' '}
-                        {e.duration_min && `\u00b7 ${e.duration_min} min`}
+                        {e.duration_min && `· ${e.duration_min} min`}
                       </p>
                       {e.zoom_link && (
                         <a
@@ -572,7 +572,7 @@ export default function AgendaPage() {
                   }
                   rows={2}
                   className="w-full bg-[#F7F5F2] rounded-2xl px-4 py-3 text-sm text-[#111111] focus:outline-none focus:ring-1 focus:ring-[#111111] resize-none"
-                  placeholder="Notes de s\u00e9ance, objectifs..."
+                  placeholder="Notes de séance, objectifs..."
                 />
               </div>
 

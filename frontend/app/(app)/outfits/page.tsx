@@ -121,7 +121,7 @@ export default function OutfitsPage() {
                   </p>
                   <p className="text-sm text-[#8A8A8A]">
                     {pieces} pi&egrave;ce{pieces > 1 ? 's' : ''}
-                    {look.occasion ? ` \u00b7 ${look.occasion.toLowerCase()}` : ''}
+                    {look.occasion ? ` · ${look.occasion.toLowerCase()}` : ''}
                   </p>
 
                   {/* Item thumbnails */}

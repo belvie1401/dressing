@@ -21,12 +21,12 @@ function LoginForm() {
     const err = searchParams.get('error');
     if (err) {
       const messages: Record<string, string> = {
-        google_denied: 'Connexion Google annul\u00e9e',
-        google_token_failed: '\u00c9chec de l\u2019authentification Google',
-        google_no_email: 'Aucun email associ\u00e9 au compte Google',
+        google_denied: 'Connexion Google annulée',
+        google_token_failed: 'Échec de l’authentification Google',
+        google_no_email: 'Aucun email associé au compte Google',
         google_server_error: 'Erreur serveur lors de la connexion Google',
-        invalid_token: 'Token invalide, veuillez r\u00e9essayer',
-        network: 'Erreur r\u00e9seau, veuillez r\u00e9essayer',
+        invalid_token: 'Token invalide, veuillez réessayer',
+        network: 'Erreur réseau, veuillez réessayer',
       };
       setError(messages[err] || 'Erreur de connexion');
     }
@@ -60,7 +60,7 @@ function LoginForm() {
       setMagicStatus('sent');
     } else {
       setMagicStatus('idle');
-      setError('Impossible d\u2019envoyer le lien. R\u00e9essayez dans un instant.');
+      setError('Impossible d’envoyer le lien. Réessayez dans un instant.');
     }
   };
 

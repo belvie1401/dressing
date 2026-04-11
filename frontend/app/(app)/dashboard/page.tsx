@@ -117,7 +117,7 @@ export default function DashboardPage() {
           }
           label="Mon dressing"
           value={wardrobeCount}
-          unit="v\u00eatements"
+          unit="vêtements"
           ctaLabel="Voir tout"
           ctaHref="/wardrobe"
         />
@@ -130,7 +130,7 @@ export default function DashboardPage() {
           }
           label="Mes looks"
           value={outfitsCount}
-          unit="cr\u00e9\u00e9s"
+          unit="créés"
           ctaLabel="Voir tout"
           ctaHref="/outfits"
         />
@@ -283,7 +283,7 @@ export default function DashboardPage() {
                   {outfitsCount === null ? (
                     <span className="inline-block h-3 w-24 rounded bg-[#F0EDE8] animate-pulse align-middle" />
                   ) : (
-                    `${challenge.current} / ${challenge.target} looks cr\u00e9\u00e9s`
+                    `${challenge.current} / ${challenge.target} looks créés`
                   )}
                 </p>
                 <div className="h-1.5 w-full rounded-full bg-[#F0EDE8]">

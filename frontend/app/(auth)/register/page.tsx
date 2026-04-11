@@ -19,12 +19,12 @@ export default function RegisterPage() {
     setError('');
 
     if (password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caract\u00e8res');
+      setError('Le mot de passe doit contenir au moins 6 caractères');
       return;
     }
 
     if (!role) {
-      setError('Veuillez choisir un r\u00f4le');
+      setError('Veuillez choisir un rôle');
       return;
     }
 
@@ -32,7 +32,7 @@ export default function RegisterPage() {
     if (success) {
       router.push('/onboarding');
     } else {
-      setError('Erreur lors de l\'inscription. Cet email est peut-\u00eatre d\u00e9j\u00e0 utilis\u00e9.');
+      setError('Erreur lors de l\'inscription. Cet email est peut-être déjà utilisé.');
     }
   };
 
@@ -95,7 +95,7 @@ export default function RegisterPage() {
             required
             minLength={6}
             className="w-full bg-white border border-[#EFEFEF] rounded-2xl px-4 py-3 text-[#111111] text-sm focus:outline-none focus:border-[#111111] placeholder:text-[#CFCFCF]"
-            placeholder="Minimum 6 caract\u00e8res"
+            placeholder="Minimum 6 caractères"
           />
         </div>
 
@@ -151,7 +151,7 @@ export default function RegisterPage() {
               Cr&eacute;ation en cours...
             </>
           ) : (
-            'Cr\u00e9er mon compte'
+            'Créer mon compte'
           )}
         </button>
 

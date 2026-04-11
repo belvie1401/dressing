@@ -106,7 +106,7 @@ export default function StylistsPage() {
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#111111] border-t-transparent" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="py-16 text-center text-sm text-[#8A8A8A]">Aucun styliste trouv\u00e9</div>
+        <div className="py-16 text-center text-sm text-[#8A8A8A]">Aucun styliste trouvé</div>
       ) : (
         <div className="space-y-3">
           {filtered.map((stylist) => {
@@ -138,7 +138,7 @@ export default function StylistsPage() {
                   )}
                   {specs && specs.length > 0 && (
                     <p className="mt-0.5 text-xs text-[#8A8A8A]">
-                      Sp\u00e9cialit\u00e9 : {specs.join(', ')}
+                      Spécialité : {specs.join(', ')}
                     </p>
                   )}
                   <div className="mt-1 flex items-center gap-2">
@@ -153,7 +153,7 @@ export default function StylistsPage() {
                   </div>
                 </div>
                 {price && (
-                  <span className="shrink-0 text-xs font-medium text-[#8A8A8A]">\u00c0 partir de {price}\u20ac</span>
+                  <span className="shrink-0 text-xs font-medium text-[#8A8A8A]">À partir de {price}€</span>
                 )}
               </a>
             );

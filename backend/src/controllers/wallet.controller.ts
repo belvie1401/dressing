@@ -24,7 +24,7 @@ export async function getWallet(req: Request, res: Response): Promise<void> {
     const userId = req.user!.userId;
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user || user.role !== 'STYLIST') {
-      res.status(403).json({ success: false, error: 'R\u00e9serv\u00e9 aux stylistes' });
+      res.status(403).json({ success: false, error: 'Réservé aux stylistes' });
       return;
     }
 
@@ -125,13 +125,13 @@ export async function recordSessionPayment(
     } = req.body;
 
     if (!stylist_id || typeof gross_amount !== 'number' || gross_amount <= 0) {
-      res.status(400).json({ success: false, error: 'Donn\u00e9es invalides' });
+      res.status(400).json({ success: false, error: 'Données invalides' });
       return;
     }
 
     const stylist = await prisma.user.findUnique({ where: { id: stylist_id } });
     if (!stylist || stylist.role !== 'STYLIST') {
-      res.status(404).json({ success: false, error: 'Styliste non trouv\u00e9' });
+      res.status(404).json({ success: false, error: 'Styliste non trouvé' });
       return;
     }
 
@@ -188,13 +188,13 @@ export async function completeTransaction(
       return;
     }
     if (tx.status !== 'PENDING') {
-      res.status(400).json({ success: false, error: 'Transaction d\u00e9j\u00e0 trait\u00e9e' });
+      res.status(400).json({ success: false, error: 'Transaction déjà traitée' });
       return;
     }
 
     // Only the stylist owner or the client can trigger completion
     if (tx.stylist_id !== userId && tx.client_id !== userId) {
-      res.status(403).json({ success: false, error: 'Acc\u00e8s refus\u00e9' });
+      res.status(403).json({ success: false, error: 'Accès refusé' });
       return;
     }
 
@@ -246,7 +246,7 @@ export async function withdraw(req: Request, res: Response): Promise<void> {
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user || user.role !== 'STYLIST') {
-      res.status(403).json({ success: false, error: 'R\u00e9serv\u00e9 aux stylistes' });
+      res.status(403).json({ success: false, error: 'Réservé aux stylistes' });
       return;
     }
 
