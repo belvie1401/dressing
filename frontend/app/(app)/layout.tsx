@@ -73,8 +73,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (!token) return null;
 
-  // /stylist-dashboard has its own dedicated layout (sidebar + top bar + mobile nav)
-  if (pathname === '/stylist-dashboard') {
+  // /dashboard and /stylist-dashboard have their own dedicated layouts
+  // (sidebar + main + right panel/top bar + mobile nav fallback)
+  if (pathname === '/dashboard' || pathname === '/stylist-dashboard') {
     return <>{children}</>;
   }
 
