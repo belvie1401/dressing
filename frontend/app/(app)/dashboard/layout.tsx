@@ -32,8 +32,10 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Mon dressing',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2a2 2 0 0 0-2 2 2 2 0 0 0 1 1.73L12 7l9 5H3l9-5" />
-        <path d="M3 12v2h18v-2" />
+        <circle cx="12" cy="4" r="2" />
+        <line x1="12" y1="6" x2="12" y2="8" />
+        <polyline points="3,15 12,8 21,15" />
+        <line x1="3" y1="15" x2="21" y2="15" />
       </svg>
     ),
   },
@@ -126,7 +128,10 @@ const STATS = [
     label: 'port\u00e9s',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2a2 2 0 0 0-2 2 2 2 0 0 0 1 1.73L12 7l9 5H3l9-5" />
+        <circle cx="12" cy="4" r="2" />
+        <line x1="12" y1="6" x2="12" y2="8" />
+        <polyline points="3,15 12,8 21,15" />
+        <line x1="3" y1="15" x2="21" y2="15" />
       </svg>
     ),
   },
@@ -144,8 +149,8 @@ const STATS = [
     label: 'co\u00fbt par port',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <polyline points="12 6 12 12 16 14" />
+        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+        <line x1="7" y1="7" x2="7.01" y2="7" strokeWidth="2.5" />
       </svg>
     ),
   },
@@ -200,7 +205,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 </span>
                 <span className="flex-1 truncate">{item.label}</span>
                 {item.badge ? (
-                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#F0EDE8] px-1 text-[10px] font-semibold text-[#111111]">
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#111111] px-1 text-[10px] font-bold text-white">
                     {item.badge}
                   </span>
                 ) : null}
@@ -610,7 +615,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     </span>
                     <span className="flex-1">{item.label}</span>
                     {item.badge ? (
-                      <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#F0EDE8] px-1 text-[10px] font-semibold text-[#111111]">
+                      <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#111111] px-1 text-[10px] font-bold text-white">
                         {item.badge}
                       </span>
                     ) : null}

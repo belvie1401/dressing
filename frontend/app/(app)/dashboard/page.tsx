@@ -38,11 +38,11 @@ const STAT_CARDS: StatCard[] = [
 
 // Thumbnails displayed in each stat card header
 const DRESSING_THUMB =
-  'https://images.unsplash.com/photo-1594938298603-c8148c4b4057?w=120&h=120&fit=crop';
+  'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=120&h=160&fit=crop';
 const LOOKS_THUMBS = [
-  'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=80&h=80&fit=crop',
-  'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=80&h=80&fit=crop',
-  'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=80&h=80&fit=crop',
+  'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=80&h=100&fit=crop',
+  'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=80&h=100&fit=crop',
+  'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=80&h=100&fit=crop',
 ];
 const SESSION_AVATARS = [
   'https://i.pravatar.cc/40?img=47',
@@ -61,17 +61,17 @@ const RECOMMANDATIONS: Look[] = [
   {
     name: 'Look pour le bureau',
     pieces: 4,
-    img: 'https://images.unsplash.com/photo-1594938298603-c8148c4b4057?w=500&h=650&fit=crop',
+    img: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=500&h=650&fit=crop',
   },
   {
     name: 'Look d\u00e9contract\u00e9',
     pieces: 5,
-    img: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&h=650&fit=crop',
+    img: 'https://images.unsplash.com/photo-1485462537746-965f33f41199?w=500&h=650&fit=crop',
   },
   {
     name: 'Look minimaliste',
     pieces: 3,
-    img: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=500&h=650&fit=crop',
+    img: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=500&h=650&fit=crop',
   },
   {
     name: 'Look soir\u00e9e',
@@ -118,8 +118,10 @@ export default function DashboardPage() {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <path d="M12 2a2 2 0 0 0-2 2 2 2 0 0 0 1 1.73L12 7l9 5H3l9-5" />
-              <path d="M3 12v2h18v-2" />
+              <circle cx="12" cy="4" r="2" />
+              <line x1="12" y1="6" x2="12" y2="8" />
+              <polyline points="3,15 12,8 21,15" />
+              <line x1="3" y1="15" x2="21" y2="15" />
             </svg>
           }
           label={STAT_CARDS[0].label}
@@ -128,12 +130,12 @@ export default function DashboardPage() {
           ctaLabel={STAT_CARDS[0].ctaLabel}
           ctaHref={STAT_CARDS[0].ctaHref}
           thumb={
-            <div className="h-14 w-14 overflow-hidden rounded-xl bg-[#F0EDE8]">
+            <div className="h-[76px] w-[56px] overflow-hidden rounded-xl bg-[#F0EDE8]">
               <Image
                 src={DRESSING_THUMB}
                 alt=""
                 width={56}
-                height={56}
+                height={76}
                 className="h-full w-full object-cover"
               />
             </div>
@@ -376,11 +378,7 @@ export default function DashboardPage() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <polyline points="20 12 20 22 4 22 4 12" />
-                <rect x="2" y="7" width="20" height="5" />
-                <line x1="12" y1="22" x2="12" y2="7" />
-                <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
-                <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
               </svg>
             </div>
           </div>
