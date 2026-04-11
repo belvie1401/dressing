@@ -4,6 +4,27 @@ import type { User, ClothingItem, Message, Conversation } from '@/types';
 import { api } from './api';
 
 // Auth Store
+export type TutorialKey =
+  | 'client_dashboard'
+  | 'client_wardrobe'
+  | 'client_outfits'
+  | 'stylist_dashboard'
+  | 'stylist_clients'
+  | 'stylist_lookbooks';
+
+export type Tutorials = Record<TutorialKey, boolean>;
+
+const DEFAULT_TUTORIALS: Tutorials = {
+  client_dashboard: false,
+  client_wardrobe: false,
+  client_outfits: false,
+  stylist_dashboard: false,
+  stylist_clients: false,
+  stylist_lookbooks: false,
+};
+
+const TUTORIALS_LOCAL_KEY = 'lien-tutorials';
+
 interface AuthState {
   user: User | null;
   token: string | null;
@@ -11,6 +32,7 @@ interface AuthState {
   activeRole: 'CLIENT' | 'STYLIST';
   isDualRole: boolean;
   hasSeenTour: boolean;
+  tutorials: Tutorials;
   _hasHydrated: boolean;
   _setHasHydrated: (v: boolean) => void;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<boolean>;
@@ -21,6 +43,30 @@ interface AuthState {
   switchRole: (role: 'CLIENT' | 'STYLIST') => Promise<void>;
   activateStylistMode: () => Promise<void>;
   completeTour: () => void;
+  completeTutorial: (key: TutorialKey) => void;
+  resetTutorial: (key: TutorialKey) => void;
+  hasCompletedTutorial: (key: TutorialKey) => boolean;
+}
+
+function persistTutorialsToLocal(tutorials: Tutorials): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(TUTORIALS_LOCAL_KEY, JSON.stringify(tutorials));
+  } catch {
+    // ignore quota / privacy mode failures
+  }
+}
+
+function readTutorialsFromLocal(): Tutorials | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(TUTORIALS_LOCAL_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<Tutorials>;
+    return { ...DEFAULT_TUTORIALS, ...parsed };
+  } catch {
+    return null;
+  }
 }
 
 function resolveActiveRole(user: User): 'CLIENT' | 'STYLIST' {
@@ -39,6 +85,7 @@ export const useAuthStore = create<AuthState>()(
       activeRole: 'CLIENT' as 'CLIENT' | 'STYLIST',
       isDualRole: false,
       hasSeenTour: false,
+      tutorials: { ...DEFAULT_TUTORIALS },
       _hasHydrated: false,
       _setHasHydrated: (v) => set({ _hasHydrated: v }),
 
@@ -142,6 +189,24 @@ export const useAuthStore = create<AuthState>()(
         api.put('/auth/profile', { tour_completed: true });
         set({ hasSeenTour: true });
       },
+
+      completeTutorial: (key) => {
+        const next = { ...get().tutorials, [key]: true };
+        set({ tutorials: next });
+        persistTutorialsToLocal(next);
+        // Best-effort backend sync — server may ignore unknown fields.
+        api.put('/auth/profile', { tutorial_completed: { [key]: true } });
+      },
+
+      resetTutorial: (key) => {
+        const next = { ...get().tutorials, [key]: false };
+        set({ tutorials: next });
+        persistTutorialsToLocal(next);
+      },
+
+      hasCompletedTutorial: (key) => {
+        return get().tutorials[key] === true;
+      },
     }),
     {
       name: 'lien-auth',
@@ -151,9 +216,17 @@ export const useAuthStore = create<AuthState>()(
         activeRole: state.activeRole,
         isDualRole: state.isDualRole,
         hasSeenTour: state.hasSeenTour,
+        tutorials: state.tutorials,
       }),
       onRehydrateStorage: () => (state) => {
-        state?._setHasHydrated(true);
+        if (!state) return;
+        // Merge any standalone 'lien-tutorials' key (spec-named bucket)
+        // with whatever the persist layer rehydrated.
+        const fromLocal = readTutorialsFromLocal();
+        if (fromLocal) {
+          state.tutorials = { ...DEFAULT_TUTORIALS, ...state.tutorials, ...fromLocal };
+        }
+        state._setHasHydrated(true);
       },
     }
   )

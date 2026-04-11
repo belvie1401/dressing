@@ -17,6 +17,7 @@ type NavItem = {
   label: string;
   icon: ReactNode;
   badge?: number;
+  tourId?: string;
 };
 
 const NAV_BASE: NavItem[] = [
@@ -35,6 +36,7 @@ const NAV_BASE: NavItem[] = [
   {
     href: '/my-clients',
     label: 'Clientes',
+    tourId: 'clients-nav',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -47,6 +49,7 @@ const NAV_BASE: NavItem[] = [
   {
     href: '/lookbooks',
     label: 'Dressings clientes',
+    tourId: 'lookbooks-nav',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2C12 2 8 2 8 6H4l1 14h14l1-14h-4c0-4-4-4-4-4z" />
@@ -58,6 +61,7 @@ const NAV_BASE: NavItem[] = [
   {
     href: '/agenda',
     label: 'Rendez-vous',
+    tourId: 'agenda-nav',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="4" width="18" height="18" rx="2" />
@@ -70,6 +74,7 @@ const NAV_BASE: NavItem[] = [
   {
     href: '/messages',
     label: 'Messagerie',
+    tourId: 'messages-nav',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -165,6 +170,7 @@ export default function StylistDashboardLayout({ children }: { children: ReactNo
               <Link
                 key={item.href}
                 href={item.href}
+                {...(item.tourId ? { 'data-tour': item.tourId } : {})}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${
                   active
                     ? 'bg-[#F0EDE8] font-medium text-[#111111]'

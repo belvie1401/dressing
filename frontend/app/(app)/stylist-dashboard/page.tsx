@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import type { CalendarEntry } from '@/types';
+import StylistTutorial from '@/components/ui/StylistTutorial';
+import TutorialHelpButton from '@/components/ui/TutorialHelpButton';
 
 // ============ TYPES ============
 type StylistStats = {
@@ -131,9 +133,27 @@ export default function StylistDashboardPage() {
   const user = useAuthStore((s) => s.user);
   const isDualRole = useAuthStore((s) => s.isDualRole);
   const activateStylistMode = useAuthStore((s) => s.activateStylistMode);
+  const _hasHydrated = useAuthStore((s) => s._hasHydrated);
+  const tutorials = useAuthStore((s) => s.tutorials);
+  const resetTutorial = useAuthStore((s) => s.resetTutorial);
   const [activatingClient, setActivatingClient] = useState(false);
 
   const firstName = user?.name?.split(' ')[0] ?? '';
+
+  // Tutorial visibility
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  useEffect(() => {
+    if (!_hasHydrated) return;
+    if (!tutorials.stylist_dashboard) {
+      setShowTutorial(true);
+    }
+  }, [_hasHydrated, tutorials.stylist_dashboard]);
+
+  const restartTutorial = () => {
+    resetTutorial('stylist_dashboard');
+    setShowTutorial(true);
+  };
 
   // Data states
   const [stats, setStats] = useState<StylistStats | null>(null);
@@ -222,6 +242,17 @@ export default function StylistDashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-[1400px] px-5 py-6 lg:px-8 lg:py-10">
+      {/* ============ TUTORIAL ============ */}
+      {showTutorial && (
+        <StylistTutorial
+          firstName={firstName}
+          onClose={() => setShowTutorial(false)}
+        />
+      )}
+
+      {/* ============ HELP BUTTON ============ */}
+      <TutorialHelpButton onRestart={restartTutorial} />
+
       {/* ============ GREETING ============ */}
       <section className="mb-8">
         <p className="text-sm text-[#8A8A8A]">
@@ -243,7 +274,10 @@ export default function StylistDashboardPage() {
       </section>
 
       {/* ============ STATS ROW ============ */}
-      <section className="mb-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_280px]">
+      <section
+        data-tour="stylist-stats"
+        className="mb-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_280px]"
+      >
         <StatsCard
           icon="users"
           label="Clientes actives"
@@ -349,7 +383,7 @@ export default function StylistDashboardPage() {
       {/* ============ DRESSINGS CLIENTES + RIGHT SIDEBAR ============ */}
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
         {/* ---- Left: clients grid ---- */}
-        <div>
+        <div data-tour="clients-grid">
           <div className="mb-5 flex items-end justify-between">
             <div>
               <h2 className="font-serif text-2xl text-[#111111]">

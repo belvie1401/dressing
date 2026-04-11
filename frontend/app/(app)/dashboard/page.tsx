@@ -6,7 +6,8 @@ import Image from 'next/image';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import type { Outfit } from '@/types';
-import OnboardingTour from '@/components/ui/OnboardingTour';
+import DashboardTutorial from '@/components/ui/DashboardTutorial';
+import TutorialHelpButton from '@/components/ui/TutorialHelpButton';
 
 // ============ TYPES ============
 type CountResponse = { count: number };
@@ -23,8 +24,9 @@ function capitalize(name: string): string {
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
-  const hasSeenTour = useAuthStore((s) => s.hasSeenTour);
   const _hasHydrated = useAuthStore((s) => s._hasHydrated);
+  const tutorials = useAuthStore((s) => s.tutorials);
+  const resetTutorial = useAuthStore((s) => s.resetTutorial);
   const firstName = capitalize(user?.name?.split(' ')[0] ?? '');
 
   // Top stat cards — each a separate independent count
@@ -35,12 +37,20 @@ export default function DashboardPage() {
   // Recommandations — recent outfits
   const [recommendations, setRecommendations] = useState<Outfit[] | null>(null);
 
-  // Tour visibility — also check localStorage to survive page refresh
-  const [localTourDone, setLocalTourDone] = useState<boolean | null>(null);
+  // Tutorial visibility
+  const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
-    setLocalTourDone(localStorage.getItem('lien-tour-done') === 'true');
-  }, []);
+    if (!_hasHydrated) return;
+    if (!tutorials.client_dashboard) {
+      setShowTutorial(true);
+    }
+  }, [_hasHydrated, tutorials.client_dashboard]);
+
+  const restartTutorial = () => {
+    resetTutorial('client_dashboard');
+    setShowTutorial(true);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -67,14 +77,6 @@ export default function DashboardPage() {
     };
   }, []);
 
-  // Show tour for new users (registered < 24h ago) who haven't seen it
-  const isNewUser =
-    user?.created_at
-      ? Date.now() - new Date(user.created_at).getTime() < 86_400_000
-      : false;
-  const showTour =
-    _hasHydrated && localTourDone === false && !hasSeenTour && isNewUser;
-
   const challenge: ChallengeState = {
     target: 5,
     current: Math.min(outfitsCount ?? 0, 5),
@@ -86,10 +88,16 @@ export default function DashboardPage() {
 
   return (
     <>
-      {/* ============ ONBOARDING TOUR ============ */}
-      {showTour && (
-        <OnboardingTour onComplete={() => setLocalTourDone(true)} />
+      {/* ============ TUTORIAL ============ */}
+      {showTutorial && (
+        <DashboardTutorial
+          firstName={firstName}
+          onClose={() => setShowTutorial(false)}
+        />
       )}
+
+      {/* ============ HELP BUTTON ============ */}
+      <TutorialHelpButton onRestart={restartTutorial} />
 
       {/* ============ A. GREETING ============ */}
       <div className="mb-10">
@@ -153,7 +161,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ============ C. RECOMMANDATIONS POUR VOUS ============ */}
-      <section className="mb-12" data-tour="mes-looks">
+      <section className="mb-12" data-tour="look-du-jour">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="font-serif text-2xl text-[#111111]">
@@ -247,7 +255,10 @@ export default function DashboardPage() {
       </section>
 
       {/* ============ D. TWO BOTTOM CARDS ============ */}
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <section
+        data-tour="cette-semaine"
+        className="grid grid-cols-1 gap-4 md:grid-cols-2"
+      >
         {/* ----- Besoin d'inspiration ----- */}
         <div className="relative overflow-hidden rounded-2xl bg-[#EDE5DC] p-6">
           <div className="relative z-10">
