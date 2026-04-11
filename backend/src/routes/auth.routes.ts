@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { register, login, getMe, updateProfile, switchRole, activateStylist } from '../controllers/auth.controller';
 import { googleRedirect, googleCallback } from '../controllers/google-auth.controller';
 import { requestMagicLink, verifyMagicLink } from '../controllers/magic-link.controller';
+import { forgotPassword, verifyResetToken, resetPassword } from '../controllers/password-reset.controller';
 import { authenticate } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -20,5 +21,10 @@ router.get('/google/callback', googleCallback);
 // Magic link (passwordless)
 router.post('/magic-link', requestMagicLink);
 router.get('/verify', verifyMagicLink);
+
+// Password recovery
+router.post('/forgot-password', forgotPassword);
+router.get('/verify-reset-token', verifyResetToken);
+router.post('/reset-password', resetPassword);
 
 export default router;

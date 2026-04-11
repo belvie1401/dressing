@@ -267,6 +267,20 @@ CREATE INDEX IF NOT EXISTS "ClothingItem_user_id_photo_hash_idx" ON "ClothingIte
 ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "photo_back_url" TEXT;
 ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "photo_back_removed" TEXT;
 ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "has_360_view" BOOLEAN NOT NULL DEFAULT false;
+
+-- Password reset tokens
+CREATE TABLE IF NOT EXISTS "PasswordReset" (
+  "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
+  "user_id" TEXT NOT NULL,
+  "token" TEXT NOT NULL,
+  "expires_at" TIMESTAMP(3) NOT NULL,
+  "used" BOOLEAN NOT NULL DEFAULT false,
+  "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "PasswordReset_pkey" PRIMARY KEY ("id")
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "PasswordReset_token_key" ON "PasswordReset"("token");
+CREATE INDEX IF NOT EXISTS "PasswordReset_user_id_idx" ON "PasswordReset"("user_id");
+CREATE INDEX IF NOT EXISTS "PasswordReset_token_idx" ON "PasswordReset"("token");
 `;
 
 // Try multiple connection strategies

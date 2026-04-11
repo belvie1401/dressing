@@ -254,6 +254,18 @@ model MagicLinkToken {
   @@index([token])
 }
 
+model PasswordReset {
+  id         String   @id @default(cuid())
+  user_id    String
+  token      String   @unique
+  expires_at DateTime
+  used       Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  @@index([user_id])
+  @@index([token])
+}
+
 model StylistWallet {
   id                String   @id @default(cuid())
   stylist_id        String   @unique

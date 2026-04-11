@@ -84,22 +84,40 @@ export async function login(req: Request, res: Response): Promise<void> {
   try {
     const { email, password, remember_me } = req.body;
 
+    if (!email || !password) {
+      res.status(400).json({ success: false, error: 'INVALID_CREDENTIALS' });
+      return;
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || !user.style_profile) {
-      res.status(401).json({ success: false, error: 'Email ou mot de passe incorrect' });
+
+    // Email not registered → distinct code so the UI can guide to /register or /forgot
+    if (!user) {
+      res.status(404).json({ success: false, error: 'ACCOUNT_NOT_FOUND' });
+      return;
+    }
+
+    // Account exists but has been suspended
+    if ((user as any).suspended === true) {
+      res.status(403).json({ success: false, error: 'ACCOUNT_SUSPENDED' });
+      return;
+    }
+
+    if (!user.style_profile) {
+      res.status(401).json({ success: false, error: 'INVALID_CREDENTIALS' });
       return;
     }
 
     const profile = user.style_profile as Record<string, unknown>;
     const storedPassword = profile.password as string;
     if (!storedPassword) {
-      res.status(401).json({ success: false, error: 'Email ou mot de passe incorrect' });
+      res.status(401).json({ success: false, error: 'INVALID_CREDENTIALS' });
       return;
     }
 
     const valid = await bcrypt.compare(password, storedPassword);
     if (!valid) {
-      res.status(401).json({ success: false, error: 'Email ou mot de passe incorrect' });
+      res.status(401).json({ success: false, error: 'INVALID_CREDENTIALS' });
       return;
     }
 
@@ -133,7 +151,7 @@ export async function login(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ success: false, error: 'Erreur lors de la connexion' });
+    res.status(500).json({ success: false, error: 'SERVER_ERROR' });
   }
 }
 

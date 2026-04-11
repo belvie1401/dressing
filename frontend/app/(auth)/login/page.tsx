@@ -1,48 +1,203 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import type { User } from '@/types';
 import { useAuthStore } from '@/lib/store';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const REQUEST_TIMEOUT_MS = 10_000;
+const REMEMBER_EMAIL_KEY = 'lien_email';
+
+// ─── Backend error code → French message ──────────────────────────────────
+const ERROR_MESSAGES: Record<string, string> = {
+  INVALID_CREDENTIALS: 'Email ou mot de passe incorrect',
+  ACCOUNT_NOT_FOUND: 'Aucun compte trouv\u00e9 avec cet email',
+  ACCOUNT_SUSPENDED: 'Ce compte a \u00e9t\u00e9 suspendu. Contactez le support.',
+  SERVER_ERROR: 'Probl\u00e8me technique. R\u00e9essayez dans quelques instants.',
+};
+
+interface LoginResult {
+  ok: boolean;
+  user?: User;
+  token?: string;
+  /** Backend error code or one of: 'NETWORK', 'TIMEOUT' */
+  errorCode?: string;
+}
+
+/** Single login fetch with abort/timeout. Throws nothing — returns a result. */
+async function loginFetch(
+  email: string,
+  password: string,
+  rememberMe: boolean,
+): Promise<LoginResult> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, remember_me: rememberMe }),
+      signal: controller.signal,
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data?.success) {
+      return { ok: false, errorCode: data?.error || 'SERVER_ERROR' };
+    }
+    return { ok: true, user: data.data.user, token: data.data.token };
+  } catch (err: unknown) {
+    const e = err as { name?: string };
+    if (e?.name === 'AbortError') {
+      return { ok: false, errorCode: 'TIMEOUT' };
+    }
+    return { ok: false, errorCode: 'NETWORK' };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 function LoginForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
-  const [error, setError] = useState('');
-  const [magicStatus, setMagicStatus] = useState<'idle' | 'loading' | 'sent'>('idle');
-  const [magicSentTo, setMagicSentTo] = useState('');
-  const { login, requestMagicLink, isLoading } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Show error from Google OAuth redirect
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberEmail, setRememberEmail] = useState(true);
+  const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Magic link state
+  const [magicStatus, setMagicStatus] = useState<'idle' | 'loading' | 'sent'>('idle');
+  const [magicSentTo, setMagicSentTo] = useState('');
+
+  const { requestMagicLink } = useAuthStore();
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // OAuth redirect error from query string
   useEffect(() => {
     const err = searchParams.get('error');
     if (err) {
       const messages: Record<string, string> = {
-        google_denied: 'Connexion Google annulée',
-        google_token_failed: 'Échec de l’authentification Google',
-        google_no_email: 'Aucun email associé au compte Google',
+        google_denied: 'Connexion Google annul\u00e9e',
+        google_token_failed: 'Échec de l\u2019authentification Google',
+        google_no_email: 'Aucun email associ\u00e9 au compte Google',
         google_server_error: 'Erreur serveur lors de la connexion Google',
-        invalid_token: 'Token invalide, veuillez réessayer',
-        network: 'Erreur réseau, veuillez réessayer',
+        invalid_token: 'Token invalide, veuillez r\u00e9essayer',
+        network: 'Erreur r\u00e9seau, veuillez r\u00e9essayer',
       };
       setError(messages[err] || 'Erreur de connexion');
     }
   }, [searchParams]);
 
+  // Pre-fill email from "remember email" preference
+  useEffect(() => {
+    try {
+      const remembered = localStorage.getItem(REMEMBER_EMAIL_KEY);
+      if (remembered) {
+        setEmail(remembered);
+        setRememberEmail(true);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Cleanup any pending retry on unmount
+  useEffect(() => {
+    return () => {
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+    };
+  }, []);
+
+  const persistAndRedirect = useCallback(
+    (user: User, token: string) => {
+      localStorage.setItem('lien_token', token);
+      localStorage.setItem('lien_remember_me', rememberMe ? 'true' : 'false');
+      const activeRole: 'CLIENT' | 'STYLIST' =
+        user.active_role === 'STYLIST'
+          ? 'STYLIST'
+          : user.active_role === 'CLIENT'
+            ? 'CLIENT'
+            : user.role === 'STYLIST'
+              ? 'STYLIST'
+              : 'CLIENT';
+      useAuthStore.setState({
+        user,
+        token,
+        activeRole,
+        isDualRole: user.is_dual_role ?? false,
+      });
+      router.push(activeRole === 'STYLIST' ? '/stylist-dashboard' : '/dashboard');
+    },
+    [rememberMe, router],
+  );
+
+  /**
+   * Run a login attempt. On a network failure (NOT credential failure),
+   * the first call schedules a single retry 3 s later.
+   */
+  const attemptLogin = useCallback(
+    async (attempt: number) => {
+      const result = await loginFetch(email, password, rememberMe);
+
+      if (result.ok && result.user && result.token) {
+        // Save remembered email preference
+        try {
+          if (rememberEmail) {
+            localStorage.setItem(REMEMBER_EMAIL_KEY, email);
+          } else {
+            localStorage.removeItem(REMEMBER_EMAIL_KEY);
+          }
+        } catch {
+          // ignore
+        }
+        persistAndRedirect(result.user, result.token);
+        return;
+      }
+
+      const code = result.errorCode || 'SERVER_ERROR';
+
+      // Network failure → auto-retry once after 3 s
+      if ((code === 'NETWORK' || code === 'TIMEOUT') && attempt === 0) {
+        setInfo(
+          'Probl\u00e8me de connexion r\u00e9seau. Nouvelle tentative dans 3s...',
+        );
+        setError('');
+        retryTimerRef.current = setTimeout(() => {
+          setInfo('');
+          attemptLogin(1).finally(() => setLoading(false));
+        }, 3000);
+        return;
+      }
+
+      // Final failure → display message
+      const message =
+        code === 'TIMEOUT'
+          ? 'Connexion trop lente. R\u00e9essayez.'
+          : code === 'NETWORK'
+            ? 'Probl\u00e8me de connexion r\u00e9seau. R\u00e9essayez.'
+            : ERROR_MESSAGES[code] || ERROR_MESSAGES.SERVER_ERROR;
+      setError(message);
+      setInfo('');
+      setLoading(false);
+    },
+    [email, password, rememberMe, rememberEmail, persistAndRedirect],
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setError('');
-
-    const success = await login(email, password, rememberMe);
-    if (success) {
-      const role = useAuthStore.getState().user?.role;
-      router.push(role === 'STYLIST' ? '/stylist-dashboard' : '/dashboard');
-    } else {
-      setError('Email ou mot de passe incorrect');
-    }
+    setInfo('');
+    setLoading(true);
+    // attemptLogin handles its own setLoading(false) — we don't wrap in finally
+    // because the auto-retry path needs to keep loading=true across the 3s wait.
+    attemptLogin(0).catch(() => setLoading(false));
   };
 
   const handleMagicLink = async () => {
@@ -60,7 +215,7 @@ function LoginForm() {
       setMagicStatus('sent');
     } else {
       setMagicStatus('idle');
-      setError('Impossible d’envoyer le lien. Réessayez dans un instant.');
+      setError('Impossible d\u2019envoyer le lien. R\u00e9essayez dans un instant.');
     }
   };
 
@@ -81,9 +236,7 @@ function LoginForm() {
             <br />
             Cliquez dessus pour vous connecter instantan&eacute;ment.
           </p>
-          <p className="text-xs text-[#8A8A8A] mt-4">
-            Le lien expire dans 15 minutes.
-          </p>
+          <p className="text-xs text-[#8A8A8A] mt-4">Le lien expire dans 15 minutes.</p>
         </div>
         <button
           type="button"
@@ -100,15 +253,27 @@ function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-sm mx-auto w-full">
-      {error && (
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-4 max-w-sm mx-auto w-full"
+    >
+      {error ? (
         <div className="rounded-2xl border border-[#D4785C]/20 bg-[#FFF8F6] px-4 py-3 text-sm text-[#D4785C]">
           {error}
         </div>
-      )}
+      ) : null}
+
+      {info ? (
+        <div className="rounded-2xl border border-[#C6A47E]/30 bg-[#FFFBF8] px-4 py-3 text-sm text-[#8A8A8A] flex items-center gap-2">
+          <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#C6A47E] border-t-transparent" />
+          {info}
+        </div>
+      ) : null}
 
       <div>
-        <label className="text-xs text-[#8A8A8A] mb-1 font-medium uppercase tracking-wide block">Email</label>
+        <label className="text-xs text-[#8A8A8A] mb-1 font-medium uppercase tracking-wide block">
+          Email
+        </label>
         <input
           type="email"
           value={email}
@@ -119,8 +284,21 @@ function LoginForm() {
         />
       </div>
 
+      {/* Remember email */}
+      <label className="flex items-center gap-2 cursor-pointer select-none -mt-2">
+        <input
+          type="checkbox"
+          checked={rememberEmail}
+          onChange={(e) => setRememberEmail(e.target.checked)}
+          className="w-4 h-4 accent-[#111111] cursor-pointer"
+        />
+        <span className="text-xs text-[#8A8A8A]">M&eacute;moriser mon email</span>
+      </label>
+
       <div>
-        <label className="text-xs text-[#8A8A8A] mb-1 font-medium uppercase tracking-wide block">Mot de passe</label>
+        <label className="text-xs text-[#8A8A8A] mb-1 font-medium uppercase tracking-wide block">
+          Mot de passe
+        </label>
         <input
           type="password"
           value={password}
@@ -129,9 +307,15 @@ function LoginForm() {
           className="w-full bg-white border border-[#EFEFEF] rounded-2xl px-4 py-3 text-[#111111] text-sm focus:outline-none focus:border-[#111111] placeholder:text-[#CFCFCF]"
           placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;"
         />
+        <Link
+          href="/forgot-password"
+          className="text-xs text-[#8A8A8A] underline cursor-pointer mt-2 inline-block"
+        >
+          Mot de passe oubli&eacute; ?
+        </Link>
       </div>
 
-      {/* Remember me */}
+      {/* Stay-signed-in */}
       <label className="flex items-center gap-2 cursor-pointer select-none">
         <input
           type="checkbox"
@@ -144,10 +328,10 @@ function LoginForm() {
 
       <button
         type="submit"
-        disabled={isLoading || magicStatus === 'loading'}
+        disabled={loading || magicStatus === 'loading'}
         className="bg-[#111111] text-white rounded-full w-full py-4 text-sm font-medium disabled:opacity-60 flex items-center justify-center gap-2"
       >
-        {isLoading ? (
+        {loading ? (
           <>
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
             Connexion en cours...
@@ -168,7 +352,7 @@ function LoginForm() {
       <button
         type="button"
         onClick={handleMagicLink}
-        disabled={isLoading || magicStatus === 'loading'}
+        disabled={loading || magicStatus === 'loading'}
         className="bg-[#F0EDE8] text-[#111111] rounded-full w-full py-4 text-sm font-medium disabled:opacity-60 flex items-center justify-center gap-2"
       >
         {magicStatus === 'loading' ? (
@@ -190,8 +374,7 @@ function LoginForm() {
       <button
         type="button"
         onClick={() => {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-          window.location.href = `${apiUrl}/auth/google`;
+          window.location.href = `${API_URL}/auth/google`;
         }}
         className="bg-white border border-[#EFEFEF] rounded-full w-full py-4 text-sm text-[#111111] font-medium flex items-center justify-center gap-2"
       >
@@ -218,10 +401,14 @@ export default function LoginPage() {
       </a>
 
       <div className="text-center mt-6 mb-2">
-        <Link href="/" className="font-serif text-2xl text-[#111111] no-underline">LIEN</Link>
+        <Link href="/" className="font-serif text-2xl text-[#111111] no-underline">
+          LIEN
+        </Link>
       </div>
       <h1 className="font-serif text-xl text-center text-[#111111]">Bon retour</h1>
-      <p className="text-sm text-[#8A8A8A] text-center mb-8">Connectez-vous &agrave; votre compte</p>
+      <p className="text-sm text-[#8A8A8A] text-center mb-8">
+        Connectez-vous &agrave; votre compte
+      </p>
 
       <Suspense fallback={null}>
         <LoginForm />
@@ -229,7 +416,9 @@ export default function LoginPage() {
 
       <p className="text-sm text-[#8A8A8A] text-center mt-4">
         Pas encore de compte ?{' '}
-        <a href="/register" className="font-semibold text-[#111111]">S&apos;inscrire</a>
+        <a href="/register" className="font-semibold text-[#111111]">
+          S&apos;inscrire
+        </a>
       </p>
     </div>
   );
