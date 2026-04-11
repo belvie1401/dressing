@@ -97,6 +97,8 @@ model User {
   wallet              StylistWallet?
   stylist_transactions Transaction[]  @relation("StylistTransactions")
   client_transactions  Transaction[]  @relation("ClientTransactions")
+  notifications       Notification[]
+  sent_broadcasts     AdminBroadcast[] @relation("BroadcastSender")
 }
 
 model ClothingItem {
@@ -281,4 +283,46 @@ model Transaction {
 
   @@index([stylist_id])
   @@index([status])
+}
+
+// ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
+// Per-user notification record. `user_id = null` means broadcast (rare in
+// practice — broadcasts are fanned out into one row per recipient at send time
+// so the unread count + read state stays per-user).
+model Notification {
+  id          String    @id @default(cuid())
+  user_id     String?
+  user        User?     @relation(fields: [user_id], references: [id])
+  type        String    // PROMO | ALERT | INFO | LIMIT | SYSTEM
+  title       String
+  message     String
+  link        String?
+  link_label  String?
+  read        Boolean   @default(false)
+  sent_at     DateTime  @default(now())
+  expires_at  DateTime?
+  broadcast_id String?  // optional FK back to AdminBroadcast for analytics
+
+  @@index([user_id, read, sent_at])
+  @@index([broadcast_id])
+}
+
+// Admin-side broadcast log. One row per "send notification" admin action,
+// regardless of how many users it fans out to.
+model AdminBroadcast {
+  id          String    @id @default(cuid())
+  type        String    // PROMO | ALERT | INFO | LIMIT | SYSTEM
+  title       String
+  message     String
+  target      String    // ALL | CLIENTS | STYLISTS | SPECIFIC
+  link        String?
+  link_label  String?
+  expires_at  DateTime?
+  sent_at     DateTime  @default(now())
+  sent_by     String
+  sender      User      @relation("BroadcastSender", fields: [sent_by], references: [id])
+  read_count  Int       @default(0)
+  total_sent  Int       @default(0)
+
+  @@index([sent_at])
 }

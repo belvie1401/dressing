@@ -207,6 +207,48 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
+// ─── Notifications ─────────────────────────────────────────────────────────
+export type NotificationType = 'PROMO' | 'ALERT' | 'INFO' | 'LIMIT' | 'SYSTEM';
+export type BroadcastTarget = 'ALL' | 'CLIENTS' | 'STYLISTS' | 'SPECIFIC';
+
+export interface Notification {
+  id: string;
+  user_id: string | null;
+  type: NotificationType;
+  title: string;
+  message: string;
+  link?: string | null;
+  link_label?: string | null;
+  read: boolean;
+  sent_at: string;
+  expires_at?: string | null;
+  broadcast_id?: string | null;
+}
+
+export interface NotificationListResponse {
+  items: Notification[];
+  total: number;
+  unread_count: number;
+  page: number;
+  limit: number;
+}
+
+export interface AdminBroadcast {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  target: BroadcastTarget;
+  link?: string | null;
+  link_label?: string | null;
+  expires_at?: string | null;
+  sent_at: string;
+  sent_by: string;
+  read_count: number;
+  total_sent: number;
+  sender?: { id: string; name: string; email: string } | null;
+}
+
 // Wallet
 export type TransactionStatus = 'PENDING' | 'COMPLETED' | 'REFUNDED' | 'WITHDRAWN';
 

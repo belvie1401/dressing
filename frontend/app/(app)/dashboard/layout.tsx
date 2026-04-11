@@ -10,6 +10,7 @@ import type { CalendarEntry } from '@/types';
 import RoleSwitcher from '@/components/ui/RoleSwitcher';
 import ShareModal from '@/components/ui/ShareModal';
 import BottomNav from '@/components/ui/BottomNav';
+import NotificationBell from '@/components/ui/NotificationBell';
 
 // ============ SIDEBAR NAV ITEMS ============
 type NavItem = {
@@ -291,6 +292,27 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
         {/* Bottom block */}
         <div className="mt-auto">
+          {user?.role === 'ADMIN' ? (
+            <div className="mb-2 border-t border-[#EFEFEF] pt-3">
+              <p className="mb-1 px-3 text-[10px] font-medium uppercase tracking-widest text-[#C6A47E]">
+                Admin
+              </p>
+              <Link
+                href="/admin/notifications"
+                className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all ${
+                  pathname?.startsWith('/admin/notifications')
+                    ? 'bg-[#F0EDE8] font-medium text-[#111111]'
+                    : 'text-[#8A8A8A] hover:bg-[#F7F5F2] hover:text-[#111111]'
+                }`}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+                Notifications
+              </Link>
+            </div>
+          ) : null}
           <Link
             href="/profile"
             className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#8A8A8A] transition-all hover:bg-[#F7F5F2] hover:text-[#111111]"
@@ -379,19 +401,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 <line x1="12" y1="2" x2="12" y2="15" />
               </svg>
             </button>
-            <Link
-              href="/messages"
-              aria-label="Notifications"
-              className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white shadow-sm transition-colors hover:bg-[#F0EDE8]"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              {unreadMessages > 0 ? (
-                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#D4785C]" />
-              ) : null}
-            </Link>
+            <NotificationBell variant="light" />
             <Link
               href="/wardrobe/add"
               className="flex items-center gap-2 rounded-full bg-[#111111] px-5 py-3 text-xs font-medium text-white transition-colors hover:bg-[#2a2a2a]"
@@ -713,6 +723,28 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   </Link>
                 );
               })}
+              {user?.role === 'ADMIN' ? (
+                <div className="mt-3 border-t border-[#EFEFEF] pt-3">
+                  <p className="mb-1 px-3 text-[10px] font-medium uppercase tracking-widest text-[#C6A47E]">
+                    Admin
+                  </p>
+                  <Link
+                    href="/admin/notifications"
+                    onClick={() => setMobileOpen(false)}
+                    className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm ${
+                      pathname?.startsWith('/admin/notifications')
+                        ? 'bg-[#F0EDE8] font-medium text-[#111111]'
+                        : 'text-[#8A8A8A]'
+                    }`}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                    Notifications
+                  </Link>
+                </div>
+              ) : null}
             </nav>
           </aside>
         </div>

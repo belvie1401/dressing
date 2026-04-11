@@ -9,6 +9,7 @@ import { api } from '@/lib/api';
 import RoleSwitcher from '@/components/ui/RoleSwitcher';
 import ShareModal from '@/components/ui/ShareModal';
 import BottomNav from '@/components/ui/BottomNav';
+import NotificationBell from '@/components/ui/NotificationBell';
 
 type NavItem = {
   href: string;
@@ -194,6 +195,28 @@ export default function StylistDashboardLayout({ children }: { children: ReactNo
             </svg>
             Param&egrave;tres
           </Link>
+
+          {user?.role === 'ADMIN' ? (
+            <div className="mt-3 border-t border-[#EFEFEF] pt-3">
+              <p className="mb-1 px-3 text-[10px] font-medium uppercase tracking-widest text-[#C6A47E]">
+                Admin
+              </p>
+              <Link
+                href="/admin/notifications"
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${
+                  pathname?.startsWith('/admin/notifications')
+                    ? 'bg-[#F0EDE8] font-medium text-[#111111]'
+                    : 'text-[#8A8A8A] hover:bg-[#F7F5F2] hover:text-[#111111]'
+                }`}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+                Notifications
+              </Link>
+            </div>
+          ) : null}
         </nav>
 
         {/* User card */}
@@ -280,21 +303,7 @@ export default function StylistDashboardLayout({ children }: { children: ReactNo
               </svg>
             </button>
 
-            <Link
-              href="/messages"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full bg-[#F7F5F2] hover:bg-[#F0EDE8] transition-colors"
-              aria-label="Notifications"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              {unreadMessages > 0 ? (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#D4785C] text-[9px] font-bold text-white">
-                  {unreadMessages}
-                </span>
-              ) : null}
-            </Link>
+            <NotificationBell variant="compact" />
 
             <Link
               href="/wardrobe/add"
@@ -364,6 +373,28 @@ export default function StylistDashboardLayout({ children }: { children: ReactNo
                     </Link>
                   );
                 })}
+                {user?.role === 'ADMIN' ? (
+                  <div className="mt-3 border-t border-[#EFEFEF] pt-3">
+                    <p className="mb-1 px-3 text-[10px] font-medium uppercase tracking-widest text-[#C6A47E]">
+                      Admin
+                    </p>
+                    <Link
+                      href="/admin/notifications"
+                      onClick={() => setMobileOpen(false)}
+                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm ${
+                        pathname?.startsWith('/admin/notifications')
+                          ? 'bg-[#F0EDE8] font-medium text-[#111111]'
+                          : 'text-[#8A8A8A]'
+                      }`}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                      </svg>
+                      Notifications
+                    </Link>
+                  </div>
+                ) : null}
               </nav>
             </aside>
           </div>

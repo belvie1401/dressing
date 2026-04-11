@@ -215,6 +215,28 @@ export default function Sidebar() {
           </svg>
           Param&egrave;tres
         </a>
+
+        {user?.role === 'ADMIN' ? (
+          <div className="mt-3 border-t border-[#EFEFEF] pt-3">
+            <p className="mb-1 px-3 text-[10px] font-medium uppercase tracking-widest text-[#C6A47E]">
+              Admin
+            </p>
+            <Link
+              href="/admin/notifications"
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${
+                pathname?.startsWith('/admin/notifications')
+                  ? 'bg-[#F0EDE8] font-medium text-[#111111]'
+                  : 'text-[#8A8A8A] hover:bg-[#F7F5F2] hover:text-[#111111]'
+              }`}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              Notifications
+            </Link>
+          </div>
+        ) : null}
       </nav>
 
       {/* User profile at bottom */}

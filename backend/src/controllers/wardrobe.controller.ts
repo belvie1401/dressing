@@ -1,6 +1,31 @@
 import { Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import { uploadImage, removeBackground } from '../services/cloudinary.service';
+import { createNotification } from './notifications.controller';
+
+// ─── Plan limits ─────────────────────────────────────────────────────────────
+const FREE_PLAN_ITEM_LIMIT = 50;
+const FREE_PLAN_WARN_AT = 45;
+
+/**
+ * Returns the current plan for a user. Absent subscription = FREE.
+ */
+async function getUserPlan(userId: string): Promise<string> {
+  try {
+    const sub = await prisma.subscription.findUnique({
+      where: { user_id: userId },
+      select: { plan: true, status: true },
+    });
+    if (!sub) return 'FREE';
+    // Treat any non-active sub as FREE
+    if (sub.status && sub.status !== 'active' && sub.status !== 'trialing') {
+      return 'FREE';
+    }
+    return sub.plan;
+  } catch {
+    return 'FREE';
+  }
+}
 
 // ─── Shared photo upload helper ──────────────────────────────────────────────
 // Uploads a single buffer to Cloudinary (with optional bg removal) and
@@ -129,6 +154,32 @@ export async function createItem(req: Request, res: Response): Promise<void> {
 
     const userId = req.user!.userId;
 
+    // ── FREE plan hard limit (50 items) ──
+    // Block additional adds and surface a friendly LIMIT notification.
+    const plan = await getUserPlan(userId);
+    if (plan === 'FREE') {
+      const currentCount = await prisma.clothingItem.count({
+        where: { user_id: userId },
+      });
+      if (currentCount >= FREE_PLAN_ITEM_LIMIT) {
+        // Best-effort: surface a persistent ALERT notification
+        await createNotification({
+          user_id: userId,
+          type: 'ALERT',
+          title: 'Limite atteinte',
+          message: `Vous avez atteint la limite de ${FREE_PLAN_ITEM_LIMIT} vêtements du plan Gratuit.`,
+          link: '/pricing',
+          link_label: 'Passer au Pro',
+        });
+        res.status(403).json({
+          success: false,
+          error: 'PLAN_LIMIT_REACHED',
+          message: `Limite de ${FREE_PLAN_ITEM_LIMIT} vêtements atteinte sur le plan Gratuit.`,
+        });
+        return;
+      }
+    }
+
     // ── Photo deduplication check ──
     // Wrapped in its own try/catch so a missing column (before DB migration runs)
     // never blocks item creation — worst case we skip the check.
@@ -197,6 +248,37 @@ export async function createItem(req: Request, res: Response): Promise<void> {
         ai_tags: ai_tags ? (typeof ai_tags === 'string' ? JSON.parse(ai_tags) : ai_tags) : undefined,
       },
     });
+
+    // ── Auto-trigger LIMIT notifications (FREE plan only) ──
+    if (plan === 'FREE') {
+      try {
+        const newCount = await prisma.clothingItem.count({
+          where: { user_id: userId },
+        });
+        if (newCount === FREE_PLAN_WARN_AT) {
+          await createNotification({
+            user_id: userId,
+            type: 'LIMIT',
+            title: 'Limite bientôt atteinte',
+            message:
+              'Il vous reste 5 emplacements sur votre plan Gratuit. Passez au plan Pro pour continuer.',
+            link: '/pricing',
+            link_label: 'Voir les plans',
+          });
+        } else if (newCount === FREE_PLAN_ITEM_LIMIT) {
+          await createNotification({
+            user_id: userId,
+            type: 'ALERT',
+            title: 'Limite atteinte',
+            message: `Vous avez atteint la limite de ${FREE_PLAN_ITEM_LIMIT} vêtements du plan Gratuit.`,
+            link: '/pricing',
+            link_label: 'Passer au Pro',
+          });
+        }
+      } catch {
+        // Notification creation must never block item creation
+      }
+    }
 
     res.status(201).json({ success: true, data: item });
   } catch (error) {

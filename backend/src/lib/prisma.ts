@@ -275,6 +275,45 @@ CREATE TABLE IF NOT EXISTS "Transaction" (
 );
 DO $$ BEGIN CREATE INDEX "Transaction_stylist_id_idx" ON "Transaction"("stylist_id"); EXCEPTION WHEN duplicate_table THEN null; END $$;
 DO $$ BEGIN CREATE INDEX "Transaction_status_idx" ON "Transaction"("status"); EXCEPTION WHEN duplicate_table THEN null; END $$;
+
+-- ── NOTIFICATION ──────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS "Notification" (
+  "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
+  "user_id" TEXT,
+  "type" TEXT NOT NULL,
+  "title" TEXT NOT NULL,
+  "message" TEXT NOT NULL,
+  "link" TEXT,
+  "link_label" TEXT,
+  "read" BOOLEAN NOT NULL DEFAULT false,
+  "sent_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "expires_at" TIMESTAMP(3),
+  "broadcast_id" TEXT,
+  CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
+);
+ALTER TABLE "Notification" ADD COLUMN IF NOT EXISTS "broadcast_id" TEXT;
+DO $$ BEGIN ALTER TABLE "Notification" ADD CONSTRAINT "Notification_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE; EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE INDEX "Notification_user_id_read_sent_at_idx" ON "Notification"("user_id", "read", "sent_at"); EXCEPTION WHEN duplicate_table THEN null; END $$;
+DO $$ BEGIN CREATE INDEX "Notification_broadcast_id_idx" ON "Notification"("broadcast_id"); EXCEPTION WHEN duplicate_table THEN null; END $$;
+
+-- ── ADMIN BROADCAST ──────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS "AdminBroadcast" (
+  "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
+  "type" TEXT NOT NULL,
+  "title" TEXT NOT NULL,
+  "message" TEXT NOT NULL,
+  "target" TEXT NOT NULL,
+  "link" TEXT,
+  "link_label" TEXT,
+  "expires_at" TIMESTAMP(3),
+  "sent_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "sent_by" TEXT NOT NULL,
+  "read_count" INTEGER NOT NULL DEFAULT 0,
+  "total_sent" INTEGER NOT NULL DEFAULT 0,
+  CONSTRAINT "AdminBroadcast_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "AdminBroadcast_sent_by_fkey" FOREIGN KEY ("sent_by") REFERENCES "User"("id") ON DELETE CASCADE
+);
+DO $$ BEGIN CREATE INDEX "AdminBroadcast_sent_at_idx" ON "AdminBroadcast"("sent_at"); EXCEPTION WHEN duplicate_table THEN null; END $$;
 `;
 
 let prisma: PrismaClient;

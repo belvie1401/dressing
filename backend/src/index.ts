@@ -20,6 +20,7 @@ import subscriptionsRoutes from './routes/subscriptions.routes';
 import walletRoutes from './routes/wallet.routes';
 import referralRoutes from './routes/referral.routes';
 import activityRoutes from './routes/activity.routes';
+import notificationsRoutes, { adminRouter as adminNotificationsRouter } from './routes/notifications.routes';
 
 dotenv.config();
 
@@ -61,6 +62,8 @@ app.use('/api/subscriptions', subscriptionsRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/referral', referralRoutes);
 app.use('/api/activity', activityRoutes);
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/admin', adminNotificationsRouter);
 
 // Health check
 app.get('/api/health', (_req: any, res: any) => {
