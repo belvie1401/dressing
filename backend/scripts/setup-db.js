@@ -262,6 +262,11 @@ UPDATE "User" SET "referral_code" = 'LIEN-' || UPPER(SUBSTRING("id", 1, 6)) WHER
 ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "name" TEXT;
 ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "photo_hash" TEXT;
 CREATE INDEX IF NOT EXISTS "ClothingItem_user_id_photo_hash_idx" ON "ClothingItem"("user_id", "photo_hash");
+
+-- Clothing item: back photo + 360° view
+ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "photo_back_url" TEXT;
+ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "photo_back_removed" TEXT;
+ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "has_360_view" BOOLEAN NOT NULL DEFAULT false;
 `;
 
 // Try multiple connection strategies

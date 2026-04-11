@@ -2,6 +2,66 @@ import { Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import { uploadImage, removeBackground } from '../services/cloudinary.service';
 
+// ─── Shared photo upload helper ──────────────────────────────────────────────
+// Uploads a single buffer to Cloudinary (with optional bg removal) and
+// gracefully falls back to a base64 data URI when credentials are missing
+// or the upload fails. Returns { url, bgUrl } where `url` is always set.
+async function processPhotoBuffer(
+  file: Express.Multer.File,
+  removeBg: boolean,
+): Promise<{ url: string; bgUrl?: string }> {
+  let url = '';
+  let bgUrl: string | undefined;
+
+  const cloudinaryConfigured =
+    process.env.CLOUDINARY_CLOUD_NAME &&
+    process.env.CLOUDINARY_CLOUD_NAME !== 'placeholder' &&
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_KEY !== 'placeholder';
+
+  if (cloudinaryConfigured) {
+    try {
+      const result = await uploadImage(file.buffer);
+      url = result.url;
+
+      if (removeBg) {
+        try {
+          bgUrl = await removeBackground(result.public_id);
+        } catch {
+          // Background removal failed — continue without it
+        }
+      }
+    } catch (uploadErr) {
+      console.error('Cloudinary upload error:', uploadErr);
+      // Fall through to data-URI fallback below
+    }
+  }
+
+  if (!url) {
+    const b64 = file.buffer.toString('base64');
+    const mime = file.mimetype || 'image/jpeg';
+    url = `data:${mime};base64,${b64}`;
+  }
+
+  return { url, bgUrl };
+}
+
+function getUploadedFile(
+  req: Request,
+  fieldName: string,
+): Express.Multer.File | undefined {
+  // Supports both upload.single() (req.file) and upload.fields() (req.files)
+  if (req.file && fieldName === 'photo') return req.file;
+  const files = req.files as
+    | { [field: string]: Express.Multer.File[] }
+    | Express.Multer.File[]
+    | undefined;
+  if (files && !Array.isArray(files) && files[fieldName]?.[0]) {
+    return files[fieldName][0];
+  }
+  return undefined;
+}
+
 export async function getItems(req: Request, res: Response): Promise<void> {
   try {
     const { category, season, occasion, color } = req.query;
@@ -91,45 +151,29 @@ export async function createItem(req: Request, res: Response): Promise<void> {
       }
     }
 
+    // ── Upload front photo ──
     let photo_url = '';
     let bg_removed_url: string | undefined;
-
-    if (req.file) {
-      // Only attempt Cloudinary upload if real credentials are configured
-      const cloudinaryConfigured =
-        process.env.CLOUDINARY_CLOUD_NAME &&
-        process.env.CLOUDINARY_CLOUD_NAME !== 'placeholder' &&
-        process.env.CLOUDINARY_API_KEY &&
-        process.env.CLOUDINARY_API_KEY !== 'placeholder';
-
-      if (cloudinaryConfigured) {
-        try {
-          const result = await uploadImage(req.file.buffer);
-          photo_url = result.url;
-
-          if (remove_bg !== '0') {
-            try {
-              bg_removed_url = await removeBackground(result.public_id);
-            } catch {
-              // Background removal failed — continue without it
-            }
-          }
-        } catch (uploadErr) {
-          console.error('Cloudinary upload error:', uploadErr);
-          // Fall through to data-URI fallback below
-        }
-      }
-
-      // Fallback: encode as a data URI so the item can always be saved
-      if (!photo_url) {
-        const b64 = req.file.buffer.toString('base64');
-        const mime = req.file.mimetype || 'image/jpeg';
-        photo_url = `data:${mime};base64,${b64}`;
-      }
+    const frontFile = getUploadedFile(req, 'photo');
+    if (frontFile) {
+      const res1 = await processPhotoBuffer(frontFile, remove_bg !== '0');
+      photo_url = res1.url;
+      bg_removed_url = res1.bgUrl;
     } else if (req.body.photo_url) {
       photo_url = req.body.photo_url;
     }
 
+    // ── Upload back photo (optional) ──
+    let photo_back_url: string | undefined;
+    let photo_back_removed: string | undefined;
+    const backFile = getUploadedFile(req, 'photo_back');
+    if (backFile) {
+      const res2 = await processPhotoBuffer(backFile, remove_bg !== '0');
+      photo_back_url = res2.url;
+      photo_back_removed = res2.bgUrl;
+    }
+
+    const has_360_view = !!photo_back_url;
     const parsedColors = typeof colors === 'string' ? JSON.parse(colors) : colors || [];
 
     const item = await prisma.clothingItem.create({
@@ -139,6 +183,9 @@ export async function createItem(req: Request, res: Response): Promise<void> {
         photo_url,
         photo_hash: photo_hash || null,
         bg_removed_url,
+        photo_back_url: photo_back_url || null,
+        photo_back_removed: photo_back_removed || null,
+        has_360_view,
         category: category || 'TOP',
         colors: parsedColors,
         material,
@@ -170,7 +217,29 @@ export async function updateItem(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const { name, category, colors, material, season, occasion, brand, purchase_price, purchase_date, ai_tags } = req.body;
+    const {
+      name,
+      category,
+      colors,
+      material,
+      season,
+      occasion,
+      brand,
+      purchase_price,
+      purchase_date,
+      ai_tags,
+      remove_bg,
+    } = req.body;
+
+    // Allow uploading a back photo later to unlock the 360° view
+    const backFile = getUploadedFile(req, 'photo_back');
+    let newBackUrl: string | undefined;
+    let newBackRemoved: string | undefined;
+    if (backFile) {
+      const uploaded = await processPhotoBuffer(backFile, remove_bg !== '0');
+      newBackUrl = uploaded.url;
+      newBackRemoved = uploaded.bgUrl;
+    }
 
     const updated = await prisma.clothingItem.update({
       where: { id },
@@ -185,11 +254,17 @@ export async function updateItem(req: Request, res: Response): Promise<void> {
         ...(purchase_price !== undefined && { purchase_price: parseFloat(purchase_price) }),
         ...(purchase_date && { purchase_date: new Date(purchase_date) }),
         ...(ai_tags && { ai_tags }),
+        ...(newBackUrl && {
+          photo_back_url: newBackUrl,
+          photo_back_removed: newBackRemoved || null,
+          has_360_view: true,
+        }),
       },
     });
 
     res.json({ success: true, data: updated });
   } catch (error) {
+    console.error('Update clothing item error:', error);
     res.status(500).json({ success: false, error: 'Erreur lors de la mise à jour' });
   }
 }

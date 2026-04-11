@@ -32,6 +32,9 @@ export interface ClothingItem {
   photo_url: string;
   photo_hash?: string | null;
   bg_removed_url?: string;
+  photo_back_url?: string | null;
+  photo_back_removed?: string | null;
+  has_360_view?: boolean;
   category: Category;
   colors: string[];
   material?: string;

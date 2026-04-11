@@ -72,7 +72,7 @@ export const api = {
   put: <T>(endpoint: string, body?: unknown) =>
     request<T>(endpoint, {
       method: 'PUT',
-      body: JSON.stringify(body),
+      body: body instanceof FormData ? body : JSON.stringify(body),
     }),
 
   delete: <T>(endpoint: string) =>

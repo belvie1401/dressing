@@ -17,14 +17,16 @@ interface ClothingCardProps {
 }
 
 export default function ClothingCard({ item }: ClothingCardProps) {
-  const imageUrl = item.bg_removed_url || item.photo_url;
+  const frontUrl = item.bg_removed_url || item.photo_url;
+  const backUrl = item.photo_back_removed || item.photo_back_url;
+  const has360 = !!item.has_360_view && !!backUrl;
 
   return (
     <a href={`/wardrobe/${item.id}`} className="group relative block overflow-hidden rounded-2xl bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
       <div className="relative aspect-[3/4]" style={{ background: 'var(--color-app-bg)' }}>
-        {imageUrl ? (
+        {frontUrl ? (
           <Image
-            src={imageUrl}
+            src={frontUrl}
             alt={item.category}
             fill
             className="object-contain p-3 transition-transform group-hover:scale-105"
@@ -38,6 +40,20 @@ export default function ClothingCard({ item }: ClothingCardProps) {
               <polyline points="21 15 16 10 5 21" />
             </svg>
           </div>
+        )}
+
+        {/* 360° badge top-left */}
+        {has360 && (
+          <span
+            className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-[#111111] px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-white"
+            style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}
+          >
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="animate-spin-slow">
+              <circle cx="12" cy="12" r="9" opacity="0.35" />
+              <path d="M21 12a9 9 0 0 1-9 9" />
+            </svg>
+            360°
+          </span>
         )}
 
         {/* Price badge top-right */}

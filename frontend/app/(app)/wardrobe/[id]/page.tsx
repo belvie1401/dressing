@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import type { ClothingItem } from '@/types';
 import { api } from '@/lib/api';
 import { useWardrobeStore } from '@/lib/store';
 import WearBadge from '@/components/wardrobe/WearBadge';
+import View360 from '@/components/wardrobe/View360';
 
 const categoryLabels: Record<string, string> = {
   TOP: 'Haut', BOTTOM: 'Bas', DRESS: 'Robe', JACKET: 'Veste', SHOES: 'Chaussures', ACCESSORY: 'Accessoire',
@@ -25,7 +26,9 @@ export default function WardrobeItemPage() {
   const [item, setItem] = useState<ClothingItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState('');
+  const [uploadingBack, setUploadingBack] = useState(false);
   const markWornInStore = useWardrobeStore((s) => s.markWorn);
+  const backInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -47,6 +50,26 @@ export default function WardrobeItemPage() {
       setToast('\u2713 Enregistr\u00e9 !');
       setTimeout(() => setToast(''), 3000);
     }
+  };
+
+  const handleBackPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !item) return;
+    setUploadingBack(true);
+    const body = new FormData();
+    body.append('photo_back', file);
+    body.append('remove_bg', '1');
+    const res = await api.put<ClothingItem>(`/wardrobe/${id}`, body);
+    if (res.success && res.data) {
+      setItem(res.data);
+      setToast('\u2713 Vue 360° activée !');
+      setTimeout(() => setToast(''), 3000);
+    } else {
+      setToast("Échec de l'ajout de la photo dos");
+      setTimeout(() => setToast(''), 3000);
+    }
+    setUploadingBack(false);
   };
 
   if (loading) {
@@ -73,16 +96,64 @@ export default function WardrobeItemPage() {
         <h1 className="text-lg font-semibold text-[#111111]">Détails</h1>
       </div>
 
-      {/* Large product photo */}
-      <div className="relative aspect-square overflow-hidden rounded-3xl" style={{ background: 'var(--color-app-bg)' }}>
-        <Image
-          src={item.bg_removed_url || item.photo_url}
-          alt={item.category}
-          fill
-          className="object-contain p-6"
-          sizes="(max-width: 768px) 100vw, 500px"
-        />
-      </div>
+      {/* Large product photo (or 360° view when back photo exists) */}
+      {item.has_360_view && (item.photo_back_removed || item.photo_back_url) ? (
+        <div className="relative h-[320px] w-full overflow-hidden rounded-3xl" style={{ background: 'var(--color-app-bg)' }}>
+          <View360
+            frontUrl={item.bg_removed_url || item.photo_url}
+            backUrl={item.photo_back_removed || item.photo_back_url || ''}
+            alt={item.name || item.category}
+            fit="contain"
+          />
+        </div>
+      ) : (
+        <div className="relative aspect-square overflow-hidden rounded-3xl" style={{ background: 'var(--color-app-bg)' }}>
+          <Image
+            src={item.bg_removed_url || item.photo_url}
+            alt={item.category}
+            fill
+            className="object-contain p-6"
+            sizes="(max-width: 768px) 100vw, 500px"
+          />
+        </div>
+      )}
+
+      {/* Add back photo CTA (when missing) */}
+      {!item.has_360_view && (
+        <>
+          <button
+            type="button"
+            onClick={() => backInputRef.current?.click()}
+            disabled={uploadingBack}
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#C6A47E]/50 bg-[#EDE5DC]/30 py-3 text-sm font-medium text-[#C6A47E] transition-colors hover:bg-[#EDE5DC]/50 disabled:opacity-60"
+          >
+            {uploadingBack ? (
+              <>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+                  <circle cx="12" cy="12" r="10" opacity="0.25" />
+                  <path d="M22 12a10 10 0 0 1-10 10" />
+                </svg>
+                Envoi en cours…
+              </>
+            ) : (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                  <circle cx="12" cy="13" r="4" />
+                </svg>
+                Ajouter la vue dos (360°)
+              </>
+            )}
+          </button>
+          <input
+            ref={backInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleBackPhotoUpload}
+            className="hidden"
+          />
+        </>
+      )}
 
       {/* Product info card */}
       <div className="rounded-3xl bg-white p-5" style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.06)' }}>

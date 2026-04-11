@@ -99,12 +99,18 @@ function normalizeColorName(raw: string): string | null {
 export default function WardrobeAddPage() {
   const router = useRouter();
   const addItem = useWardrobeStore((s) => s.addItem);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
-  const galleryInputRef = useRef<HTMLInputElement>(null);
 
-  // Photo state
+  // Hidden file inputs — one per (side × source) combination
+  const frontCameraRef = useRef<HTMLInputElement>(null);
+  const frontGalleryRef = useRef<HTMLInputElement>(null);
+  const backCameraRef = useRef<HTMLInputElement>(null);
+  const backGalleryRef = useRef<HTMLInputElement>(null);
+
+  // Photo state — front (required) + back (optional)
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [backFile, setBackFile] = useState<File | null>(null);
+  const [backPreview, setBackPreview] = useState<string | null>(null);
   const [photoHash, setPhotoHash] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState<AIScan | null>(null);
@@ -174,19 +180,38 @@ export default function WardrobeAddPage() {
     }
   }, []);
 
-  const onFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onFrontFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
     if (selected) handleFileSelected(selected);
-    e.target.value = ''; // allow re-selecting the same file
+    e.target.value = '';
   };
 
-  const handleReset = () => {
+  const onBackFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (selected) {
+      setError(null);
+      setBackFile(selected);
+      const reader = new FileReader();
+      reader.onload = () => setBackPreview(reader.result as string);
+      reader.readAsDataURL(selected);
+    }
+    e.target.value = '';
+  };
+
+  const handleResetFront = () => {
     setFile(null);
     setPreview(null);
     setPhotoHash(null);
     setScanResult(null);
     setError(null);
   };
+
+  const handleResetBack = () => {
+    setBackFile(null);
+    setBackPreview(null);
+  };
+
+  const has360 = !!preview && !!backPreview;
 
   const toggleColor = (colorName: string) => {
     setSelectedColors((prev) =>
@@ -206,6 +231,7 @@ export default function WardrobeAddPage() {
 
     const body = new FormData();
     body.append('photo', file);
+    if (backFile) body.append('photo_back', backFile);
     body.append('name', name.trim());
     body.append('category', category);
     body.append('colors', JSON.stringify(selectedColors));
@@ -277,93 +303,93 @@ export default function WardrobeAddPage() {
         </button>
       </div>
 
-      {/* ============ PHOTO UPLOAD ============ */}
+      {/* ============ PHOTO UPLOAD (2-photo 360°) ============ */}
       <section className="mb-6">
-        {!preview ? (
-          <div className="rounded-2xl border-2 border-dashed border-[#EFEFEF] bg-white p-8">
-            <div className="flex flex-col items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F0EDE8]">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                  <circle cx="12" cy="13" r="4" />
-                </svg>
-              </div>
-              <div className="text-center">
-                <p className="font-serif text-lg text-[#111111]">Ajoutez une photo</p>
-                <p className="mt-1 text-xs text-[#8A8A8A]">
-                  L&rsquo;IA identifiera automatiquement votre vêtement
-                </p>
-              </div>
-              <div className="flex w-full flex-col gap-2 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={() => cameraInputRef.current?.click()}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-full bg-[#111111] px-4 py-3 text-xs font-medium text-white"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                    <circle cx="12" cy="13" r="4" />
-                  </svg>
-                  Prendre une photo
-                </button>
-                <button
-                  type="button"
-                  onClick={() => galleryInputRef.current?.click()}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-full border border-[#EFEFEF] bg-white px-4 py-3 text-xs font-medium text-[#111111]"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="17 8 12 3 7 8" />
-                    <line x1="12" y1="3" x2="12" y2="15" />
-                  </svg>
-                  Galerie
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="relative overflow-hidden rounded-2xl bg-[#F0EDE8]">
-            <div className="relative aspect-[4/5] w-full">
-              <Image
-                src={preview}
-                alt="Aperçu"
-                fill
-                className="object-cover"
-                unoptimized
-                sizes="(min-width: 768px) 500px, 100vw"
-              />
-              {scanning && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/45 backdrop-blur-sm">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" className="animate-spin">
-                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                  </svg>
-                  <p className="font-serif text-sm text-white">Analyse IA en cours…</p>
-                </div>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={handleReset}
-              className="absolute right-3 top-3 cursor-pointer rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-[#111111] shadow-sm backdrop-blur-sm"
-            >
-              Changer
-            </button>
+        <h2 className="font-serif text-base text-[#111111]">Photos du vêtement</h2>
+        <p className="mt-1 mb-4 text-xs text-[#8A8A8A]">
+          Ajoutez une photo de face et de dos pour activer la vue 360°
+        </p>
+
+        <div className="grid grid-cols-2 gap-3">
+          {/* ---- ZONE 1 — FRONT (required) ---- */}
+          <PhotoZone
+            side="front"
+            label="Face"
+            requiredLabel="Requis"
+            preview={preview}
+            scanning={scanning}
+            onCameraClick={() => frontCameraRef.current?.click()}
+            onGalleryClick={() => frontGalleryRef.current?.click()}
+            onRemove={handleResetFront}
+          />
+
+          {/* ---- ZONE 2 — BACK (optional) ---- */}
+          <PhotoZone
+            side="back"
+            label="Dos"
+            requiredLabel="Optionnel"
+            preview={backPreview}
+            scanning={false}
+            onCameraClick={() => backCameraRef.current?.click()}
+            onGalleryClick={() => backGalleryRef.current?.click()}
+            onRemove={handleResetBack}
+          />
+        </div>
+
+        {/* ---- 360° activation status ---- */}
+        {preview && !backPreview && (
+          <p className="mt-2 text-center text-xs text-[#8A8A8A]">
+            Ajoutez une photo de dos pour activer la vue 360°
+          </p>
+        )}
+        {has360 && (
+          <div className="mt-2 flex items-center justify-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3v2" />
+              <path d="M12 19v2" />
+              <path d="M3 12h2" />
+              <path d="M19 12h2" />
+              <path d="M18.364 5.636l-1.414 1.414" />
+              <path d="M7.05 16.95l-1.414 1.414" />
+              <path d="M18.364 18.364l-1.414-1.414" />
+              <path d="M7.05 7.05L5.636 5.636" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <span className="text-xs font-medium text-[#C6A47E]">
+              Vue 360° activée&nbsp;!
+            </span>
           </div>
         )}
 
+        {/* ---- Hidden file inputs (4 total) ---- */}
         <input
-          ref={cameraInputRef}
+          ref={frontCameraRef}
           type="file"
           accept="image/*"
           capture="environment"
-          onChange={onFileInput}
+          onChange={onFrontFileInput}
           className="hidden"
         />
         <input
-          ref={galleryInputRef}
+          ref={frontGalleryRef}
           type="file"
           accept="image/*"
-          onChange={onFileInput}
+          onChange={onFrontFileInput}
+          className="hidden"
+        />
+        <input
+          ref={backCameraRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={onBackFileInput}
+          className="hidden"
+        />
+        <input
+          ref={backGalleryRef}
+          type="file"
+          accept="image/*"
+          onChange={onBackFileInput}
           className="hidden"
         />
       </section>
@@ -684,6 +710,128 @@ function Field({
         {hint && <span className="text-[10px] text-[#8A8A8A]">{hint}</span>}
       </div>
       {children}
+    </div>
+  );
+}
+
+// ─── PhotoZone — single-side upload card (front or back) ────────────────────
+function PhotoZone({
+  side,
+  label,
+  requiredLabel,
+  preview,
+  scanning,
+  onCameraClick,
+  onGalleryClick,
+  onRemove,
+}: {
+  side: 'front' | 'back';
+  label: string;
+  requiredLabel: string;
+  preview: string | null;
+  scanning: boolean;
+  onCameraClick: () => void;
+  onGalleryClick: () => void;
+  onRemove: () => void;
+}) {
+  const isBack = side === 'back';
+  const borderClass = isBack
+    ? 'border-dashed border-[#C6A47E]/40 bg-[#EDE5DC]/20'
+    : 'border-dashed border-[#CFCFCF] bg-white';
+
+  return (
+    <div
+      className={`relative h-[200px] overflow-hidden rounded-2xl border-2 ${
+        preview ? 'border-solid border-[#EFEFEF]' : borderClass
+      }`}
+    >
+      {preview ? (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={preview}
+            alt={label}
+            className="h-full w-full object-cover"
+          />
+          {/* Bottom label bar */}
+          <div className="absolute inset-x-0 bottom-0 bg-black/40 py-1.5 text-center text-xs font-medium text-white">
+            {label}
+          </div>
+          {/* Remove button */}
+          <button
+            type="button"
+            onClick={onRemove}
+            aria-label={`Supprimer la photo ${label}`}
+            className="absolute right-2 top-2 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+          {/* Scanning overlay (front only) */}
+          {scanning && side === 'front' && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+              <div className="flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[11px] font-medium text-[#111111]">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+                  <circle cx="12" cy="12" r="10" opacity="0.25" />
+                  <path d="M22 12a10 10 0 0 1-10 10" />
+                </svg>
+                Analyse IA…
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="flex h-full w-full flex-col items-center justify-center px-2">
+          {/* 360° pill badge (back only) */}
+          {isBack && (
+            <span className="absolute right-2 top-2 rounded-full bg-[#C6A47E]/10 px-2 py-0.5 text-[9px] font-medium text-[#C6A47E]">
+              360°
+            </span>
+          )}
+          {/* Camera icon */}
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#CFCFCF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+            <circle cx="12" cy="13" r="4" />
+          </svg>
+          <p className="mt-2 font-serif text-sm text-[#111111]">{label}</p>
+          <p className="text-[10px] text-[#8A8A8A]">{requiredLabel}</p>
+
+          {/* Source buttons */}
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCameraClick();
+              }}
+              aria-label={`Prendre une photo ${label}`}
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-[#F0EDE8] hover:bg-[#EDE5DC]"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onGalleryClick();
+              }}
+              aria-label={`Choisir une photo ${label} depuis la galerie`}
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-[#F0EDE8] hover:bg-[#EDE5DC]"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

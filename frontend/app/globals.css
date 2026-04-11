@@ -38,3 +38,26 @@ body {
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* ─── 360° view animations ─────────────────────────────────────────────── */
+@keyframes bounce-left {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-3px); }
+}
+@keyframes bounce-right {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(3px); }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-bounce-left {
+  animation: bounce-left 1.1s ease-in-out infinite;
+}
+.animate-bounce-right {
+  animation: bounce-right 1.1s ease-in-out infinite;
+}
+.animate-spin-slow {
+  animation: spin-slow 3.5s linear infinite;
+}
