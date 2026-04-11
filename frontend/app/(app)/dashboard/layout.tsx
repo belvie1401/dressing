@@ -17,6 +17,7 @@ type NavItem = {
   label: string;
   icon: ReactNode;
   badge?: number;
+  tourId?: string;
 };
 
 type ActivityItem = {
@@ -46,6 +47,7 @@ const NAV_BASE: NavItem[] = [
   {
     href: '/wardrobe',
     label: 'Mon dressing',
+    tourId: 'wardrobe-nav',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="4" r="2" />
@@ -76,6 +78,7 @@ const NAV_BASE: NavItem[] = [
   {
     href: '/stylists',
     label: 'Stylistes',
+    tourId: 'stylists-nav',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -86,6 +89,7 @@ const NAV_BASE: NavItem[] = [
   {
     href: '/calendar',
     label: 'Calendrier',
+    tourId: 'calendar-nav',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="4" width="18" height="18" rx="2" />
@@ -264,6 +268,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
+                {...(item.tourId ? { 'data-tour': item.tourId } : {})}
                 className={`relative flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all ${
                   active
                     ? 'bg-[#F0EDE8] font-medium text-[#111111]'

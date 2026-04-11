@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import type { Outfit } from '@/types';
+import OnboardingTour from '@/components/ui/OnboardingTour';
 
 // ============ TYPES ============
 type CountResponse = { count: number };
@@ -22,6 +23,8 @@ function capitalize(name: string): string {
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
+  const hasSeenTour = useAuthStore((s) => s.hasSeenTour);
+  const _hasHydrated = useAuthStore((s) => s._hasHydrated);
   const firstName = capitalize(user?.name?.split(' ')[0] ?? '');
 
   // Top stat cards — each a separate independent count
@@ -31,6 +34,13 @@ export default function DashboardPage() {
 
   // Recommandations — recent outfits
   const [recommendations, setRecommendations] = useState<Outfit[] | null>(null);
+
+  // Tour visibility — also check localStorage to survive page refresh
+  const [localTourDone, setLocalTourDone] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setLocalTourDone(localStorage.getItem('lien-tour-done') === 'true');
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -57,6 +67,14 @@ export default function DashboardPage() {
     };
   }, []);
 
+  // Show tour for new users (registered < 24h ago) who haven't seen it
+  const isNewUser =
+    user?.created_at
+      ? Date.now() - new Date(user.created_at).getTime() < 86_400_000
+      : false;
+  const showTour =
+    _hasHydrated && localTourDone === false && !hasSeenTour && isNewUser;
+
   const challenge: ChallengeState = {
     target: 5,
     current: Math.min(outfitsCount ?? 0, 5),
@@ -68,6 +86,11 @@ export default function DashboardPage() {
 
   return (
     <>
+      {/* ============ ONBOARDING TOUR ============ */}
+      {showTour && (
+        <OnboardingTour onComplete={() => setLocalTourDone(true)} />
+      )}
+
       {/* ============ A. GREETING ============ */}
       <div className="mb-10">
         <h1 className="font-serif text-4xl leading-tight text-[#111111]">
@@ -130,7 +153,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ============ C. RECOMMANDATIONS POUR VOUS ============ */}
-      <section className="mb-12">
+      <section className="mb-12" data-tour="mes-looks">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="font-serif text-2xl text-[#111111]">

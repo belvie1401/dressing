@@ -10,6 +10,7 @@ interface AuthState {
   isLoading: boolean;
   activeRole: 'CLIENT' | 'STYLIST';
   isDualRole: boolean;
+  hasSeenTour: boolean;
   _hasHydrated: boolean;
   _setHasHydrated: (v: boolean) => void;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<boolean>;
@@ -19,6 +20,7 @@ interface AuthState {
   loadUser: () => Promise<void>;
   switchRole: (role: 'CLIENT' | 'STYLIST') => Promise<void>;
   activateStylistMode: () => Promise<void>;
+  completeTour: () => void;
 }
 
 function resolveActiveRole(user: User): 'CLIENT' | 'STYLIST' {
@@ -36,6 +38,7 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       activeRole: 'CLIENT' as 'CLIENT' | 'STYLIST',
       isDualRole: false,
+      hasSeenTour: false,
       _hasHydrated: false,
       _setHasHydrated: (v) => set({ _hasHydrated: v }),
 
@@ -130,6 +133,15 @@ export const useAuthStore = create<AuthState>()(
           set({ isDualRole: true, activeRole: 'STYLIST', user: res.data });
         }
       },
+
+      completeTour: () => {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('lien-tour-done', 'true');
+        }
+        // Best-effort backend sync (tour_completed ignored if field absent)
+        api.put('/auth/profile', { tour_completed: true });
+        set({ hasSeenTour: true });
+      },
     }),
     {
       name: 'lien-auth',
@@ -138,6 +150,7 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         activeRole: state.activeRole,
         isDualRole: state.isDualRole,
+        hasSeenTour: state.hasSeenTour,
       }),
       onRehydrateStorage: () => (state) => {
         state?._setHasHydrated(true);
