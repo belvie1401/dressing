@@ -70,20 +70,24 @@ export async function createItem(req: Request, res: Response): Promise<void> {
     const userId = req.user!.userId;
 
     // ── Photo deduplication check ──
-    // If the client computed a SHA-256 of the image, reject duplicates
-    // unless the user has confirmed they want to add it anyway.
+    // Wrapped in its own try/catch so a missing column (before DB migration runs)
+    // never blocks item creation — worst case we skip the check.
     if (photo_hash && duplicate_confirmed !== '1') {
-      const existing = await prisma.clothingItem.findFirst({
-        where: { user_id: userId, photo_hash },
-      });
-      if (existing) {
-        res.status(409).json({
-          success: false,
-          error: 'DUPLICATE',
-          message: 'Ce vêtement existe déjà dans votre dressing',
-          existing_item: existing,
+      try {
+        const existing = await prisma.clothingItem.findFirst({
+          where: { user_id: userId, photo_hash },
         });
-        return;
+        if (existing) {
+          res.status(409).json({
+            success: false,
+            error: 'DUPLICATE',
+            message: 'Ce vêtement existe déjà dans votre dressing',
+            existing_item: existing,
+          });
+          return;
+        }
+      } catch {
+        // Column not yet migrated — skip dedup check silently
       }
     }
 
@@ -91,15 +95,36 @@ export async function createItem(req: Request, res: Response): Promise<void> {
     let bg_removed_url: string | undefined;
 
     if (req.file) {
-      const result = await uploadImage(req.file.buffer);
-      photo_url = result.url;
+      // Only attempt Cloudinary upload if real credentials are configured
+      const cloudinaryConfigured =
+        process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_CLOUD_NAME !== 'placeholder' &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_KEY !== 'placeholder';
 
-      if (remove_bg !== '0') {
+      if (cloudinaryConfigured) {
         try {
-          bg_removed_url = await removeBackground(result.public_id);
-        } catch {
-          // Background removal failed, continue without it
+          const result = await uploadImage(req.file.buffer);
+          photo_url = result.url;
+
+          if (remove_bg !== '0') {
+            try {
+              bg_removed_url = await removeBackground(result.public_id);
+            } catch {
+              // Background removal failed — continue without it
+            }
+          }
+        } catch (uploadErr) {
+          console.error('Cloudinary upload error:', uploadErr);
+          // Fall through to data-URI fallback below
         }
+      }
+
+      // Fallback: encode as a data URI so the item can always be saved
+      if (!photo_url) {
+        const b64 = req.file.buffer.toString('base64');
+        const mime = req.file.mimetype || 'image/jpeg';
+        photo_url = `data:${mime};base64,${b64}`;
       }
     } else if (req.body.photo_url) {
       photo_url = req.body.photo_url;
