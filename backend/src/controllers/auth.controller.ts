@@ -33,7 +33,14 @@ export async function register(req: Request, res: Response): Promise<void> {
     res.status(201).json({
       success: true,
       data: {
-        user: { id: user.id, email: user.email, name: user.name, role: user.role },
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          active_role: user.active_role,
+          is_dual_role: user.is_dual_role,
+        },
         token,
       },
     });
@@ -83,6 +90,8 @@ export async function login(req: Request, res: Response): Promise<void> {
           email: user.email,
           name: user.name,
           role: user.role,
+          active_role: user.active_role,
+          is_dual_role: user.is_dual_role,
           avatar_url: user.avatar_url,
           location: user.location,
         },
@@ -104,6 +113,8 @@ export async function getMe(req: Request, res: Response): Promise<void> {
         email: true,
         name: true,
         role: true,
+        active_role: true,
+        is_dual_role: true,
         avatar_url: true,
         location: true,
         style_profile: true,
@@ -145,6 +156,8 @@ export async function updateProfile(req: Request, res: Response): Promise<void> 
         email: true,
         name: true,
         role: true,
+        active_role: true,
+        is_dual_role: true,
         avatar_url: true,
         location: true,
         style_profile: true,
@@ -154,5 +167,63 @@ export async function updateProfile(req: Request, res: Response): Promise<void> 
     res.json({ success: true, data: user });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Erreur lors de la mise à jour' });
+  }
+}
+
+export async function switchRole(req: Request, res: Response): Promise<void> {
+  try {
+    const { role } = req.body;
+    if (role !== 'CLIENT' && role !== 'STYLIST') {
+      res.status(400).json({ success: false, error: 'Rôle invalide' });
+      return;
+    }
+    const user = await prisma.user.update({
+      where: { id: req.user!.userId },
+      data: { active_role: role },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        active_role: true,
+        is_dual_role: true,
+        avatar_url: true,
+        location: true,
+      },
+    });
+    res.json({ success: true, data: user });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Erreur serveur' });
+  }
+}
+
+export async function activateStylist(req: Request, res: Response): Promise<void> {
+  try {
+    const userId = req.user!.userId;
+
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { is_dual_role: true, active_role: 'STYLIST' },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        active_role: true,
+        is_dual_role: true,
+        avatar_url: true,
+        location: true,
+      },
+    });
+
+    await prisma.stylistWallet.upsert({
+      where: { stylist_id: userId },
+      create: { stylist_id: userId },
+      update: {},
+    });
+
+    res.json({ success: true, data: user });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Erreur serveur' });
   }
 }

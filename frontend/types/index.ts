@@ -15,6 +15,8 @@ export interface User {
   name: string;
   avatar_url?: string;
   role: Role;
+  active_role?: 'CLIENT' | 'STYLIST';
+  is_dual_role?: boolean;
   style_profile?: Record<string, unknown>;
   location?: string;
   created_at: string;

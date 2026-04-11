@@ -74,6 +74,8 @@ model User {
   name          String
   avatar_url    String?
   role          Role     @default(CLIENT)
+  active_role   String   @default("CLIENT")
+  is_dual_role  Boolean  @default(false)
   style_profile Json?
   location      String?
   created_at    DateTime @default(now())

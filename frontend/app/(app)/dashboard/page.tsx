@@ -1,8 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
+import RoleSwitcher from '@/components/ui/RoleSwitcher';
 
 const LOOK_DU_JOUR_IMAGES = [
   'https://images.unsplash.com/photo-1551232864-3f0890e580d9?w=200&h=300&fit=crop',
@@ -79,12 +82,38 @@ const ACTIVITIES: Activity[] = [
 ];
 
 export default function DashboardPage() {
+  const router = useRouter();
   const user = useAuthStore((s) => s.user);
+  const isDualRole = useAuthStore((s) => s.isDualRole);
+  const activateStylistMode = useAuthStore((s) => s.activateStylistMode);
   const firstName = user?.name?.split(' ')[0] || 'Camille';
   const initials = (user?.name || 'Camille').charAt(0).toUpperCase();
+  const [showActivateModal, setShowActivateModal] = useState(false);
+  const [activating, setActivating] = useState(false);
+  const [toast, setToast] = useState(false);
+
+  const handleActivate = async () => {
+    setActivating(true);
+    await activateStylistMode();
+    setActivating(false);
+    setShowActivateModal(false);
+    setToast(true);
+    setTimeout(() => {
+      setToast(false);
+      router.push('/stylist-dashboard');
+    }, 1500);
+  };
 
   return (
     <div className="min-h-screen bg-[#F7F5F2] pb-24">
+      <RoleSwitcher />
+
+      {/* Toast notification */}
+      {toast && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-[#111111] text-white text-sm font-medium px-5 py-3 rounded-full shadow-lg">
+          Votre espace styliste est activ&eacute;&nbsp;!
+        </div>
+      )}
       <div className="mx-auto max-w-md lg:max-w-6xl lg:px-6">
         <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-x-6 lg:gap-y-5">
 
@@ -521,43 +550,159 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* ===== ROW 9: UPGRADE BANNER ===== */}
+          {/* ===== ROW 9: STYLISTE CTA ===== */}
           <section className="px-5 mb-6 lg:px-0 lg:mb-0 lg:col-start-3 lg:row-start-5">
-            <div className="bg-[#111111] rounded-3xl p-5 flex justify-between items-start gap-3">
-              <div className="flex-1 min-w-0">
-                <h3 className="font-serif text-base text-white leading-snug">
-                  Upgradez votre exp&eacute;rience
+            {isDualRole ? (
+              /* Already dual-role: simple link card */
+              <Link href="/stylist-dashboard" className="block bg-[#111111] rounded-3xl p-5">
+                <p className="text-[#C6A47E] text-[9px] uppercase tracking-widest font-medium">
+                  Espace styliste
+                </p>
+                <h3 className="font-serif text-base text-white mt-2 leading-snug">
+                  Mon espace styliste
                 </h3>
                 <p className="text-xs text-[#CFCFCF] mt-2 leading-relaxed">
-                  Acc&eacute;dez &agrave; des fonctionnalit&eacute;s exclusives et collaborez
-                  avec des stylistes experts.
+                  Voir mes clientes, lookbooks et revenus
                 </p>
-                <Link
-                  href="/pricing"
-                  className="inline-block text-[#C6A47E] text-sm font-medium mt-4"
+                <span className="inline-block text-[#C6A47E] text-sm font-medium mt-4">
+                  Acc&eacute;der &rarr;
+                </span>
+              </Link>
+            ) : (
+              /* Not yet dual-role: become stylist CTA */
+              <div className="bg-[#111111] rounded-3xl p-5">
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <span className="inline-block bg-[#C6A47E] text-[#111111] text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">
+                      Nouveau
+                    </span>
+                    <h3 className="font-serif text-lg text-white mt-2 leading-snug">
+                      Devenez styliste
+                    </h3>
+                    <p className="text-xs text-[#CFCFCF] mt-2 leading-relaxed">
+                      Partagez votre expertise et aidez d&apos;autres femmes &agrave;
+                      sublimer leur style.
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-[#EDE5DC] shrink-0 flex items-center justify-center">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#C6A47E"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 2C12 2 8 2 8 6H4l1 14h14l1-14h-4c0-4-4-4-4-4z" />
+                    </svg>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowActivateModal(true)}
+                  className="bg-[#C6A47E] text-[#111111] rounded-full w-full py-3 text-sm font-semibold mt-4"
                 >
-                  D&eacute;couvrir &rarr;
-                </Link>
+                  Cr&eacute;er mon espace styliste
+                </button>
               </div>
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#C6A47E"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="shrink-0 mt-1"
-              >
-                <path d="M12 3l1.9 5.8L20 10l-5.1 3.7L17 20l-5-3.8L7 20l2.1-6.3L4 10l6.1-1.2z" />
-                <path d="M19 3v4" />
-                <path d="M21 5h-4" />
-                <path d="M5 17v2" />
-                <path d="M6 18H4" />
-              </svg>
-            </div>
+            )}
           </section>
+
+          {/* ===== ACTIVATION MODAL ===== */}
+          {showActivateModal && (
+            <div className="fixed inset-0 z-40 flex flex-col justify-end">
+              <button
+                type="button"
+                className="absolute inset-0 bg-black/40"
+                onClick={() => setShowActivateModal(false)}
+                aria-label="Fermer"
+              />
+              <div className="relative z-10 bg-white rounded-t-3xl p-6 max-w-md mx-auto w-full">
+                <h2 className="font-serif text-xl text-[#111111]">
+                  Devenir styliste sur LIEN
+                </h2>
+                <div className="flex flex-col gap-4 mt-4">
+                  {/* Benefit 1 */}
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-[#F0EDE8] rounded-full flex-shrink-0 flex items-center justify-center">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#111111]">
+                        G&eacute;rez vos clientes
+                      </p>
+                      <p className="text-xs text-[#8A8A8A] mt-0.5 leading-relaxed">
+                        Acc&eacute;dez au dressing de vos clientes et cr&eacute;ez des
+                        looks sur mesure.
+                      </p>
+                    </div>
+                  </div>
+                  {/* Benefit 2 */}
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-[#F0EDE8] rounded-full flex-shrink-0 flex items-center justify-center">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M14.31 8l.32.87A5 5 0 0 1 10 16" />
+                        <line x1="8" y1="10" x2="14" y2="10" />
+                        <line x1="8" y1="14" x2="12" y2="14" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#111111]">
+                        Mon&eacute;tisez votre talent
+                      </p>
+                      <p className="text-xs text-[#8A8A8A] mt-0.5 leading-relaxed">
+                        Proposez vos prestations et recevez des paiements directement
+                        sur LIEN.
+                      </p>
+                    </div>
+                  </div>
+                  {/* Benefit 3 */}
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-[#F0EDE8] rounded-full flex-shrink-0 flex items-center justify-center">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#111111]">
+                        Gardez vos deux espaces
+                      </p>
+                      <p className="text-xs text-[#8A8A8A] mt-0.5 leading-relaxed">
+                        Passez de cliente &agrave; styliste en un clic. Vos deux
+                        dashboards restent s&eacute;par&eacute;s.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleActivate}
+                  disabled={activating}
+                  className="bg-[#111111] text-white rounded-full w-full py-4 text-sm font-semibold mt-6 disabled:opacity-60"
+                >
+                  {activating ? 'Activation...' : 'Activer mon espace styliste'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowActivateModal(false)}
+                  className="w-full text-sm text-[#8A8A8A] text-center mt-3"
+                >
+                  Plus tard
+                </button>
+              </div>
+            </div>
+          )}
 
         </div>
       </div>

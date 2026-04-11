@@ -157,7 +157,8 @@ const stylistNavItems: NavItem[] = [
 export default function Sidebar() {
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
-  const isStylist = user?.role === 'STYLIST';
+  const activeRole = useAuthStore((s) => s.activeRole);
+  const isStylist = activeRole === 'STYLIST';
 
   const navItems = isStylist ? stylistNavItems : clientNavItems;
   const profileHref = isStylist ? '/stylist-profile' : '/profile';

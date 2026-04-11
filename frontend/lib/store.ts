@@ -8,6 +8,8 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isLoading: boolean;
+  activeRole: 'CLIENT' | 'STYLIST';
+  isDualRole: boolean;
   _hasHydrated: boolean;
   _setHasHydrated: (v: boolean) => void;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<boolean>;
@@ -15,6 +17,15 @@ interface AuthState {
   requestMagicLink: (email: string) => Promise<boolean>;
   logout: () => void;
   loadUser: () => Promise<void>;
+  switchRole: (role: 'CLIENT' | 'STYLIST') => Promise<void>;
+  activateStylistMode: () => Promise<void>;
+}
+
+function resolveActiveRole(user: User): 'CLIENT' | 'STYLIST' {
+  if (user.active_role === 'STYLIST') return 'STYLIST';
+  if (user.active_role === 'CLIENT') return 'CLIENT';
+  // Fallback for users without active_role set yet
+  return user.role === 'STYLIST' ? 'STYLIST' : 'CLIENT';
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -23,6 +34,8 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isLoading: false,
+      activeRole: 'CLIENT' as 'CLIENT' | 'STYLIST',
+      isDualRole: false,
       _hasHydrated: false,
       _setHasHydrated: (v) => set({ _hasHydrated: v }),
 
@@ -34,9 +47,16 @@ export const useAuthStore = create<AuthState>()(
           remember_me: rememberMe,
         });
         if (res.success && res.data) {
+          const user = res.data.user;
           localStorage.setItem('lien_token', res.data.token);
           localStorage.setItem('lien_remember_me', rememberMe ? 'true' : 'false');
-          set({ user: res.data.user, token: res.data.token, isLoading: false });
+          set({
+            user,
+            token: res.data.token,
+            isLoading: false,
+            activeRole: resolveActiveRole(user),
+            isDualRole: user.is_dual_role ?? false,
+          });
           return true;
         }
         set({ isLoading: false });
@@ -57,8 +77,15 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         const res = await api.post<{ user: User; token: string }>('/auth/register', { email, password, name, role });
         if (res.success && res.data) {
+          const user = res.data.user;
           localStorage.setItem('lien_token', res.data.token);
-          set({ user: res.data.user, token: res.data.token, isLoading: false });
+          set({
+            user,
+            token: res.data.token,
+            isLoading: false,
+            activeRole: resolveActiveRole(user),
+            isDualRole: user.is_dual_role ?? false,
+          });
           return true;
         }
         set({ isLoading: false });
@@ -67,7 +94,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         localStorage.removeItem('lien_token');
-        set({ user: null, token: null });
+        set({ user: null, token: null, activeRole: 'CLIENT', isDualRole: false });
       },
 
       loadUser: async () => {
@@ -76,11 +103,31 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         const res = await api.get<User>('/auth/me');
         if (res.success && res.data) {
-          set({ user: res.data, isLoading: false });
+          const user = res.data;
+          set({
+            user,
+            isLoading: false,
+            activeRole: resolveActiveRole(user),
+            isDualRole: user.is_dual_role ?? false,
+          });
         } else {
           // Token is invalid or expired
           localStorage.removeItem('lien_token');
           set({ user: null, token: null, isLoading: false });
+        }
+      },
+
+      switchRole: async (role) => {
+        const res = await api.put<User>('/auth/switch-role', { role });
+        if (res.success && res.data) {
+          set({ activeRole: role, user: res.data });
+        }
+      },
+
+      activateStylistMode: async () => {
+        const res = await api.post<User>('/auth/activate-stylist');
+        if (res.success && res.data) {
+          set({ isDualRole: true, activeRole: 'STYLIST', user: res.data });
         }
       },
     }),
@@ -89,6 +136,8 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         token: state.token,
         user: state.user,
+        activeRole: state.activeRole,
+        isDualRole: state.isDualRole,
       }),
       onRehydrateStorage: () => (state) => {
         state?._setHasHydrated(true);

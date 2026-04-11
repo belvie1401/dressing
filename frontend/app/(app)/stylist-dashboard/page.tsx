@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { api } from '@/lib/api';
+import RoleSwitcher from '@/components/ui/RoleSwitcher';
 
 type Stat = {
   icon: 'users' | 'sparkles' | 'star' | 'euro';
@@ -196,11 +198,15 @@ const STATUS_BADGE_CLASS: Record<LookbookItem['status'], string> = {
 };
 
 export default function StylistDashboardPage() {
+  const router = useRouter();
   const user = useAuthStore((s) => s.user);
+  const isDualRole = useAuthStore((s) => s.isDualRole);
+  const activateStylistMode = useAuthStore((s) => s.activateStylistMode);
   const initialAvailable =
     (user?.style_profile as Record<string, unknown> | undefined)?.available !== false;
   const [available, setAvailable] = useState<boolean>(initialAvailable);
   const [togglingStatus, setTogglingStatus] = useState(false);
+  const [activatingClient, setActivatingClient] = useState(false);
 
   const firstName = user?.name?.split(' ')[0] || 'Chlo\u00e9';
 
@@ -231,8 +237,16 @@ export default function StylistDashboardPage() {
     }
   };
 
+  const handleActivateClient = async () => {
+    setActivatingClient(true);
+    await activateStylistMode();
+    setActivatingClient(false);
+    router.push('/dashboard');
+  };
+
   return (
     <div className="min-h-screen bg-[#F7F5F2] pb-24">
+      <RoleSwitcher />
       <div className="mx-auto max-w-md lg:max-w-6xl lg:px-6">
         <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-x-6 lg:gap-y-5">
 
@@ -500,8 +514,47 @@ export default function StylistDashboardPage() {
             </div>
           </section>
 
-          {/* ===== ROW 7: WALLET PREVIEW ===== */}
-          <section className="px-5 mb-6 lg:px-0 lg:mb-0 lg:col-start-3 lg:row-start-3">
+          {/* ===== ROW 7: CLIENT CTA + WALLET PREVIEW (desktop: stacked in col-3 row-3) ===== */}
+          <section className="px-5 mb-6 lg:px-0 lg:mb-0 lg:col-start-3 lg:row-start-3 flex flex-col gap-4">
+            {/* Client mode CTA — only when NOT yet dual-role */}
+            {!isDualRole && (
+              <div className="bg-white rounded-3xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#EDE5DC] flex items-center justify-center shrink-0">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#C6A47E"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 2C12 2 8 2 8 6H4l1 14h14l1-14h-4c0-4-4-4-4-4z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-[#111111]">
+                      G&eacute;rez aussi votre dressing
+                    </p>
+                    <p className="text-xs text-[#8A8A8A] mt-0.5">
+                      Activez votre espace cliente
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleActivateClient}
+                    disabled={activatingClient}
+                    className="bg-[#F0EDE8] text-[#111111] rounded-full px-3 py-1.5 text-xs font-medium shrink-0 disabled:opacity-60"
+                  >
+                    {activatingClient ? '...' : 'Activer'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Wallet preview */}
             <div className="bg-[#111111] rounded-3xl p-5 flex justify-between items-center gap-3">
               <div className="min-w-0 flex-1">
                 <p className="text-[#CFCFCF] text-[10px] uppercase tracking-wide">

@@ -244,6 +244,11 @@ CREATE TABLE IF NOT EXISTS "Transaction" (
 );
 CREATE INDEX IF NOT EXISTS "Transaction_stylist_id_idx" ON "Transaction"("stylist_id");
 CREATE INDEX IF NOT EXISTS "Transaction_status_idx" ON "Transaction"("status");
+
+-- Dual role fields
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "active_role" TEXT NOT NULL DEFAULT 'CLIENT';
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "is_dual_role" BOOLEAN NOT NULL DEFAULT false;
+UPDATE "User" SET "active_role" = 'STYLIST' WHERE "role" = 'STYLIST' AND "active_role" = 'CLIENT';
 `;
 
 // Try multiple connection strategies

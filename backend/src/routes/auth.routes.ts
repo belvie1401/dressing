@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, getMe, updateProfile } from '../controllers/auth.controller';
+import { register, login, getMe, updateProfile, switchRole, activateStylist } from '../controllers/auth.controller';
 import { googleRedirect, googleCallback } from '../controllers/google-auth.controller';
 import { requestMagicLink, verifyMagicLink } from '../controllers/magic-link.controller';
 import { authenticate } from '../middleware/auth.middleware';
@@ -10,6 +10,8 @@ router.post('/register', register);
 router.post('/login', login);
 router.get('/me', authenticate, getMe);
 router.put('/profile', authenticate, updateProfile);
+router.put('/switch-role', authenticate, switchRole);
+router.post('/activate-stylist', authenticate, activateStylist);
 
 // Google OAuth
 router.get('/google', googleRedirect);
