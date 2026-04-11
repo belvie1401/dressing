@@ -433,12 +433,20 @@ export async function bulkCreateItems(req: Request, res: Response): Promise<void
       return;
     }
 
-    // ── Index uploaded photos by their `photo_<i>` field name ──
+    // ── Index uploaded photos by their field name ──
+    // `photo_<i>`        → front photo (required)
+    // `photo_back_<i>`   → back photo (optional, unlocks 360° view)
     const files = (req.files as Express.Multer.File[]) || [];
     const photoByIndex = new Map<number, Express.Multer.File>();
+    const backPhotoByIndex = new Map<number, Express.Multer.File>();
     for (const f of files) {
-      const m = /^photo_(\d+)$/.exec(f.fieldname);
-      if (m) photoByIndex.set(parseInt(m[1], 10), f);
+      const back = /^photo_back_(\d+)$/.exec(f.fieldname);
+      if (back) {
+        backPhotoByIndex.set(parseInt(back[1], 10), f);
+        continue;
+      }
+      const front = /^photo_(\d+)$/.exec(f.fieldname);
+      if (front) photoByIndex.set(parseInt(front[1], 10), f);
     }
 
     // ── FREE plan limit (block whole batch if it would exceed) ──
@@ -477,6 +485,16 @@ export async function bulkCreateItems(req: Request, res: Response): Promise<void
       try {
         const { url, bgUrl } = await processPhotoBuffer(file, removeBg);
 
+        // Optional back photo
+        let photo_back_url: string | undefined;
+        let photo_back_removed: string | undefined;
+        const backFile = backPhotoByIndex.get(i);
+        if (backFile) {
+          const backRes = await processPhotoBuffer(backFile, removeBg);
+          photo_back_url = backRes.url;
+          photo_back_removed = backRes.bgUrl;
+        }
+
         const rawColors = meta.colors;
         let colors: string[] = [];
         if (Array.isArray(rawColors)) {
@@ -496,6 +514,9 @@ export async function bulkCreateItems(req: Request, res: Response): Promise<void
             name: (meta.name as string) || null,
             photo_url: url,
             bg_removed_url: bgUrl,
+            photo_back_url: photo_back_url || null,
+            photo_back_removed: photo_back_removed || null,
+            has_360_view: !!photo_back_url,
             category: ((meta.category as string) || 'TOP') as any,
             colors,
             material: (meta.material as string) || undefined,

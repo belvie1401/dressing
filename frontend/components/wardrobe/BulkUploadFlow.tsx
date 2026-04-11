@@ -65,13 +65,17 @@ type AIScan = {
   style_tags?: string[];
 };
 
-type PhotoStatus = 'pending' | 'analyzing' | 'done' | 'error';
+type PhotoStatus = 'pending' | 'analyzing' | 'done' | 'error' | 'skipped';
 
 interface BulkPhoto {
   id: string;
   file: File;
   preview: string;
+  // Optional back photo (unlocks 360° view on the saved item)
+  backFile?: File;
+  backPreview?: string;
   status: PhotoStatus;
+  errorMessage?: string;
   ai?: AIScan;
   // Editable fields (start as AI defaults)
   name: string;
@@ -233,7 +237,9 @@ export default function BulkUploadFlow() {
   // ─── Per-photo AI scan (used by both the loop and single-item retry) ─────
   const analyzeOne = useCallback(async (photoId: string): Promise<boolean> => {
     setPhotos((prev) =>
-      prev.map((p) => (p.id === photoId ? { ...p, status: 'analyzing' } : p))
+      prev.map((p) =>
+        p.id === photoId ? { ...p, status: 'analyzing', errorMessage: undefined } : p
+      )
     );
 
     // Snapshot the current file from the latest state to avoid stale closures
@@ -249,7 +255,21 @@ export default function BulkUploadFlow() {
     try {
       // Compress + transcode to JPEG so the payload stays small AND matches
       // the hardcoded media_type the backend AI service sends to Anthropic.
-      const base64 = await compressImageToBase64(currentFile);
+      let base64: string;
+      try {
+        base64 = await compressImageToBase64(currentFile);
+      } catch (err) {
+        const msg =
+          (err instanceof Error && err.message) ||
+          "Impossible de lire ce fichier image (format non supporté ?)";
+        setPhotos((prev) =>
+          prev.map((p) =>
+            p.id === photoId ? { ...p, status: 'error', errorMessage: msg } : p
+          )
+        );
+        return false;
+      }
+
       const res = await api.post<AIScan>('/ai/scan-clothing', {
         image_base64: base64,
       });
@@ -267,6 +287,7 @@ export default function BulkUploadFlow() {
               ? {
                   ...p,
                   status: 'done',
+                  errorMessage: undefined,
                   ai,
                   name: ai.name ?? p.name,
                   category: ai.category ?? p.category,
@@ -282,13 +303,31 @@ export default function BulkUploadFlow() {
         return true;
       }
 
+      // Surface the actual server error (status code + message) so the user
+      // knows whether it's a missing API key, rate limit, image issue, etc.
+      const failedRes = res as unknown as {
+        error?: string;
+        message?: string;
+        status?: number;
+      };
+      const reason =
+        failedRes.message ||
+        failedRes.error ||
+        (failedRes.status ? `Erreur HTTP ${failedRes.status}` : 'Erreur inconnue');
       setPhotos((prev) =>
-        prev.map((p) => (p.id === photoId ? { ...p, status: 'error' } : p))
+        prev.map((p) =>
+          p.id === photoId ? { ...p, status: 'error', errorMessage: reason } : p
+        )
       );
       return false;
-    } catch {
+    } catch (err) {
+      const msg =
+        (err instanceof Error && err.message) ||
+        'Erreur de connexion au serveur';
       setPhotos((prev) =>
-        prev.map((p) => (p.id === photoId ? { ...p, status: 'error' } : p))
+        prev.map((p) =>
+          p.id === photoId ? { ...p, status: 'error', errorMessage: msg } : p
+        )
       );
       return false;
     }
@@ -340,9 +379,21 @@ export default function BulkUploadFlow() {
 
   // ─── Bulk save ───────────────────────────────────────────────────────────
   const saveAll = async () => {
-    const eligible = photos.filter((p) => p.status !== 'error');
-    if (eligible.length === 0) {
+    // Save EVERY photo — errored items are still uploaded with whatever
+    // metadata the user filled in manually. Only items still actively
+    // being analyzed are excluded so we don't race the AI loop.
+    const toSave = photos.filter((p) => p.status !== 'analyzing');
+    if (toSave.length === 0) {
       setError('Aucun vêtement à enregistrer.');
+      return;
+    }
+
+    // Sanity check: each item needs at minimum a name OR a category set
+    const missing = toSave.filter((p) => !p.name.trim());
+    if (missing.length > 0) {
+      setError(
+        `${missing.length} vêtement${missing.length > 1 ? 's ont' : ' a'} besoin d'un nom avant l'enregistrement.`
+      );
       return;
     }
 
@@ -351,7 +402,7 @@ export default function BulkUploadFlow() {
     setError(null);
 
     const body = new FormData();
-    const meta = eligible.map((p) => ({
+    const meta = toSave.map((p) => ({
       name: p.name.trim(),
       category: p.category,
       colors: p.colors,
@@ -363,10 +414,13 @@ export default function BulkUploadFlow() {
     }));
     body.append('items_meta', JSON.stringify(meta));
     body.append('remove_bg', '1');
-    eligible.forEach((p, i) => body.append(`photo_${i}`, p.file));
+    toSave.forEach((p, i) => {
+      body.append(`photo_${i}`, p.file);
+      if (p.backFile) body.append(`photo_back_${i}`, p.backFile);
+    });
 
     // Progress bar advances optimistically while the single bulk request runs.
-    const totalToSave = eligible.length;
+    const totalToSave = toSave.length;
     const progressTimer = setInterval(() => {
       setSaveIndex((i) => (i < totalToSave - 1 ? i + 1 : i));
     }, 600);
@@ -401,10 +455,44 @@ export default function BulkUploadFlow() {
     }
   };
 
+  // ─── Skip AI entirely and go straight to manual editing ─────────────────
+  const skipAnalysis = () => {
+    setError(null);
+    setPhotos((prev) =>
+      prev.map((p) => ({ ...p, status: 'skipped', errorMessage: undefined }))
+    );
+    setPhase('review');
+  };
+
+  // ─── Attach / replace a back photo on a single item ─────────────────────
+  const attachBackPhoto = async (id: string, file: File) => {
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > MAX_FILE_SIZE) {
+      setError(`«${file.name}» dépasse 10 Mo et a été ignoré.`);
+      return;
+    }
+    const preview = await readDataUrl(file);
+    setPhotos((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, backFile: file, backPreview: preview } : p
+      )
+    );
+  };
+
+  const removeBackPhoto = (id: string) => {
+    setPhotos((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, backFile: undefined, backPreview: undefined } : p
+      )
+    );
+  };
+
   // ─────────────────────────────────────────────────────────────────────────
   // RENDER
   // ─────────────────────────────────────────────────────────────────────────
-  const eligibleCount = photos.filter((p) => p.status !== 'error').length;
+  // Items eligible to be saved = anything NOT mid-analysis. Errored items are
+  // included so the user can edit + save them manually.
+  const eligibleCount = photos.filter((p) => p.status !== 'analyzing').length;
   const errorCount = photos.filter((p) => p.status === 'error').length;
 
   return (
@@ -591,28 +679,37 @@ export default function BulkUploadFlow() {
                 )}
               </div>
 
-              {/* Analyze button (select phase only) */}
+              {/* Analyze + skip buttons (select phase only) */}
               {phase === 'select' && (
-                <button
-                  type="button"
-                  onClick={startAnalysis}
-                  className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#111111] py-4 text-sm font-semibold text-white"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                <div className="mt-2 flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={startAnalysis}
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#111111] py-4 text-sm font-semibold text-white"
                   >
-                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                  </svg>
-                  Analyser {photos.length} vêtement{photos.length > 1 ? 's' : ''} avec
-                  l&rsquo;IA
-                </button>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                    </svg>
+                    Analyser {photos.length} vêtement{photos.length > 1 ? 's' : ''} avec
+                    l&rsquo;IA
+                  </button>
+                  <button
+                    type="button"
+                    onClick={skipAnalysis}
+                    className="cursor-pointer rounded-full border border-[#EFEFEF] bg-white py-3 text-xs font-medium text-[#8A8A8A] hover:text-[#111111]"
+                  >
+                    Continuer sans l&rsquo;IA (saisie manuelle)
+                  </button>
+                </div>
               )}
             </>
           )}
@@ -654,51 +751,57 @@ export default function BulkUploadFlow() {
         <>
           <div className="mb-4">
             <h2 className="font-serif text-lg text-[#111111]">
-              Vérifiez les {photos.length} vêtements détectés
+              Vérifiez les {photos.length} vêtement{photos.length > 1 ? 's' : ''}
             </h2>
             <p className="mt-1 text-xs text-[#8A8A8A]">
-              L&rsquo;IA a prérempli les informations. Modifiez si nécessaire.
+              Vous pouvez modifier les informations et ajouter une photo de dos
+              avant de tout enregistrer.
             </p>
           </div>
 
           {/* Errors banner — visible only if at least one photo failed analysis */}
-          {errorCount > 0 && (
-            <div className="mb-3 flex items-start gap-3 rounded-2xl border border-[#D4785C]/20 bg-[#FFF8F6] p-3">
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#D4785C"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="mt-0.5 flex-shrink-0"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-[#D4785C]">
-                  {errorCount} photo{errorCount > 1 ? 's' : ''} n&rsquo;
-                  {errorCount > 1 ? 'ont' : 'a'} pas pu être analysée
-                  {errorCount > 1 ? 's' : ''}
-                </p>
-                <p className="mt-0.5 text-[11px] text-[#8A8A8A]">
-                  Vérifiez votre connexion puis réessayez. Vous pouvez aussi retirer
-                  ces photos pour continuer.
-                </p>
+          {errorCount > 0 && (() => {
+            // Show the most common / most actionable failure reason
+            const firstReason =
+              photos.find((p) => p.status === 'error' && p.errorMessage)?.errorMessage ||
+              "Impossible de joindre l'analyse IA.";
+            return (
+              <div className="mb-3 flex items-start gap-3 rounded-2xl border border-[#D4785C]/20 bg-[#FFF8F6] p-3">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#D4785C"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mt-0.5 flex-shrink-0"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-[#D4785C]">
+                    {errorCount} photo{errorCount > 1 ? 's' : ''} sans analyse IA
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-[#8A8A8A]">{firstReason}</p>
+                  <p className="mt-1 text-[11px] text-[#8A8A8A]">
+                    Vous pouvez tout de même les enregistrer en remplissant les
+                    informations à la main ci-dessous.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={retryAllErrors}
+                  className="flex-shrink-0 cursor-pointer rounded-full bg-[#D4785C] px-3 py-1.5 text-[11px] font-semibold text-white"
+                >
+                  Tout réessayer
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={retryAllErrors}
-                className="flex-shrink-0 cursor-pointer rounded-full bg-[#D4785C] px-3 py-1.5 text-[11px] font-semibold text-white"
-              >
-                Tout réessayer
-              </button>
-            </div>
-          )}
+            );
+          })()}
 
           {photos.map((photo) => {
             const expanded = expandedId === photo.id;
@@ -858,6 +961,21 @@ export default function BulkUploadFlow() {
                   </div>
                 </div>
 
+                {/* Inline error message — visible even when collapsed so the
+                    user immediately sees WHY a photo failed analysis */}
+                {errored && photo.errorMessage && (
+                  <div className="border-b border-[#F7F5F2] bg-[#FFF8F6] px-3 py-2">
+                    <p className="text-[11px] text-[#D4785C]">
+                      <span className="font-semibold">Analyse IA :</span>{' '}
+                      {photo.errorMessage}
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-[#8A8A8A]">
+                      Vous pouvez quand même enregistrer ce vêtement en remplissant
+                      les informations ci-dessous.
+                    </p>
+                  </div>
+                )}
+
                 {/* Expanded edit form */}
                 {expanded && (
                   <div className="flex flex-col gap-3 p-4">
@@ -869,6 +987,89 @@ export default function BulkUploadFlow() {
                       placeholder="Nom du vêtement"
                       className="w-full rounded-xl bg-[#F7F5F2] px-3 py-2 text-sm text-[#111111] placeholder-[#8A8A8A] outline-none"
                     />
+
+                    {/* Front + back photo previews */}
+                    <div>
+                      <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wide text-[#8A8A8A]">
+                        Photos
+                      </p>
+                      <div className="flex gap-2">
+                        {/* Front (read-only) */}
+                        <div className="flex flex-col items-center">
+                          <div className="h-20 w-20 overflow-hidden rounded-xl bg-[#F0EDE8]">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={photo.preview}
+                              alt="Devant"
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <span className="mt-1 text-[9px] text-[#8A8A8A]">Devant</span>
+                        </div>
+
+                        {/* Back (add / replace) */}
+                        <div className="flex flex-col items-center">
+                          {photo.backPreview ? (
+                            <div className="relative h-20 w-20 overflow-hidden rounded-xl bg-[#F0EDE8]">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={photo.backPreview}
+                                alt="Dos"
+                                className="h-full w-full object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeBackPhoto(photo.id)}
+                                aria-label="Retirer la photo de dos"
+                                className="absolute right-1 top-1 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white"
+                              >
+                                <svg
+                                  width="9"
+                                  height="9"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="3"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <line x1="18" y1="6" x2="6" y2="18" />
+                                  <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                              </button>
+                            </div>
+                          ) : (
+                            <label className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[#C6A47E]/60 bg-[#F7F5F2] text-[#8A8A8A] hover:text-[#111111]">
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.8"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                              </svg>
+                              <span className="text-[9px]">Ajouter</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0];
+                                  if (f) attachBackPhoto(photo.id, f);
+                                  e.target.value = '';
+                                }}
+                              />
+                            </label>
+                          )}
+                          <span className="mt-1 text-[9px] text-[#8A8A8A]">Dos</span>
+                        </div>
+                      </div>
+                    </div>
 
                     {/* Category pills */}
                     <div className="flex flex-wrap gap-1.5">
@@ -979,9 +1180,13 @@ export default function BulkUploadFlow() {
                 <p className="mb-2 text-xs text-[#D4785C]">{error}</p>
               )}
               <p className="mb-3 text-xs text-[#8A8A8A]">
-                {eligibleCount} vêtement{eligibleCount > 1 ? 's' : ''} prêt
-                {eligibleCount > 1 ? 's' : ''} à être ajouté
-                {eligibleCount > 1 ? 's' : ''}
+                {eligibleCount} vêtement{eligibleCount > 1 ? 's' : ''} à enregistrer
+                {errorCount > 0 && (
+                  <span className="text-[#D4785C]">
+                    {' '}
+                    · {errorCount} sans IA
+                  </span>
+                )}
               </p>
               <button
                 type="button"
@@ -989,7 +1194,7 @@ export default function BulkUploadFlow() {
                 disabled={eligibleCount === 0}
                 className="w-full cursor-pointer rounded-full bg-[#111111] py-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Ajouter tous au dressing
+                Ajouter au dressing
               </button>
             </div>
           </div>

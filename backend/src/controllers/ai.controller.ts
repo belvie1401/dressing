@@ -11,10 +11,61 @@ export async function scanClothing(req: Request, res: Response): Promise<void> {
       return;
     }
 
+    if (!process.env.ANTHROPIC_API_KEY) {
+      res.status(503).json({
+        success: false,
+        error: 'AI_NOT_CONFIGURED',
+        message:
+          "L'analyse IA n'est pas configurée sur ce serveur. Vous pouvez continuer sans l'IA et saisir les informations manuellement.",
+      });
+      return;
+    }
+
     const tags = await aiService.scanClothing(image_base64);
     res.json({ success: true, data: tags });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'Erreur lors de l\'analyse IA' });
+    console.error('AI scanClothing error:', error);
+    const err = error as { status?: number; message?: string };
+
+    // Map known Anthropic SDK error shapes to actionable user messages
+    if (err.status === 401) {
+      res.status(503).json({
+        success: false,
+        error: 'AI_AUTH_FAILED',
+        message: "Clé API Anthropic invalide. Contactez l'administrateur.",
+      });
+      return;
+    }
+    if (err.status === 429) {
+      res.status(429).json({
+        success: false,
+        error: 'AI_RATE_LIMITED',
+        message: "Trop de requêtes vers l'IA. Patientez quelques secondes puis réessayez.",
+      });
+      return;
+    }
+    if (err.status === 529 || err.status === 503) {
+      res.status(503).json({
+        success: false,
+        error: 'AI_OVERLOADED',
+        message: "Le service IA est surchargé. Réessayez dans un instant.",
+      });
+      return;
+    }
+    if (err.message?.includes('Could not process image') || err.message?.includes('image')) {
+      res.status(400).json({
+        success: false,
+        error: 'AI_BAD_IMAGE',
+        message: "L'IA n'a pas pu lire cette image. Essayez une photo plus claire ou plus petite.",
+      });
+      return;
+    }
+
+    res.status(500).json({
+      success: false,
+      error: 'AI_FAILED',
+      message: err.message || "Erreur lors de l'analyse IA",
+    });
   }
 }
 
