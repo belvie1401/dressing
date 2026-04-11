@@ -1,157 +1,51 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
-import { api } from '@/lib/api';
-import RoleSwitcher from '@/components/ui/RoleSwitcher';
-import ShareModal from '@/components/ui/ShareModal';
 
-type Stat = {
-  icon: 'users' | 'sparkles' | 'star' | 'euro';
-  iconBg: string;
-  value: string;
+// ============ STAT CARDS ============
+type StatCard = {
   label: string;
-  valueClass?: string;
-  trend: { text: string; kind: 'up' | 'neutral' };
+  value: string;
+  trend: string;
+  trendKind: 'up' | 'neutral';
+  icon: 'users' | 'wardrobe' | 'calendar';
 };
 
-const STATS: Stat[] = [
+const STATS: StatCard[] = [
   {
+    label: 'Clientes actives',
+    value: '15',
+    trend: '\u2191 +3 ce mois',
+    trendKind: 'up',
     icon: 'users',
-    iconBg: 'bg-[#EDE5DC]',
-    value: '8',
-    label: 'clientes actives',
-    trend: { text: '\u2191 +2', kind: 'up' },
   },
   {
-    icon: 'sparkles',
-    iconBg: 'bg-[#F0EDE8]',
-    value: '47',
-    label: 'looks cr\u00e9\u00e9s',
-    trend: { text: '\u2191 +5', kind: 'up' },
+    label: 'Dressings g\u00e9r\u00e9s',
+    value: '82',
+    trend: '\u2191 +12 pi\u00e8ces',
+    trendKind: 'up',
+    icon: 'wardrobe',
   },
   {
-    icon: 'star',
-    iconBg: 'bg-[#C6A47E]/15',
-    value: '98%',
-    label: 'satisfaction',
-    valueClass: 'text-[#C6A47E]',
-    trend: { text: '\u2192', kind: 'neutral' },
-  },
-  {
-    icon: 'euro',
-    iconBg: 'bg-[#111111]/5',
-    value: '620\u20ac',
-    label: 'ce mois',
-    trend: { text: '\u2191 +20%', kind: 'up' },
+    label: 'Rendez-vous',
+    value: '5',
+    trend: 'cette semaine',
+    trendKind: 'neutral',
+    icon: 'calendar',
   },
 ];
 
-type PendingRequest = {
-  name: string;
-  initials: string;
-  details: string;
-  price: string;
-};
-
-const PENDING_REQUESTS: PendingRequest[] = [
-  {
-    name: 'Lucie B.',
-    initials: 'LB',
-    details: 'Session 60 min \u00b7 Lookbook',
-    price: '79 \u20ac',
-  },
-  {
-    name: 'Am\u00e9lie R.',
-    initials: 'AR',
-    details: 'Session 30 min \u00b7 Conseil express',
-    price: '39 \u20ac',
-  },
-  {
-    name: 'Chlo\u00e9 D.',
-    initials: 'CD',
-    details: 'Session 45 min \u00b7 Conseil style',
-    price: '49 \u20ac',
-  },
-];
-
-type Client = {
-  name: string;
-  avatar: string;
-  status: string;
-  online: boolean;
-};
-
-const CLIENTS: Client[] = [
-  {
-    name: 'Sophie M.',
-    avatar: 'https://i.pravatar.cc/160?img=47',
-    status: 'En ligne',
-    online: true,
-  },
-  {
-    name: 'Marie L.',
-    avatar: 'https://i.pravatar.cc/160?img=32',
-    status: 'Il y a 2h',
-    online: false,
-  },
-  {
-    name: 'Julie R.',
-    avatar: 'https://i.pravatar.cc/160?img=44',
-    status: 'Hier',
-    online: false,
-  },
-  {
-    name: 'Emma D.',
-    avatar: 'https://i.pravatar.cc/160?img=29',
-    status: 'Il y a 3j',
-    online: false,
-  },
-];
-
-type LookbookItem = {
-  client: string;
-  title: string;
-  image: string;
-  status: 'Approuv\u00e9' | 'En attente' | 'Envoy\u00e9';
-};
-
-const LOOKBOOKS: LookbookItem[] = [
-  {
-    client: 'Sophie M.',
-    title: 'Printemps bureau',
-    image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&h=480&fit=crop',
-    status: 'Envoy\u00e9',
-  },
-  {
-    client: 'Marie L.',
-    title: 'Weekend casual',
-    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=480&fit=crop',
-    status: 'Approuv\u00e9',
-  },
-  {
-    client: 'Julie R.',
-    title: 'Soir\u00e9e chic',
-    image: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400&h=480&fit=crop',
-    status: 'En attente',
-  },
-  {
-    client: 'Emma D.',
-    title: 'Escapade Rome',
-    image: 'https://images.unsplash.com/photo-1496217590455-aa63a8350eea?w=400&h=480&fit=crop',
-    status: 'Envoy\u00e9',
-  },
-];
-
-function StatIcon({ name }: { name: Stat['icon'] }) {
+function StatIcon({ name }: { name: StatCard['icon'] }) {
   const common = {
-    width: 16,
-    height: 16,
+    width: 18,
+    height: 18,
     viewBox: '0 0 24 24',
     fill: 'none' as const,
+    stroke: '#C6A47E',
     strokeWidth: 1.5,
     strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const,
@@ -159,85 +53,138 @@ function StatIcon({ name }: { name: Stat['icon'] }) {
   switch (name) {
     case 'users':
       return (
-        <svg {...common} stroke="#C6A47E">
+        <svg {...common}>
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
           <circle cx="9" cy="7" r="4" />
           <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
           <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
       );
-    case 'sparkles':
+    case 'wardrobe':
       return (
-        <svg {...common} stroke="#111111">
-          <path d="M12 3l1.9 4.5 4.8.4-3.7 3.2 1.1 4.7L12 13.5 7.9 15.8 9 11.1 5.3 7.9l4.8-.4z" />
-          <path d="M5 20l.8-.8" />
-          <path d="M19 4l-.8.8" />
-          <path d="M18.5 20l.8-.8" />
+        <svg {...common}>
+          <path d="M12 2C12 2 8 2 8 6H4l1 14h14l1-14h-4c0-4-4-4-4-4z" />
+          <line x1="8" y1="6" x2="8" y2="8" />
+          <line x1="16" y1="6" x2="16" y2="8" />
         </svg>
       );
-    case 'star':
+    case 'calendar':
       return (
-        <svg {...common} fill="#C6A47E" stroke="#C6A47E">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-        </svg>
-      );
-    case 'euro':
-      return (
-        <svg {...common} stroke="#111111">
-          <path d="M18 7c-1.5-1.5-3.5-2-5.5-2A7 7 0 0 0 6 12a7 7 0 0 0 6.5 7c2 0 4-.5 5.5-2" />
-          <line x1="3" y1="10" x2="14" y2="10" />
-          <line x1="3" y1="14" x2="12" y2="14" />
+        <svg {...common}>
+          <rect x="3" y="4" width="18" height="18" rx="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
         </svg>
       );
   }
 }
 
-const STATUS_BADGE_CLASS: Record<LookbookItem['status'], string> = {
-  'Approuv\u00e9': 'bg-green-50 text-green-600',
-  'En attente': 'bg-amber-50 text-amber-600',
-  'Envoy\u00e9': 'bg-white text-[#111111]',
+// ============ CLIENT CARDS ============
+type Client = {
+  name: string;
+  initials: string;
+  avatar: string;
+  pieces: number;
+  lastUpdate: string;
+  status: 'En ligne' | 'Hors ligne';
+  tags: string[];
 };
+
+const CLIENTS: Client[] = [
+  {
+    name: 'Sophie Moreau',
+    initials: 'SM',
+    avatar: 'https://i.pravatar.cc/160?img=47',
+    pieces: 28,
+    lastUpdate: 'MAJ il y a 2h',
+    status: 'En ligne',
+    tags: ['Chic', 'Minimaliste'],
+  },
+  {
+    name: 'Marie Laurent',
+    initials: 'ML',
+    avatar: 'https://i.pravatar.cc/160?img=32',
+    pieces: 34,
+    lastUpdate: 'MAJ hier',
+    status: 'Hors ligne',
+    tags: ['Boh\u00e8me', 'Couleurs'],
+  },
+  {
+    name: 'Julie Roche',
+    initials: 'JR',
+    avatar: 'https://i.pravatar.cc/160?img=44',
+    pieces: 20,
+    lastUpdate: 'MAJ il y a 3j',
+    status: 'En ligne',
+    tags: ['Classique'],
+  },
+  {
+    name: 'Emma Dubois',
+    initials: 'ED',
+    avatar: 'https://i.pravatar.cc/160?img=29',
+    pieces: 42,
+    lastUpdate: 'MAJ il y a 1j',
+    status: 'Hors ligne',
+    tags: ['\u00c9dgy', 'Street'],
+  },
+  {
+    name: 'L\u00e9a Bernard',
+    initials: 'LB',
+    avatar: 'https://i.pravatar.cc/160?img=48',
+    pieces: 18,
+    lastUpdate: 'MAJ hier',
+    status: 'Hors ligne',
+    tags: ['Sportif'],
+  },
+  {
+    name: 'Chlo\u00e9 Martin',
+    initials: 'CM',
+    avatar: 'https://i.pravatar.cc/160?img=41',
+    pieces: 26,
+    lastUpdate: 'MAJ il y a 5h',
+    status: 'En ligne',
+    tags: ['Romantique'],
+  },
+];
+
+// ============ MINI CALENDAR ============
+const CAL_DAYS = [
+  { num: 10, label: 'Lun' },
+  { num: 11, label: 'Mar', today: true },
+  { num: 12, label: 'Mer' },
+  { num: 13, label: 'Jeu' },
+  { num: 14, label: 'Ven' },
+  { num: 15, label: 'Sam' },
+  { num: 16, label: 'Dim' },
+];
+
+const CAL_APPTS = [
+  { time: '10:00', title: 'Sophie M.', type: 'Session 60 min' },
+  { time: '14:00', title: 'Marie L.', type: 'Conseil style' },
+  { time: '16:30', title: 'Julie R.', type: 'Lookbook' },
+];
+
+// ============ TIPS ============
+const TIPS = [
+  {
+    title: 'Boostez vos r\u00e9servations',
+    text: 'Les stylistes qui r\u00e9pondent en moins d\u20191h ont 2\u00d7 plus de rendez-vous.',
+  },
+  {
+    title: 'Soignez vos lookbooks',
+    text: 'Ajoutez au moins 3 photos par look pour augmenter le taux de validation.',
+  },
+];
 
 export default function StylistDashboardPage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const isDualRole = useAuthStore((s) => s.isDualRole);
   const activateStylistMode = useAuthStore((s) => s.activateStylistMode);
-  const initialAvailable =
-    (user?.style_profile as Record<string, unknown> | undefined)?.available !== false;
-  const [available, setAvailable] = useState<boolean>(initialAvailable);
-  const [togglingStatus, setTogglingStatus] = useState(false);
   const [activatingClient, setActivatingClient] = useState(false);
-  const [showShare, setShowShare] = useState(false);
 
   const firstName = user?.name?.split(' ')[0] || 'Chlo\u00e9';
-
-  const toggleAvailability = async () => {
-    if (togglingStatus) return;
-    const next = !available;
-    setAvailable(next);
-    setTogglingStatus(true);
-    try {
-      const existingProfile =
-        (user?.style_profile as Record<string, unknown> | undefined) || {};
-      const res = await api.put<{ style_profile?: Record<string, unknown> }>(
-        '/auth/profile',
-        {
-          style_profile: { ...existingProfile, available: next },
-        }
-      );
-      if (res.success && user) {
-        useAuthStore.setState({
-          user: {
-            ...user,
-            style_profile: { ...existingProfile, available: next },
-          },
-        });
-      }
-    } finally {
-      setTogglingStatus(false);
-    }
-  };
 
   const handleActivateClient = async () => {
     setActivatingClient(true);
@@ -247,364 +194,361 @@ export default function StylistDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2] pb-24">
-      <RoleSwitcher />
-      <div className="mx-auto max-w-md lg:max-w-6xl lg:px-6">
-        <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-x-6 lg:gap-y-5">
+    <div className="mx-auto w-full max-w-[1400px] px-5 py-6 lg:px-8 lg:py-10">
+      {/* ============ GREETING ============ */}
+      <section className="mb-8">
+        <p className="text-sm text-[#8A8A8A]">
+          {new Date().toLocaleDateString('fr-FR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+          })}
+        </p>
+        <h1 className="font-serif text-3xl text-[#111111] sm:text-4xl lg:text-[42px] mt-1">
+          Bonjour <em className="italic text-[#C6A47E]">{firstName}</em>
+        </h1>
+        <p className="mt-2 max-w-xl text-sm text-[#8A8A8A]">
+          Voici un aper&ccedil;u de votre activit&eacute; et de vos clientes cette semaine.
+        </p>
+      </section>
 
-          {/* ===== ROW 1: HEADER ===== */}
-          <header className="flex justify-between items-start px-5 pt-8 pb-2 lg:px-0 lg:col-span-3">
-            <div>
-              <p className="text-xs text-[#8A8A8A] leading-none">Bonjour,</p>
-              <h1 className="font-serif text-3xl text-[#111111] italic leading-tight mt-1">
-                {firstName}
-              </h1>
+      {/* ============ STATS ROW: 3 cards + objectives ============ */}
+      <section className="mb-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_280px]">
+        {STATS.map((s) => (
+          <div
+            key={s.label}
+            className="rounded-3xl bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EDE5DC]">
+                <StatIcon name={s.icon} />
+              </div>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                  s.trendKind === 'up'
+                    ? 'bg-green-50 text-green-600'
+                    : 'bg-[#F0EDE8] text-[#8A8A8A]'
+                }`}
+              >
+                {s.trend}
+              </span>
             </div>
-            <div className="flex flex-col items-end gap-2">
-              <div className="flex items-center gap-2">
-                {/* Share button */}
-                <button
-                  type="button"
-                  onClick={() => setShowShare(true)}
-                  className="w-9 h-9 rounded-full bg-[#F0EDE8] flex items-center justify-center"
-                  aria-label="Partager LIEN"
-                >
+            <p className="mt-4 font-serif text-[44px] leading-none text-[#111111]">
+              {s.value}
+            </p>
+            <p className="mt-1 text-sm text-[#8A8A8A]">{s.label}</p>
+          </div>
+        ))}
+
+        {/* Objectives dark card */}
+        <div className="rounded-3xl bg-[#111111] p-5 text-white">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#C6A47E]">
+              Mes objectifs
+            </p>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#C6A47E"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="6" />
+              <circle cx="12" cy="12" r="2" />
+            </svg>
+          </div>
+          <p className="mt-3 font-serif text-2xl leading-tight">
+            Avril <span className="text-[#C6A47E]">2026</span>
+          </p>
+
+          <div className="mt-4 space-y-3">
+            <div>
+              <div className="flex justify-between text-[11px]">
+                <span className="text-[#CFCFCF]">Nouvelles clientes</span>
+                <span className="text-white">8 / 10</span>
+              </div>
+              <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/10">
+                <div className="h-full bg-[#C6A47E]" style={{ width: '80%' }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-[11px]">
+                <span className="text-[#CFCFCF]">Lookbooks cr&eacute;&eacute;s</span>
+                <span className="text-white">12 / 20</span>
+              </div>
+              <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/10">
+                <div className="h-full bg-[#C6A47E]" style={{ width: '60%' }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-[11px]">
+                <span className="text-[#CFCFCF]">Revenus</span>
+                <span className="text-white">620 / 1000 &euro;</span>
+              </div>
+              <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/10">
+                <div className="h-full bg-[#D4785C]" style={{ width: '62%' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ DRESSINGS CLIENTS + RIGHT SIDEBAR ============ */}
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
+        {/* ---- Left: clients grid ---- */}
+        <div>
+          <div className="mb-5 flex items-end justify-between">
+            <div>
+              <h2 className="font-serif text-2xl text-[#111111]">
+                Dressings clientes
+              </h2>
+              <p className="mt-1 text-sm text-[#8A8A8A]">
+                Explorez et g&eacute;rez les dressings de vos clientes
+              </p>
+            </div>
+            <Link
+              href="/my-clients"
+              className="text-sm text-[#C6A47E] font-medium hover:underline"
+            >
+              Voir tout &rarr;
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {CLIENTS.map((c) => (
+              <Link
+                key={c.name}
+                href="/my-clients"
+                className="group rounded-3xl bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full ring-2 ring-[#EFEFEF]">
+                    <Image
+                      src={c.avatar}
+                      alt={c.name}
+                      fill
+                      className="object-cover"
+                      sizes="48px"
+                    />
+                    {c.status === 'En ligne' && (
+                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-[#4ade80]" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-[#111111]">
+                      {c.name}
+                    </p>
+                    <p className="truncate text-[11px] text-[#8A8A8A]">
+                      {c.lastUpdate}
+                    </p>
+                  </div>
                   <svg
+                    className="shrink-0 text-[#CFCFCF] transition-colors group-hover:text-[#111111]"
                     width="16"
                     height="16"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#111111"
+                    stroke="currentColor"
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                    <polyline points="16 6 12 2 8 6" />
-                    <line x1="12" y1="2" x2="12" y2="15" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
                   </svg>
-                </button>
-                <Link
-                  href="/messages"
-                  aria-label="Notifications"
-                  className="flex items-center justify-center p-1"
-                >
+                </div>
+
+                <div className="mt-4 flex items-center justify-between rounded-2xl bg-[#F7F5F2] px-4 py-3">
+                  <div>
+                    <p className="font-serif text-2xl leading-none text-[#111111]">
+                      {c.pieces}
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-[#8A8A8A]">
+                      pi&egrave;ces dans le dressing
+                    </p>
+                  </div>
                   <svg
                     width="20"
                     height="20"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#111111"
+                    stroke="#C6A47E"
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    <path d="M12 2C12 2 8 2 8 6H4l1 14h14l1-14h-4c0-4-4-4-4-4z" />
                   </svg>
-                </Link>
-              </div>
-              <button
-                type="button"
-                onClick={toggleAvailability}
-                disabled={togglingStatus}
-                className={`rounded-full px-3 py-1 text-[10px] font-medium transition-colors disabled:opacity-60 ${
-                  available
-                    ? 'bg-[#111111] text-white'
-                    : 'bg-[#F0EDE8] text-[#8A8A8A]'
-                }`}
-              >
-                {available ? '\u25cf Disponible' : '\u25cb Indisponible'}
-              </button>
-            </div>
-          </header>
-
-          {showShare && <ShareModal onClose={() => setShowShare(false)} />}
-
-          {/* ===== ROW 2: NEXT SESSION ===== */}
-          <section className="px-5 mt-4 mb-5 lg:px-0 lg:mt-0 lg:mb-0 lg:col-span-2 lg:col-start-1 lg:row-start-2">
-            <div className="bg-[#111111] rounded-3xl p-5">
-              <p className="text-[#C6A47E] text-[9px] uppercase tracking-widest font-medium">
-                AUJOURD&rsquo;HUI
-              </p>
-              <div className="flex justify-between items-center mt-2">
-                <div className="min-w-0 flex-1">
-                  <p className="font-serif text-4xl text-white leading-none">15:00</p>
-                  <p className="text-white text-sm mt-1 font-medium">
-                    Session avec Sophie M.
-                  </p>
-                  <p className="text-[#CFCFCF] text-xs mt-1">
-                    60 min &middot; Visioconf&eacute;rence
-                  </p>
-                  <div className="flex gap-2 mt-4">
-                    <button
-                      type="button"
-                      className="bg-white text-[#111111] rounded-full px-5 py-2 text-xs font-semibold"
-                    >
-                      Rejoindre
-                    </button>
-                    <button
-                      type="button"
-                      className="border border-white/20 text-white rounded-full px-5 py-2 text-xs"
-                    >
-                      Reporter
-                    </button>
-                  </div>
                 </div>
-                <div className="shrink-0 ml-4">
-                  <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-[#C6A47E] ring-offset-2 ring-offset-[#111111] bg-[#EDE5DC] relative">
-                    <Image
-                      src="https://i.pravatar.cc/150?img=47"
-                      alt="Sophie M."
-                      fill
-                      className="object-cover"
-                      sizes="64px"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
 
-          {/* ===== ROW 3: STATS GRID ===== */}
-          <section className="px-5 mb-5 lg:px-0 lg:mb-0 lg:col-start-3 lg:row-start-2">
-            <div className="grid grid-cols-2 gap-3">
-              {STATS.map((s) => (
-                <div
-                  key={s.label}
-                  className="bg-white rounded-3xl p-4 shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center ${s.iconBg}`}>
-                      <StatIcon name={s.icon} />
-                    </div>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {c.tags.map((t) => (
                     <span
-                      className={`text-[9px] rounded-full px-2 py-0.5 font-medium ${
-                        s.trend.kind === 'up'
-                          ? 'bg-green-50 text-green-600'
-                          : 'bg-[#F0EDE8] text-[#8A8A8A]'
-                      }`}
+                      key={t}
+                      className="rounded-full bg-[#EDE5DC] px-2.5 py-1 text-[10px] font-medium text-[#C6A47E]"
                     >
-                      {s.trend.text}
+                      {t}
                     </span>
-                  </div>
-                  <p
-                    className={`font-serif text-3xl mt-2 leading-none ${
-                      s.valueClass || 'text-[#111111]'
-                    }`}
+                  ))}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* ---- Right: sidebar column ---- */}
+        <aside className="flex flex-col gap-5">
+          {/* Mini calendar */}
+          <div className="rounded-3xl bg-white p-5 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-serif text-base text-[#111111]">
+                Cette semaine
+              </h3>
+              <Link href="/agenda" className="text-[11px] text-[#8A8A8A]">
+                Voir agenda
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-7 gap-1">
+              {CAL_DAYS.map((d) => (
+                <div
+                  key={d.num}
+                  className={`flex flex-col items-center justify-center rounded-xl py-2 text-[10px] ${
+                    d.today
+                      ? 'bg-[#111111] text-white'
+                      : 'text-[#8A8A8A] hover:bg-[#F7F5F2]'
+                  }`}
+                >
+                  <span
+                    className={d.today ? 'text-[#C6A47E]' : 'text-[#CFCFCF]'}
                   >
-                    {s.value}
-                  </p>
-                  <p className="text-[10px] text-[#8A8A8A] mt-0.5">{s.label}</p>
+                    {d.label}
+                  </span>
+                  <span className="mt-0.5 font-serif text-sm">{d.num}</span>
                 </div>
               ))}
             </div>
-          </section>
 
-          {/* ===== ROW 4: PENDING REQUESTS ===== */}
-          <section className="px-5 mb-5 lg:px-0 lg:mb-0 lg:col-span-2 lg:col-start-1 lg:row-start-3">
-            <div className="flex items-center gap-2 mb-3">
-              <h2 className="font-serif text-base text-[#111111]">
-                Demandes en attente
-              </h2>
-              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#D4785C] text-white text-[9px] font-semibold">
-                {PENDING_REQUESTS.length}
-              </span>
+            <div className="mt-4 flex flex-col gap-2">
+              {CAL_APPTS.map((a) => (
+                <div
+                  key={a.time + a.title}
+                  className="flex items-center gap-3 rounded-2xl bg-[#F7F5F2] px-3 py-2.5"
+                >
+                  <span className="font-serif text-sm text-[#C6A47E]">
+                    {a.time}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-medium text-[#111111]">
+                      {a.title}
+                    </p>
+                    <p className="truncate text-[10px] text-[#8A8A8A]">
+                      {a.type}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Planning stats */}
+          <div className="rounded-3xl bg-white p-5 shadow-sm">
+            <h3 className="font-serif text-base text-[#111111]">
+              Statistiques planning
+            </h3>
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-[#8A8A8A]">Taux d&rsquo;occupation</span>
+                <span className="font-serif text-sm text-[#111111]">72%</span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#F0EDE8]">
+                <div className="h-full rounded-full bg-[#C6A47E]" style={{ width: '72%' }} />
+              </div>
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-xs text-[#8A8A8A]">Dur&eacute;e moyenne</span>
+                <span className="font-serif text-sm text-[#111111]">55 min</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-[#8A8A8A]">Annulations</span>
+                <span className="font-serif text-sm text-[#111111]">2%</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Conseils & performance */}
+          <div className="rounded-3xl bg-[#EDE5DC] p-5">
+            <div className="mb-3 flex items-center gap-2">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#C6A47E"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 3l1.9 4.5 4.8.4-3.7 3.2 1.1 4.7L12 13.5 7.9 15.8 9 11.1 5.3 7.9l4.8-.4z" />
+              </svg>
+              <h3 className="font-serif text-base text-[#111111]">
+                Conseils &amp; performance
+              </h3>
             </div>
             <div className="flex flex-col gap-3">
-              {PENDING_REQUESTS.map((r) => (
-                <div
-                  key={r.name}
-                  className="bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3"
-                >
-                  <div className="w-11 h-11 rounded-full bg-[#EDE5DC] flex items-center justify-center shrink-0">
-                    <span className="font-serif text-sm text-[#C6A47E]">
-                      {r.initials}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#111111] truncate">
-                      {r.name}
-                    </p>
-                    <p className="text-xs text-[#8A8A8A] mt-0.5 truncate">
-                      {r.details}
-                    </p>
-                    <p className="text-xs text-[#C6A47E] font-medium mt-0.5">
-                      {r.price}
-                    </p>
-                  </div>
-                  <div className="flex flex-col gap-1.5 shrink-0">
-                    <button
-                      type="button"
-                      className="bg-[#111111] text-white rounded-full px-4 py-1.5 text-[11px] font-medium"
-                    >
-                      Accepter
-                    </button>
-                    <button
-                      type="button"
-                      className="text-[#8A8A8A] text-[11px] text-center"
-                    >
-                      Refuser
-                    </button>
-                  </div>
+              {TIPS.map((t) => (
+                <div key={t.title} className="rounded-2xl bg-white/60 p-3">
+                  <p className="text-xs font-semibold text-[#111111]">{t.title}</p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-[#8A8A8A]">
+                    {t.text}
+                  </p>
                 </div>
               ))}
             </div>
-          </section>
+          </div>
 
-          {/* ===== ROW 5: RECENT CLIENTS ===== */}
-          <section className="mb-5 lg:mb-0 lg:col-span-3 lg:row-start-4">
-            <div className="flex justify-between items-baseline mb-3 px-5 lg:px-0">
-              <h2 className="font-serif text-base text-[#111111]">Mes clientes</h2>
-              <Link href="/my-clients" className="text-xs text-[#8A8A8A]">
-                Voir tout &rarr;
-              </Link>
-            </div>
-            <div className="overflow-x-auto scrollbar-hide">
-              <div className="flex gap-4 px-5 lg:px-0">
-                {CLIENTS.map((c) => (
-                  <Link
-                    key={c.name}
-                    href="/my-clients"
-                    className="w-[76px] flex-shrink-0 text-center"
+          {/* Client mode CTA — only when NOT yet dual-role */}
+          {!isDualRole && (
+            <div className="rounded-3xl bg-white p-5 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#EDE5DC]">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#C6A47E"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    <div
-                      className={`relative w-14 h-14 rounded-full mx-auto overflow-hidden ring-2 ${
-                        c.online ? 'ring-[#4ade80]' : 'ring-[#EFEFEF]'
-                      }`}
-                    >
-                      <Image
-                        src={c.avatar}
-                        alt={c.name}
-                        fill
-                        className="object-cover"
-                        sizes="56px"
-                      />
-                    </div>
-                    <p className="text-[11px] font-medium text-[#111111] mt-2 truncate px-1">
-                      {c.name}
-                    </p>
-                    <p className="text-[9px] text-[#8A8A8A] truncate px-1">
-                      {c.status}
-                    </p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* ===== ROW 6: RECENT LOOKBOOKS ===== */}
-          <section className="mb-5 lg:mb-0 lg:col-span-3 lg:row-start-5">
-            <div className="flex justify-between items-baseline mb-3 px-5 lg:px-0">
-              <h2 className="font-serif text-base text-[#111111]">
-                Derniers lookbooks
-              </h2>
-              <Link
-                href="/lookbooks/create"
-                className="text-xs text-[#C6A47E] font-medium"
-              >
-                Cr&eacute;er &rarr;
-              </Link>
-            </div>
-            <div className="overflow-x-auto scrollbar-hide">
-              <div className="flex gap-3 px-5 lg:px-0">
-                {LOOKBOOKS.map((lb) => (
-                  <Link
-                    key={`${lb.title}-${lb.client}`}
-                    href="/lookbooks"
-                    className="w-[150px] flex-shrink-0 rounded-2xl overflow-hidden shadow-sm bg-white"
-                  >
-                    <div className="relative h-[110px] w-full bg-[#EDE5DC]">
-                      <Image
-                        src={lb.image}
-                        alt={lb.title}
-                        fill
-                        className="object-cover"
-                        sizes="150px"
-                      />
-                      <span
-                        className={`absolute top-2 left-2 text-[9px] rounded-full px-2 py-0.5 font-medium ${STATUS_BADGE_CLASS[lb.status]}`}
-                      >
-                        {lb.status}
-                      </span>
-                    </div>
-                    <div className="p-2.5">
-                      <p className="text-[9px] text-[#CFCFCF] truncate">
-                        {lb.client}
-                      </p>
-                      <p className="text-xs font-semibold text-[#111111] truncate mt-0.5">
-                        {lb.title}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* ===== ROW 7: CLIENT CTA + WALLET PREVIEW (desktop: stacked in col-3 row-3) ===== */}
-          <section className="px-5 mb-6 lg:px-0 lg:mb-0 lg:col-start-3 lg:row-start-3 flex flex-col gap-4">
-            {/* Client mode CTA — only when NOT yet dual-role */}
-            {!isDualRole && (
-              <div className="bg-white rounded-3xl p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#EDE5DC] flex items-center justify-center shrink-0">
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#C6A47E"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M12 2C12 2 8 2 8 6H4l1 14h14l1-14h-4c0-4-4-4-4-4z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#111111]">
-                      G&eacute;rez aussi votre dressing
-                    </p>
-                    <p className="text-xs text-[#8A8A8A] mt-0.5">
-                      Activez votre espace cliente
-                    </p>
-                  </div>
+                    <path d="M12 2C12 2 8 2 8 6H4l1 14h14l1-14h-4c0-4-4-4-4-4z" />
+                  </svg>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-[#111111]">
+                    G&eacute;rez aussi votre dressing
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-[#8A8A8A]">
+                    Activez votre espace cliente en un clic.
+                  </p>
                   <button
                     type="button"
                     onClick={handleActivateClient}
                     disabled={activatingClient}
-                    className="bg-[#F0EDE8] text-[#111111] rounded-full px-3 py-1.5 text-xs font-medium shrink-0 disabled:opacity-60"
+                    className="mt-3 rounded-full bg-[#F0EDE8] px-3 py-1.5 text-[11px] font-medium text-[#111111] disabled:opacity-60"
                   >
-                    {activatingClient ? '...' : 'Activer'}
+                    {activatingClient ? 'Activation...' : 'Activer mon espace cliente'}
                   </button>
                 </div>
               </div>
-            )}
-
-            {/* Wallet preview */}
-            <div className="bg-[#111111] rounded-3xl p-5 flex justify-between items-center gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="text-[#CFCFCF] text-[10px] uppercase tracking-wide">
-                  Solde disponible
-                </p>
-                <p className="font-serif text-4xl text-white mt-1 leading-none">
-                  620
-                </p>
-                <p className="text-[#CFCFCF] text-sm mt-1">euros</p>
-                <p className="text-[#C6A47E] text-xs mt-2">En attente : 158 &euro;</p>
-              </div>
-              <Link
-                href="/wallet"
-                className="bg-[#C6A47E] text-[#111111] rounded-full px-4 py-2 text-xs font-semibold shrink-0"
-              >
-                Retirer &rarr;
-              </Link>
             </div>
-          </section>
-
-        </div>
-      </div>
+          )}
+        </aside>
+      </section>
     </div>
   );
 }

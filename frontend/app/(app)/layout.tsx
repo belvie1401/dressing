@@ -73,6 +73,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (!token) return null;
 
+  // /stylist-dashboard has its own dedicated layout (sidebar + top bar + mobile nav)
+  if (pathname === '/stylist-dashboard') {
+    return <>{children}</>;
+  }
+
+  // Other stylist-facing routes reuse the client shell but skip the mobile bottom nav
+  const isStylistRoute =
+    pathname?.startsWith('/stylist') ||
+    pathname === '/my-clients' ||
+    pathname?.startsWith('/my-clients/') ||
+    pathname === '/agenda' ||
+    pathname === '/wallet' ||
+    pathname?.startsWith('/lookbooks');
+
   return (
     <div className="flex min-h-screen" style={{ background: 'var(--color-app-bg)' }}>
       {/* Desktop sidebar — hidden on mobile */}
@@ -83,8 +97,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      {/* Mobile bottom nav — hidden on desktop */}
-      <BottomNav />
+      {/* Mobile bottom nav — hidden on desktop; skipped entirely on stylist desktop routes */}
+      {!isStylistRoute && <BottomNav />}
     </div>
   );
 }
