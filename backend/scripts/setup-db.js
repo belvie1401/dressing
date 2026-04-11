@@ -197,6 +197,17 @@ ALTER TABLE "CalendarEntry" ADD COLUMN IF NOT EXISTS "event_type" TEXT;
 ALTER TABLE "CalendarEntry" ADD COLUMN IF NOT EXISTS "duration_min" INTEGER;
 ALTER TABLE "CalendarEntry" ADD COLUMN IF NOT EXISTS "zoom_link" TEXT;
 ALTER TABLE "CalendarEntry" ADD COLUMN IF NOT EXISTS "title" TEXT;
+
+-- Lookbook portfolio fields
+ALTER TABLE "Lookbook" ALTER COLUMN "client_id" DROP NOT NULL;
+ALTER TABLE "Lookbook" ADD COLUMN IF NOT EXISTS "type" TEXT;
+ALTER TABLE "Lookbook" ADD COLUMN IF NOT EXISTS "price" INTEGER;
+ALTER TABLE "Lookbook" ADD COLUMN IF NOT EXISTS "photos" TEXT[] DEFAULT '{}';
+ALTER TABLE "Lookbook" ADD COLUMN IF NOT EXISTS "before_photos" TEXT[] DEFAULT '{}';
+ALTER TABLE "Lookbook" ADD COLUMN IF NOT EXISTS "after_photos" TEXT[] DEFAULT '{}';
+ALTER TABLE "Lookbook" ADD COLUMN IF NOT EXISTS "tags" TEXT[] DEFAULT '{}';
+ALTER TABLE "Lookbook" ADD COLUMN IF NOT EXISTS "is_public" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Lookbook" ADD COLUMN IF NOT EXISTS "favorite_count" INTEGER NOT NULL DEFAULT 0;
 `;
 
 // Try multiple connection strategies

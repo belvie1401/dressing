@@ -164,14 +164,24 @@ model StylistClient {
 model Lookbook {
   id          String         @id @default(cuid())
   stylist_id  String
-  client_id   String
+  client_id   String?
   stylist     User           @relation("StylistLookbooks", fields: [stylist_id], references: [id])
-  client      User           @relation("ClientLookbooks", fields: [client_id], references: [id])
+  client      User?          @relation("ClientLookbooks", fields: [client_id], references: [id])
   title       String
   description String?
   status      LookbookStatus @default(DRAFT)
   feedback    String?
   created_at  DateTime       @default(now())
+
+  // Portfolio fields
+  type          String?
+  price         Int?
+  photos        String[] @default([])
+  before_photos String[] @default([])
+  after_photos  String[] @default([])
+  tags          String[] @default([])
+  is_public     Boolean  @default(false)
+  favorite_count Int     @default(0)
 
   outfits LookbookOutfit[]
 }

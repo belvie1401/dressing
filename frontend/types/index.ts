@@ -88,18 +88,33 @@ export interface StylistClient {
   created_at: string;
 }
 
+export type LookbookType =
+  | 'BEFORE_AFTER'
+  | 'COMPLETE_LOOK'
+  | 'THEME'
+  | 'STYLE_ADVICE';
+
 export interface Lookbook {
   id: string;
   stylist_id: string;
-  client_id: string;
+  client_id?: string | null;
   stylist?: User;
-  client?: User;
+  client?: User | null;
   title: string;
   description?: string;
   status: LookbookStatus;
   feedback?: string;
   created_at: string;
   outfits?: LookbookOutfit[];
+  // Portfolio fields
+  type?: LookbookType | string | null;
+  price?: number | null;
+  photos?: string[];
+  before_photos?: string[];
+  after_photos?: string[];
+  tags?: string[];
+  is_public?: boolean;
+  favorite_count?: number;
 }
 
 export interface LookbookOutfit {

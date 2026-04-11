@@ -7,13 +7,16 @@ import {
   deleteLookbook,
   sendLookbook,
   submitFeedback,
+  uploadLookbookPhoto,
 } from '../controllers/lookbooks.controller';
 import { authenticate } from '../middleware/auth.middleware';
+import { upload } from '../middleware/upload.middleware';
 
 const router = Router();
 
 router.use(authenticate);
 
+router.post('/upload-photo', upload.single('photo'), uploadLookbookPhoto);
 router.get('/', getLookbooks);
 router.get('/:id', getLookbook);
 router.post('/', createLookbook);
