@@ -7,6 +7,9 @@ import Image from 'next/image';
 import { api } from '@/lib/api';
 import { useWardrobeStore } from '@/lib/store';
 import type { ClothingItem, Category, Season, Occasion } from '@/types';
+import BulkUploadFlow from '@/components/wardrobe/BulkUploadFlow';
+
+type UploadMode = 'individual' | 'bulk';
 
 // ─── Colour palette (16 entries, matching the AI enum) ───────────────────────
 type ColorOption = { name: string; hex: string; ring?: boolean };
@@ -130,6 +133,9 @@ export default function WardrobeAddPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [duplicate, setDuplicate] = useState<ClothingItem | null>(null);
+
+  // Upload mode selector — defaults to individual
+  const [mode, setMode] = useState<UploadMode>('individual');
 
   // ── Handle file selection ──
   const handleFileSelected = useCallback(async (selected: File) => {
@@ -291,18 +297,96 @@ export default function WardrobeAddPage() {
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </Link>
-          <h1 className="font-serif text-2xl text-[#111111]">Ajouter un vêtement</h1>
+          <h1 className="font-serif text-2xl text-[#111111]">
+            {mode === 'bulk' ? 'Ajouter plusieurs vêtements' : 'Ajouter un vêtement'}
+          </h1>
         </div>
+        {mode === 'individual' && (
+          <button
+            type="button"
+            onClick={() => handleSubmit(false)}
+            disabled={!canSave}
+            className="cursor-pointer rounded-full bg-[#111111] px-4 py-2 text-xs font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {saving ? 'Enregistrement…' : 'Enregistrer'}
+          </button>
+        )}
+      </div>
+
+      {/* ============ MODE SELECTOR ============ */}
+      <div className="mb-6 grid grid-cols-2 gap-3">
+        {/* Individual */}
         <button
           type="button"
-          onClick={() => handleSubmit(false)}
-          disabled={!canSave}
-          className="cursor-pointer rounded-full bg-[#111111] px-4 py-2 text-xs font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+          onClick={() => setMode('individual')}
+          className={`relative cursor-pointer rounded-2xl border-2 p-4 text-left transition-colors ${
+            mode === 'individual'
+              ? 'border-[#111111] bg-white'
+              : 'border-transparent bg-[#F0EDE8]'
+          }`}
         >
-          {saving ? 'Enregistrement…' : 'Enregistrer'}
+          <div className="flex flex-col items-center text-center">
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#111111"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M16 4l-4 2-4-2-4 4 2 2 2-1v12h8V9l2 1 2-2-4-4z" />
+            </svg>
+            <p className="mt-2 font-serif text-sm text-[#111111]">Un vêtement</p>
+            <p className="mt-1 text-xs text-[#8A8A8A]">Analyse IA détaillée</p>
+          </div>
+        </button>
+
+        {/* Bulk */}
+        <button
+          type="button"
+          onClick={() => setMode('bulk')}
+          className={`relative cursor-pointer rounded-2xl border-2 p-4 text-left transition-colors ${
+            mode === 'bulk'
+              ? 'border-[#111111] bg-white'
+              : 'border-transparent bg-[#F0EDE8]'
+          }`}
+        >
+          <span
+            className="absolute right-2 top-2 rounded-full bg-[#C6A47E] px-2 py-0.5 font-bold text-[#111111]"
+            style={{ fontSize: '9px' }}
+          >
+            NOUVEAU
+          </span>
+          <div className="flex flex-col items-center text-center">
+            <div className="grid h-8 w-8 grid-cols-2 gap-0.5">
+              {[0, 1, 2, 3].map((i) => (
+                <svg
+                  key={i}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#111111"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M16 4l-4 2-4-2-4 4v12h16V8l-4-4z" />
+                </svg>
+              ))}
+            </div>
+            <p className="mt-2 font-serif text-sm text-[#111111]">Plusieurs vêtements</p>
+            <p className="mt-1 text-xs text-[#8A8A8A]">Jusqu&rsquo;à 20 photos</p>
+          </div>
         </button>
       </div>
 
+      {/* ============ BULK MODE ============ */}
+      {mode === 'bulk' && <BulkUploadFlow />}
+
+      {/* ============ INDIVIDUAL MODE ============ */}
+      {mode === 'individual' && (
+        <>
       {/* ============ PHOTO UPLOAD (2-photo 360°) ============ */}
       <section className="mb-6">
         <h2 className="font-serif text-base text-[#111111]">Photos du vêtement</h2>
@@ -686,6 +770,8 @@ export default function WardrobeAddPage() {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

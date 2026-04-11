@@ -3,6 +3,7 @@ import {
   getItems,
   getItem,
   createItem,
+  bulkCreateItems,
   updateItem,
   deleteItem,
   markWorn,
@@ -21,11 +22,16 @@ const photoFields = upload.fields([
   { name: 'photo_back', maxCount: 1 },
 ]);
 
+// Bulk uploads accept arbitrary `photo_<i>` field names (up to 20 photos),
+// so we use `upload.any()` rather than a fixed `fields()` definition.
+const bulkPhotoUpload = upload.any();
+
 router.get('/', getItems);
 router.get('/count', getItemsCount);
 router.get('/stats', getWardrobeStats);
 router.get('/:id', getItem);
 router.post('/', photoFields, createItem);
+router.post('/bulk', bulkPhotoUpload, bulkCreateItems);
 router.put('/:id', photoFields, updateItem);
 router.delete('/:id', deleteItem);
 router.post('/:id/wear', markWorn);

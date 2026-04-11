@@ -390,6 +390,166 @@ export async function deleteItem(req: Request, res: Response): Promise<void> {
   }
 }
 
+/**
+ * POST /api/wardrobe/bulk
+ *
+ * Bulk-create clothing items in one request. Used by the bulk upload flow on
+ * /wardrobe/add. Accepts multipart/form-data with:
+ *   - photo_0, photo_1, …, photo_N  — image files (max 20)
+ *   - items_meta                    — JSON string of metadata array, one entry
+ *                                     per photo, in matching order
+ *   - remove_bg                     — '1' (default) | '0'
+ *
+ * The free-plan limit is enforced for the entire batch up-front. Each photo is
+ * uploaded to Cloudinary sequentially (to avoid rate limits) using the same
+ * `processPhotoBuffer` helper as the single-item route, then a Prisma row is
+ * created for each. Failures on individual items are skipped — successfully
+ * created rows are still returned.
+ */
+export async function bulkCreateItems(req: Request, res: Response): Promise<void> {
+  try {
+    const userId = req.user!.userId;
+
+    // ── Parse metadata array ──
+    const rawMeta = req.body.items_meta;
+    let metas: Array<Record<string, unknown>> = [];
+    if (typeof rawMeta === 'string') {
+      try {
+        metas = JSON.parse(rawMeta);
+      } catch {
+        res.status(400).json({ success: false, error: 'items_meta JSON invalide' });
+        return;
+      }
+    } else if (Array.isArray(rawMeta)) {
+      metas = rawMeta as Array<Record<string, unknown>>;
+    }
+
+    if (!Array.isArray(metas) || metas.length === 0) {
+      res.status(400).json({ success: false, error: 'Aucun vêtement à enregistrer' });
+      return;
+    }
+    if (metas.length > 20) {
+      res.status(400).json({ success: false, error: 'Maximum 20 vêtements par lot' });
+      return;
+    }
+
+    // ── Index uploaded photos by their `photo_<i>` field name ──
+    const files = (req.files as Express.Multer.File[]) || [];
+    const photoByIndex = new Map<number, Express.Multer.File>();
+    for (const f of files) {
+      const m = /^photo_(\d+)$/.exec(f.fieldname);
+      if (m) photoByIndex.set(parseInt(m[1], 10), f);
+    }
+
+    // ── FREE plan limit (block whole batch if it would exceed) ──
+    const plan = await getUserPlan(userId);
+    if (plan === 'FREE') {
+      const currentCount = await prisma.clothingItem.count({
+        where: { user_id: userId },
+      });
+      if (currentCount + metas.length > FREE_PLAN_ITEM_LIMIT) {
+        await createNotification({
+          user_id: userId,
+          type: 'ALERT',
+          title: 'Limite atteinte',
+          message: `L'ajout de ${metas.length} vêtements dépasserait la limite de ${FREE_PLAN_ITEM_LIMIT} du plan Gratuit.`,
+          link: '/pricing',
+          link_label: 'Passer au Pro',
+        });
+        res.status(403).json({
+          success: false,
+          error: 'PLAN_LIMIT_REACHED',
+          message: `L'ajout de ${metas.length} vêtements dépasserait votre limite de ${FREE_PLAN_ITEM_LIMIT} sur le plan Gratuit.`,
+        });
+        return;
+      }
+    }
+
+    const removeBg = req.body.remove_bg !== '0';
+    const created: Array<Record<string, unknown>> = [];
+
+    // ── Sequential upload + create (parallel would hit Cloudinary rate limits) ──
+    for (let i = 0; i < metas.length; i++) {
+      const meta = metas[i];
+      const file = photoByIndex.get(i);
+      if (!file) continue;
+
+      try {
+        const { url, bgUrl } = await processPhotoBuffer(file, removeBg);
+
+        const rawColors = meta.colors;
+        let colors: string[] = [];
+        if (Array.isArray(rawColors)) {
+          colors = rawColors as string[];
+        } else if (typeof rawColors === 'string') {
+          try {
+            const parsed = JSON.parse(rawColors);
+            if (Array.isArray(parsed)) colors = parsed as string[];
+          } catch {
+            // ignore — leave colours empty
+          }
+        }
+
+        const item = await prisma.clothingItem.create({
+          data: {
+            user_id: userId,
+            name: (meta.name as string) || null,
+            photo_url: url,
+            bg_removed_url: bgUrl,
+            category: ((meta.category as string) || 'TOP') as any,
+            colors,
+            material: (meta.material as string) || undefined,
+            season: ((meta.season as string) || 'ALL') as any,
+            occasion: ((meta.occasion as string) || 'CASUAL') as any,
+            brand: (meta.brand as string) || undefined,
+            ai_tags: (meta.ai_tags as any) || undefined,
+          },
+        });
+
+        created.push(item);
+      } catch (err) {
+        console.error(`Bulk create — item ${i} failed:`, err);
+        // Continue with the rest of the batch
+      }
+    }
+
+    // ── LIMIT warning notification (FREE plan only) ──
+    if (plan === 'FREE') {
+      try {
+        const newCount = await prisma.clothingItem.count({
+          where: { user_id: userId },
+        });
+        if (newCount >= FREE_PLAN_WARN_AT && newCount < FREE_PLAN_ITEM_LIMIT) {
+          await createNotification({
+            user_id: userId,
+            type: 'LIMIT',
+            title: 'Limite bientôt atteinte',
+            message: `Il vous reste ${FREE_PLAN_ITEM_LIMIT - newCount} emplacements sur votre plan Gratuit.`,
+            link: '/pricing',
+            link_label: 'Voir les plans',
+          });
+        } else if (newCount >= FREE_PLAN_ITEM_LIMIT) {
+          await createNotification({
+            user_id: userId,
+            type: 'ALERT',
+            title: 'Limite atteinte',
+            message: `Vous avez atteint la limite de ${FREE_PLAN_ITEM_LIMIT} vêtements du plan Gratuit.`,
+            link: '/pricing',
+            link_label: 'Passer au Pro',
+          });
+        }
+      } catch {
+        // Notification creation must never block the response
+      }
+    }
+
+    res.status(201).json({ success: true, data: created });
+  } catch (error) {
+    console.error('Bulk create clothing items error:', error);
+    res.status(500).json({ success: false, error: "Erreur lors de l'ajout en lot" });
+  }
+}
+
 export async function markWorn(req: Request, res: Response): Promise<void> {
   try {
     const { id } = req.params as { id: string };
