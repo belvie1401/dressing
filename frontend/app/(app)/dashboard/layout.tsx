@@ -23,8 +23,7 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Accueil',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="9" />
-        <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
+        <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1V10.5Z" />
       </svg>
     ),
   },
@@ -33,9 +32,8 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Mon dressing',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2C12 2 8 2 8 6H4l1 14h14l1-14h-4c0-4-4-4-4-4z" />
-        <line x1="8" y1="6" x2="8" y2="8" />
-        <line x1="16" y1="6" x2="16" y2="8" />
+        <path d="M12 2a2 2 0 0 0-2 2 2 2 0 0 0 1 1.73L12 7l9 5H3l9-5" />
+        <path d="M3 12v2h18v-2" />
       </svg>
     ),
   },
@@ -85,7 +83,7 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Favoris',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
     ),
   },
@@ -93,13 +91,21 @@ const NAV_ITEMS: NavItem[] = [
 
 // ============ ACTIVITIES (right panel) ============
 type Activity = {
-  kind: 'message' | 'heart';
+  kind: 'item' | 'message' | 'heart';
   text: string;
   time: string;
-  avatar: string | null;
+  avatar?: string;
+  thumb?: string;
 };
 
 const ACTIVITIES: Activity[] = [
+  {
+    kind: 'item',
+    text: 'Veste en laine ajout\u00e9e',
+    time: 'Il y a 2 jours',
+    thumb:
+      'https://images.unsplash.com/photo-1594938298603-c8148c4b4057?w=80&h=80&fit=crop',
+  },
   {
     kind: 'message',
     text: 'Chlo\u00e9 vous a envoy\u00e9 3 looks',
@@ -110,7 +116,6 @@ const ACTIVITIES: Activity[] = [
     kind: 'heart',
     text: 'Look soir\u00e9e ajout\u00e9 aux favoris',
     time: 'Il y a 5 jours',
-    avatar: null,
   },
 ];
 
@@ -121,8 +126,7 @@ const STATS = [
     label: 'port\u00e9s',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
+        <path d="M12 2a2 2 0 0 0-2 2 2 2 0 0 0 1 1.73L12 7l9 5H3l9-5" />
       </svg>
     ),
   },
@@ -154,6 +158,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const firstName = user?.name?.split(' ')[0] || 'Camille';
+  const lastInitial = (user?.name?.split(' ')[1] || 'D').charAt(0).toUpperCase();
+  const fullDisplay = `${firstName} ${lastInitial}.`;
   const initial = (user?.name || 'Camille').charAt(0).toUpperCase();
 
   const isActive = (href: string) =>
@@ -194,7 +200,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 </span>
                 <span className="flex-1 truncate">{item.label}</span>
                 {item.badge ? (
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#111111] text-[9px] font-bold text-white">
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#F0EDE8] px-1 text-[10px] font-semibold text-[#111111]">
                     {item.badge}
                   </span>
                 ) : null}
@@ -203,7 +209,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        {/* Paramètres — pushed to bottom */}
+        {/* Bottom block — Paramètres + user card */}
         <div className="mt-auto">
           <Link
             href="/profile"
@@ -224,19 +230,46 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </svg>
             Param&egrave;tres
           </Link>
+
+          {/* User card */}
+          <Link
+            href="/profile"
+            className="mt-3 flex cursor-pointer items-center gap-3 rounded-xl bg-[#F7F5F2] px-3 py-2.5 transition-colors hover:bg-[#F0EDE8]"
+          >
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#EDE5DC]">
+              {user?.avatar_url ? (
+                <Image
+                  src={user.avatar_url}
+                  alt={firstName}
+                  width={36}
+                  height={36}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="font-serif text-sm text-[#C6A47E]">{initial}</span>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-semibold text-[#111111]">
+                {fullDisplay}
+              </p>
+              <p className="truncate text-[10px] text-[#8A8A8A]">Voir mon profil</p>
+            </div>
+          </Link>
         </div>
       </aside>
 
       {/* =================================================
-          ZONE 2 — CENTER CONTENT (flex-1, scrollable)
+          RIGHT SIDE — TOP BAR + (CENTER + RIGHT PANEL)
           ================================================= */}
-      <main className="flex min-w-0 flex-1 flex-col overflow-y-auto px-5 py-6 pb-24 lg:px-10 lg:py-8 lg:pb-10">
-        {/* Mobile header (small screens only) */}
-        <div className="mb-6 flex items-center justify-between lg:hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        {/* TOP BAR */}
+        <header className="flex h-[88px] flex-shrink-0 items-center gap-4 bg-[#F7F5F2] px-5 lg:px-10">
+          {/* Mobile menu button */}
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm lg:hidden"
             aria-label="Menu"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -245,63 +278,46 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
-          <Link href="/" className="font-serif text-lg text-[#111111] tracking-[0.15em] no-underline">
-            LIEN
-          </Link>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowShare(true)}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm"
-              aria-label="Partager LIEN"
+
+          {/* Search */}
+          <div className="hidden max-w-[540px] flex-1 items-center gap-3 rounded-full border border-[#EFEFEF] bg-white px-5 py-3 shadow-sm lg:flex">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#8A8A8A"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                <polyline points="16 6 12 2 8 6" />
-                <line x1="12" y1="2" x2="12" y2="15" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {children}
-      </main>
-
-      {/* =================================================
-          ZONE 3 — RIGHT PANEL (w-[320px], scrollable)
-          ================================================= */}
-      <aside className="hidden h-screen w-[320px] flex-shrink-0 flex-col overflow-y-auto border-l border-[#EFEFEF] bg-[#F7F5F2] px-6 py-8 lg:flex">
-        {/* A. USER HEADER */}
-        <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#EDE5DC]">
-            {user?.avatar_url ? (
-              <Image
-                src={user.avatar_url}
-                alt={firstName}
-                width={40}
-                height={40}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <span className="font-serif text-lg text-[#C6A47E]">{initial}</span>
-            )}
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs leading-none text-[#8A8A8A]">Bonjour,</span>
-            <span className="mt-0.5 text-sm font-semibold text-[#111111]">
-              {firstName}
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Rechercher (v\u00eatements, looks, stylistes...)"
+              className="flex-1 bg-transparent text-sm text-[#111111] outline-none placeholder:text-[#8A8A8A]"
+            />
+            <span className="flex items-center gap-1 rounded-md border border-[#EFEFEF] bg-[#F7F5F2] px-2 py-0.5 text-[10px] font-medium text-[#8A8A8A]">
+              &#8984; K
             </span>
           </div>
-          <div className="ml-auto flex items-center gap-2">
+
+          {/* Spacer for mobile */}
+          <div className="flex-1 lg:hidden" />
+
+          {/* Right controls */}
+          <div className="ml-auto flex items-center gap-3">
             <button
               type="button"
               onClick={() => setShowShare(true)}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm transition-colors hover:bg-[#F0EDE8]"
+              className="hidden h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white shadow-sm transition-colors hover:bg-[#F0EDE8] lg:flex"
               aria-label="Partager LIEN"
             >
               <svg
-                width="14"
-                height="14"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="#111111"
@@ -317,11 +333,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <Link
               href="/messages"
               aria-label="Notifications"
-              className="relative flex h-8 w-8 cursor-pointer items-center justify-center"
+              className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white shadow-sm transition-colors hover:bg-[#F0EDE8]"
             >
               <svg
-                width="20"
-                height="20"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="#111111"
@@ -332,158 +348,207 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
-              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[#D4785C]" />
+              <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#D4785C]" />
             </Link>
-          </div>
-        </div>
-
-        {/* B. WEATHER + TENUE DU JOUR */}
-        <div className="mb-6 flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm">
-          <div className="flex items-center gap-2">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#C6A47E"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="5" />
-              <line x1="12" y1="1" x2="12" y2="3" />
-              <line x1="12" y1="21" x2="12" y2="23" />
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-              <line x1="1" y1="12" x2="3" y2="12" />
-              <line x1="21" y1="12" x2="23" y2="12" />
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-            </svg>
-            <span className="text-sm font-semibold text-[#111111]">22&deg;</span>
-            <span className="text-xs text-[#8A8A8A]">Marseille</span>
-          </div>
-          <Link href="/outfits" className="font-serif text-xs text-[#111111]">
-            Tenue du jour &rarr;
-          </Link>
-        </div>
-
-        {/* C. STATISTIQUES DRESSING */}
-        <div className="mb-6">
-          <div className="mb-3 flex items-baseline justify-between">
-            <h3 className="font-serif text-base text-[#111111]">
-              Statistiques dressing
-            </h3>
-            <span className="text-xs text-[#8A8A8A]">Ce mois-ci</span>
-          </div>
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <div className="grid grid-cols-3 gap-2 text-center">
-              {STATS.map((stat) => (
-                <div key={stat.label}>
-                  <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-[#F7F5F2]">
-                    {stat.icon}
-                  </div>
-                  <p className="mt-2 font-serif text-xl leading-none text-[#111111]">
-                    {stat.value}
-                  </p>
-                  <p className="mt-0.5 text-[9px] text-[#8A8A8A]">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* D. ACTIVITE RECENTE */}
-        <div className="mb-6">
-          <h3 className="mb-3 font-serif text-base text-[#111111]">
-            Activit&eacute; r&eacute;cente
-          </h3>
-          <div className="divide-y divide-[#F7F5F2] overflow-hidden rounded-2xl bg-white shadow-sm">
-            {ACTIVITIES.map((a) => (
-              <div
-                key={a.text}
-                className="flex items-center gap-3 px-4 py-3"
-              >
-                {a.kind === 'heart' ? (
-                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-red-50">
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="#F87171"
-                      stroke="#F87171"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                    </svg>
-                  </div>
-                ) : a.avatar ? (
-                  <div className="h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
-                    <Image
-                      src={a.avatar}
-                      alt=""
-                      width={32}
-                      height={32}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="h-8 w-8 flex-shrink-0 rounded-full bg-[#EDE5DC]" />
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-medium text-[#111111]">
-                    {a.text}
-                  </p>
-                  <p className="mt-0.5 text-[10px] text-[#8A8A8A]">{a.time}</p>
-                </div>
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#CFCFCF"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="flex-shrink-0"
-                >
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* E. UPGRADE BANNER */}
-        <div className="relative overflow-hidden rounded-2xl bg-[#111111] p-5">
-          <div className="relative z-10 max-w-[65%]">
-            <p className="font-serif text-sm text-white">
-              Upgradez votre exp&eacute;rience
-            </p>
-            <p className="mt-2 text-[11px] leading-relaxed text-[#CFCFCF]">
-              Acc&eacute;dez &agrave; des fonctionnalit&eacute;s exclusives et
-              collaborez avec des stylistes experts.
-            </p>
             <Link
-              href="/pricing"
-              className="mt-4 inline-block cursor-pointer text-xs font-medium text-[#C6A47E]"
+              href="/wardrobe/add"
+              className="flex items-center gap-2 rounded-full bg-[#111111] px-5 py-3 text-xs font-medium text-white transition-colors hover:bg-[#2a2a2a]"
             >
-              D&eacute;couvrir &rarr;
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span className="hidden sm:inline">Ajouter un v&ecirc;tement</span>
+              <span className="sm:hidden">Ajouter</span>
             </Link>
           </div>
-          <div className="absolute bottom-0 right-0 top-0 w-[40%] opacity-30">
-            <Image
-              src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=200"
-              alt=""
-              fill
-              className="object-cover"
-              sizes="120px"
-            />
-          </div>
+        </header>
+
+        {/* CENTER + RIGHT PANEL row */}
+        <div className="flex min-h-0 flex-1">
+          {/* ZONE 2 — CENTER CONTENT */}
+          <main className="flex min-w-0 flex-1 flex-col overflow-y-auto px-5 pb-24 lg:px-10 lg:pb-10">
+            {children}
+          </main>
+
+          {/* ZONE 3 — RIGHT PANEL (w-[320px]) */}
+          <aside className="hidden h-full w-[320px] flex-shrink-0 flex-col overflow-y-auto border-l border-[#EFEFEF] bg-[#F7F5F2] px-6 pb-10 lg:flex">
+            {/* A. PROCHAINE SESSION (dark card) */}
+            <div className="relative mb-6 overflow-hidden rounded-2xl bg-[#111111] p-5">
+              <div className="relative z-10 max-w-[62%]">
+                <div className="flex items-center gap-2">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#C6A47E"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                  <span className="text-[11px] font-medium text-[#C6A47E]">
+                    Prochaine session
+                  </span>
+                </div>
+                <p className="mt-3 font-serif text-xl leading-tight text-white">
+                  Vendredi 24 mai
+                </p>
+                <p className="mt-1 text-xs text-[#CFCFCF]">
+                  16:00 avec Chlo&eacute;
+                </p>
+                <Link
+                  href="/calendar"
+                  className="mt-4 inline-block rounded-full bg-white px-4 py-2 text-[11px] font-medium text-[#111111] transition-colors hover:bg-[#F0EDE8]"
+                >
+                  Voir les d&eacute;tails
+                </Link>
+              </div>
+              <div className="absolute bottom-0 right-0 top-0 w-[38%]">
+                <Image
+                  src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=200&h=300&fit=crop"
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="120px"
+                />
+                <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#111111]/40" />
+              </div>
+            </div>
+
+            {/* B. ACTIVITE RECENTE */}
+            <div className="mb-6">
+              <div className="mb-3 flex items-baseline justify-between">
+                <h3 className="font-serif text-base text-[#111111]">
+                  Activit&eacute; r&eacute;cente
+                </h3>
+                <Link href="/notifications" className="text-[11px] text-[#8A8A8A]">
+                  Voir tout
+                </Link>
+              </div>
+              <div className="divide-y divide-[#F0EDE8] overflow-hidden rounded-2xl bg-white shadow-sm">
+                {ACTIVITIES.map((a) => (
+                  <div
+                    key={a.text}
+                    className="flex items-center gap-3 px-4 py-3"
+                  >
+                    {a.kind === 'item' && a.thumb ? (
+                      <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-lg bg-[#F0EDE8]">
+                        <Image
+                          src={a.thumb}
+                          alt=""
+                          width={36}
+                          height={36}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : a.kind === 'message' && a.avatar ? (
+                      <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full">
+                        <Image
+                          src={a.avatar}
+                          alt=""
+                          width={36}
+                          height={36}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#FDEEE8]">
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="#D4785C"
+                          stroke="#D4785C"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-medium text-[#111111]">
+                        {a.text}
+                      </p>
+                      <p className="mt-0.5 text-[10px] text-[#8A8A8A]">{a.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* C. STATISTIQUES DRESSING */}
+            <div className="mb-6">
+              <div className="mb-3 flex items-baseline justify-between">
+                <h3 className="font-serif text-base text-[#111111]">
+                  Statistiques dressing
+                </h3>
+                <span className="text-[11px] text-[#8A8A8A]">Ce mois-ci</span>
+              </div>
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  {STATS.map((stat) => (
+                    <div key={stat.label}>
+                      <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-[#F7F5F2]">
+                        {stat.icon}
+                      </div>
+                      <p className="mt-2 font-serif text-2xl leading-none text-[#111111]">
+                        {stat.value}
+                      </p>
+                      <p className="mt-1 text-[10px] text-[#8A8A8A]">{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* D. UPGRADE BANNER */}
+            <div className="relative overflow-hidden rounded-2xl bg-[#111111] p-5">
+              <div className="relative z-10 max-w-[62%]">
+                <p className="font-serif text-sm text-white">
+                  Upgradez votre exp&eacute;rience
+                </p>
+                <p className="mt-2 text-[11px] leading-relaxed text-[#CFCFCF]">
+                  Acc&eacute;dez &agrave; des fonctionnalit&eacute;s exclusives et
+                  collaborez avec des stylistes experts.
+                </p>
+                <Link
+                  href="/pricing"
+                  className="mt-4 inline-block cursor-pointer text-xs font-medium text-[#C6A47E]"
+                >
+                  D&eacute;couvrir &#10022;
+                </Link>
+              </div>
+              <div className="absolute bottom-0 right-0 top-0 w-[38%]">
+                <Image
+                  src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=200&h=300&fit=crop"
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="120px"
+                />
+                <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#111111]/30" />
+              </div>
+            </div>
+          </aside>
         </div>
-      </aside>
+      </div>
 
       {/* =================================================
           MOBILE DRAWER (replaces sidebar on small screens)
@@ -545,7 +610,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     </span>
                     <span className="flex-1">{item.label}</span>
                     {item.badge ? (
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#111111] text-[9px] font-bold text-white">
+                      <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#F0EDE8] px-1 text-[10px] font-semibold text-[#111111]">
                         {item.badge}
                       </span>
                     ) : null}
