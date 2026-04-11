@@ -249,6 +249,14 @@ CREATE INDEX IF NOT EXISTS "Transaction_status_idx" ON "Transaction"("status");
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "active_role" TEXT NOT NULL DEFAULT 'CLIENT';
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "is_dual_role" BOOLEAN NOT NULL DEFAULT false;
 UPDATE "User" SET "active_role" = 'STYLIST' WHERE "role" = 'STYLIST' AND "active_role" = 'CLIENT';
+
+-- Referral fields
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "referral_code" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "referred_by" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "referral_count" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "free_months_earned" INTEGER NOT NULL DEFAULT 0;
+CREATE UNIQUE INDEX IF NOT EXISTS "User_referral_code_key" ON "User"("referral_code");
+UPDATE "User" SET "referral_code" = 'LIEN-' || UPPER(SUBSTRING("id", 1, 6)) WHERE "referral_code" IS NULL;
 `;
 
 // Try multiple connection strategies

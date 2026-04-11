@@ -17,6 +17,9 @@ export interface User {
   role: Role;
   active_role?: 'CLIENT' | 'STYLIST';
   is_dual_role?: boolean;
+  referral_code?: string | null;
+  referral_count?: number;
+  free_months_earned?: number;
   style_profile?: Record<string, unknown>;
   location?: string;
   created_at: string;

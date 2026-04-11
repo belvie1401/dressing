@@ -451,7 +451,8 @@ export default function LandingPage() {
           <p className="text-sm text-[#8A8A8A]">
             &copy; {new Date().getFullYear()} Lien. Tous droits r&eacute;serv&eacute;s.
           </p>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6 flex-wrap justify-center">
+            <a href="/parrainage" className="text-sm text-[#C6A47E] hover:text-[#b8926a]">Parrainez vos amis</a>
             <a href="/pricing" className="text-sm text-[#8A8A8A] hover:text-white">Tarifs</a>
             <a href="/cgv" className="text-sm text-[#8A8A8A] hover:text-white">CGV</a>
             <a href="/confidentialite" className="text-sm text-[#8A8A8A] hover:text-white">Confidentialit&eacute;</a>

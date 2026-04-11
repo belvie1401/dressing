@@ -6,6 +6,7 @@ import prisma from '../lib/prisma';
 export async function register(req: Request, res: Response): Promise<void> {
   try {
     const { email, password, name, role } = req.body;
+    const refCode = (req.body.referral_code || req.query.ref) as string | undefined;
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -21,6 +22,34 @@ export async function register(req: Request, res: Response): Promise<void> {
         name,
         role: role || 'CLIENT',
         style_profile: { password: hashedPassword },
+      },
+    });
+
+    // Generate referral code from user ID
+    const referralCode = 'LIEN-' + user.id.slice(0, 6).toUpperCase();
+
+    // Handle incoming referral code
+    let referredBy: string | undefined;
+    if (refCode) {
+      const referrer = await prisma.user.findUnique({ where: { referral_code: refCode } });
+      if (referrer && referrer.id !== user.id) {
+        referredBy = refCode;
+        await prisma.user.update({
+          where: { id: referrer.id },
+          data: {
+            referral_count: { increment: 1 },
+            free_months_earned: { increment: 1 },
+          },
+        });
+      }
+    }
+
+    // Save referral code (and referred_by if applicable)
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        referral_code: referralCode,
+        ...(referredBy && { referred_by: referredBy }),
       },
     });
 
@@ -40,6 +69,7 @@ export async function register(req: Request, res: Response): Promise<void> {
           role: user.role,
           active_role: user.active_role,
           is_dual_role: user.is_dual_role,
+          referral_code: referralCode,
         },
         token,
       },
@@ -92,6 +122,9 @@ export async function login(req: Request, res: Response): Promise<void> {
           role: user.role,
           active_role: user.active_role,
           is_dual_role: user.is_dual_role,
+          referral_code: user.referral_code,
+          referral_count: user.referral_count,
+          free_months_earned: user.free_months_earned,
           avatar_url: user.avatar_url,
           location: user.location,
         },
@@ -115,6 +148,9 @@ export async function getMe(req: Request, res: Response): Promise<void> {
         role: true,
         active_role: true,
         is_dual_role: true,
+        referral_code: true,
+        referral_count: true,
+        free_months_earned: true,
         avatar_url: true,
         location: true,
         style_profile: true,

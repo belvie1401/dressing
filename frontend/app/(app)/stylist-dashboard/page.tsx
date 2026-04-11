@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import RoleSwitcher from '@/components/ui/RoleSwitcher';
+import ShareModal from '@/components/ui/ShareModal';
 
 type Stat = {
   icon: 'users' | 'sparkles' | 'star' | 'euro';
@@ -207,6 +208,7 @@ export default function StylistDashboardPage() {
   const [available, setAvailable] = useState<boolean>(initialAvailable);
   const [togglingStatus, setTogglingStatus] = useState(false);
   const [activatingClient, setActivatingClient] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
   const firstName = user?.name?.split(' ')[0] || 'Chlo\u00e9';
 
@@ -259,25 +261,49 @@ export default function StylistDashboardPage() {
               </h1>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <Link
-                href="/messages"
-                aria-label="Notifications"
-                className="flex items-center justify-center p-1"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#111111"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+              <div className="flex items-center gap-2">
+                {/* Share button */}
+                <button
+                  type="button"
+                  onClick={() => setShowShare(true)}
+                  className="w-9 h-9 rounded-full bg-[#F0EDE8] flex items-center justify-center"
+                  aria-label="Partager LIEN"
                 >
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                </svg>
-              </Link>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#111111"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                    <polyline points="16 6 12 2 8 6" />
+                    <line x1="12" y1="2" x2="12" y2="15" />
+                  </svg>
+                </button>
+                <Link
+                  href="/messages"
+                  aria-label="Notifications"
+                  className="flex items-center justify-center p-1"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#111111"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                </Link>
+              </div>
               <button
                 type="button"
                 onClick={toggleAvailability}
@@ -292,6 +318,8 @@ export default function StylistDashboardPage() {
               </button>
             </div>
           </header>
+
+          {showShare && <ShareModal onClose={() => setShowShare(false)} />}
 
           {/* ===== ROW 2: NEXT SESSION ===== */}
           <section className="px-5 mt-4 mb-5 lg:px-0 lg:mt-0 lg:mb-0 lg:col-span-2 lg:col-start-1 lg:row-start-2">

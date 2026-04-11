@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import RoleSwitcher from '@/components/ui/RoleSwitcher';
+import ShareModal from '@/components/ui/ShareModal';
 
 const LOOK_DU_JOUR_IMAGES = [
   'https://images.unsplash.com/photo-1551232864-3f0890e580d9?w=200&h=300&fit=crop',
@@ -91,6 +92,7 @@ export default function DashboardPage() {
   const [showActivateModal, setShowActivateModal] = useState(false);
   const [activating, setActivating] = useState(false);
   const [toast, setToast] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
   const handleActivate = async () => {
     setActivating(true);
@@ -140,27 +142,53 @@ export default function DashboardPage() {
                 </span>
               </div>
             </div>
-            <Link
-              href="/messages"
-              aria-label="Notifications"
-              className="flex items-start gap-0.5 py-1"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#111111"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            <div className="flex items-center gap-2">
+              {/* Share button */}
+              <button
+                type="button"
+                onClick={() => setShowShare(true)}
+                className="w-9 h-9 rounded-full bg-[#F0EDE8] flex items-center justify-center"
+                aria-label="Partager LIEN"
               >
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              <span className="w-2 h-2 bg-[#D4785C] rounded-full -mt-0.5" />
-            </Link>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#111111"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                  <polyline points="16 6 12 2 8 6" />
+                  <line x1="12" y1="2" x2="12" y2="15" />
+                </svg>
+              </button>
+              <Link
+                href="/messages"
+                aria-label="Notifications"
+                className="flex items-start gap-0.5 py-1"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#111111"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+                <span className="w-2 h-2 bg-[#D4785C] rounded-full -mt-0.5" />
+              </Link>
+            </div>
           </header>
+
+          {showShare && <ShareModal onClose={() => setShowShare(false)} />}
 
           {/* ===== ROW 2: WEATHER ===== */}
           <section className="px-5 mb-5 lg:px-0 lg:mb-0 lg:col-start-3 lg:row-start-2">

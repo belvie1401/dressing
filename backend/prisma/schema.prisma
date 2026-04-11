@@ -74,8 +74,12 @@ model User {
   name          String
   avatar_url    String?
   role          Role     @default(CLIENT)
-  active_role   String   @default("CLIENT")
-  is_dual_role  Boolean  @default(false)
+  active_role         String   @default("CLIENT")
+  is_dual_role        Boolean  @default(false)
+  referral_code       String?  @unique
+  referred_by         String?
+  referral_count      Int      @default(0)
+  free_months_earned  Int      @default(0)
   style_profile Json?
   location      String?
   created_at    DateTime @default(now())
