@@ -434,8 +434,8 @@ export async function updateItem(req: Request, res: Response): Promise<void> {
         ...(season && { season }),
         ...(occasion && { occasion }),
         ...(brand !== undefined && { brand }),
-        ...(purchase_price !== undefined && { purchase_price: parseFloat(purchase_price) }),
-        ...(purchase_date && { purchase_date: new Date(purchase_date) }),
+        ...(purchase_price !== undefined && { purchase_price: purchase_price ? parseFloat(String(purchase_price)) : null }),
+        ...(purchase_date !== undefined && { purchase_date: purchase_date ? new Date(purchase_date) : null }),
         ...(ai_tags && { ai_tags }),
         ...(newBackUrl && {
           photo_back_url: newBackUrl,

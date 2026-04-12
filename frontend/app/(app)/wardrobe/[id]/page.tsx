@@ -22,6 +22,14 @@ const occasionLabels: Record<string, string> = {
   CASUAL: 'Casual', WORK: 'Travail', EVENING: 'Soirée', SPORT: 'Sport',
 };
 
+const COLOR_HEX: Record<string, string> = {
+  Blanc: '#FFFFFF', Noir: '#111111', Gris: '#9CA3AF', Beige: '#E8D9C4',
+  Marron: '#6B4423', Rouge: '#DC2626', Rose: '#F9A8D4', Orange: '#F97316',
+  Jaune: '#FACC15', Vert: '#16A34A', Bleu: '#2563EB', 'Bleu marine': '#1E3A8A',
+  Violet: '#7C3AED', Camel: '#C19A6B', Kaki: '#78866B', Multicolore: '#888888',
+  Marine: '#1E3A5F',
+};
+
 export default function WardrobeItemPage() {
   const { id } = useParams<{ id: string }>();
   const [item, setItem] = useState<ClothingItem | null>(null);
@@ -87,14 +95,25 @@ export default function WardrobeItemPage() {
 
   return (
     <div className="space-y-5">
-      {/* Back button */}
+      {/* Back button + edit */}
       <div className="flex items-center gap-3 pt-2">
         <a href="/wardrobe" className="flex h-10 w-10 items-center justify-center rounded-full bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </a>
-        <h1 className="text-lg font-semibold text-[#111111]">Détails</h1>
+        <h1 className="flex-1 text-lg font-semibold text-[#111111]">Détails</h1>
+        <a
+          href={`/wardrobe/${id}/edit`}
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white"
+          style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}
+          aria-label="Modifier"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+        </a>
       </div>
 
       {/* Large product photo (or 360° view when back photo exists) */}
@@ -173,7 +192,7 @@ export default function WardrobeItemPage() {
               {item.brand || categoryLabels[item.category] || item.category}
             </h2>
             {item.brand && (
-              <p className="text-sm text-[#8A8A8A] mt-0.5">{categoryLabels[item.category]}</p>
+              <p className="mt-0.5 text-sm text-[#8A8A8A]">{categoryLabels[item.category]}</p>
             )}
           </div>
           <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#111111]">
@@ -182,7 +201,7 @@ export default function WardrobeItemPage() {
         </div>
 
         {/* Price */}
-        {item.purchase_price && (
+        {item.purchase_price != null && item.purchase_price > 0 && (
           <p className="mt-2 text-xl font-bold text-[#111111]">{item.purchase_price.toFixed(2)}€</p>
         )}
 
@@ -191,15 +210,99 @@ export default function WardrobeItemPage() {
           <WearBadge wearCount={item.wear_count} lastWornAt={item.last_worn_at} size="lg" />
         </div>
 
-        {/* Tags */}
-        <div className="mt-4 flex flex-wrap gap-2">
-          <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#111111]">{seasonLabels[item.season] || item.season}</span>
-          <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#111111]">{occasionLabels[item.occasion] || item.occasion}</span>
-          {item.material && <span className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#111111]">{item.material}</span>}
-          {item.colors.map((c) => (
-            <span key={c} className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#111111]">{c}</span>
-          ))}
+        {/* ── Informations ── */}
+        <h3 className="mt-5 font-serif text-base text-[#111111]">Informations</h3>
+        <div className="mt-3 flex flex-col divide-y divide-[#F7F5F2]">
+          <InfoRow label="Catégorie">
+            <span className="rounded-full bg-[#F0EDE8] px-3 py-1 text-xs font-medium text-[#111111]">
+              {categoryLabels[item.category] || item.category}
+            </span>
+          </InfoRow>
+          <InfoRow label="Couleurs">
+            {item.colors.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {item.colors.map((c) => (
+                  <div
+                    key={c}
+                    className="h-5 w-5 rounded-full border border-[#EFEFEF]"
+                    style={{ backgroundColor: COLOR_HEX[c] || '#CFCFCF' }}
+                    title={c}
+                  />
+                ))}
+              </div>
+            ) : (
+              <span className="text-sm text-[#8A8A8A]">—</span>
+            )}
+          </InfoRow>
+          <InfoRow label="Saison">
+            <span className="text-sm font-medium text-[#111111]">
+              {seasonLabels[item.season] || item.season}
+            </span>
+          </InfoRow>
+          <InfoRow label="Occasion">
+            <span className="rounded-full bg-[#F0EDE8] px-2 py-0.5 text-[10px] font-medium text-[#111111]">
+              {occasionLabels[item.occasion] || item.occasion}
+            </span>
+          </InfoRow>
+          <InfoRow label="Matière">
+            <span className="text-sm font-medium text-[#111111]">{item.material || '—'}</span>
+          </InfoRow>
+          <InfoRow label="Marque">
+            <span className="text-sm font-medium text-[#111111]">{item.brand || '—'}</span>
+          </InfoRow>
+          <InfoRow label="Prix d'achat">
+            <span className="text-sm font-medium text-[#111111]">
+              {item.purchase_price != null && item.purchase_price > 0
+                ? `${item.purchase_price.toFixed(2)} €`
+                : '—'}
+            </span>
+          </InfoRow>
+          <InfoRow label="Date d'achat">
+            <span className="text-sm font-medium text-[#111111]">
+              {item.purchase_date
+                ? new Date(item.purchase_date).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })
+                : '—'}
+            </span>
+          </InfoRow>
+          <InfoRow label="Ajouté le">
+            <span className="text-sm font-medium text-[#111111]">
+              {new Date(item.created_at).toLocaleDateString('fr-FR', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              })}
+            </span>
+          </InfoRow>
+          <InfoRow label="Porté">
+            {item.wear_count === 0 ? (
+              <span className="text-sm text-[#8A8A8A]">Jamais porté</span>
+            ) : (
+              <span className="text-sm font-medium text-[#111111]">
+                {item.wear_count} fois
+                {item.last_worn_at && (
+                  <>
+                    {' · Dernier : '}
+                    {new Date(item.last_worn_at).toLocaleDateString('fr-FR', {
+                      day: 'numeric',
+                      month: 'short',
+                    })}
+                  </>
+                )}
+              </span>
+            )}
+          </InfoRow>
         </div>
+
+        <a
+          href={`/wardrobe/${id}/edit`}
+          className="mt-4 block text-center text-xs font-medium text-[#C6A47E]"
+        >
+          Modifier les informations
+        </a>
 
         {/* CTA buttons */}
         <div className="mt-5 flex gap-3">
@@ -324,6 +427,15 @@ function StylistFeedback({
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between py-3">
+      <span className="text-xs uppercase tracking-wide text-[#8A8A8A]">{label}</span>
+      <div>{children}</div>
     </div>
   );
 }
