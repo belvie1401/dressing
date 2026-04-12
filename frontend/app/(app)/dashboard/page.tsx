@@ -352,8 +352,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ============ E. PROCHAINE SESSION ============ */}
-      <div className="px-5 mb-6">
+      {/* ============ E. PROCHAINE SESSION (mobile only — right panel has desktop version) ============ */}
+      <div className="px-5 mb-6 lg:hidden">
         <div className="rounded-2xl bg-[#111111] p-4">
           {!nextSession ? (
             <>
