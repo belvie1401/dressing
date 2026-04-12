@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useWardrobeStore } from '@/lib/store';
-import type { ClothingItem, Outfit } from '@/types';
+import type { Category, ClothingItem, Occasion, Outfit, Season } from '@/types';
 import { api } from '@/lib/api';
 import ClothingCard from '@/components/wardrobe/ClothingCard';
 
@@ -39,6 +39,79 @@ const CATEGORY_PILLS: Array<{ key: CategoryFilter; label: string }> = [
   { key: 'ARCHIVED', label: 'Archivés' },
 ];
 
+interface Filters {
+  categories: Category[];
+  colors: string[];
+  seasons: Season[];
+  occasions: Occasion[];
+  wornStatus: 'any' | 'worn' | 'never_worn';
+  priceMin: string;
+  priceMax: string;
+  dateFrom: string;
+  dateTo: string;
+}
+
+const DEFAULT_FILTERS: Filters = {
+  categories: [],
+  colors: [],
+  seasons: [],
+  occasions: [],
+  wornStatus: 'any',
+  priceMin: '',
+  priceMax: '',
+  dateFrom: '',
+  dateTo: '',
+};
+
+const FILTER_CATEGORIES: Array<{ key: Category; label: string }> = [
+  { key: 'TOP', label: 'Hauts' },
+  { key: 'BOTTOM', label: 'Bas' },
+  { key: 'DRESS', label: 'Robes' },
+  { key: 'JACKET', label: 'Vestes' },
+  { key: 'SHOES', label: 'Chaussures' },
+  { key: 'ACCESSORY', label: 'Accessoires' },
+];
+
+const COLOR_OPTIONS = [
+  { name: 'Noir', hex: '#000000' },
+  { name: 'Blanc', hex: '#FFFFFF' },
+  { name: 'Gris', hex: '#808080' },
+  { name: 'Bleu', hex: '#2563EB' },
+  { name: 'Rouge', hex: '#DC2626' },
+  { name: 'Rose', hex: '#EC4899' },
+  { name: 'Vert', hex: '#16A34A' },
+  { name: 'Jaune', hex: '#EAB308' },
+  { name: 'Orange', hex: '#F97316' },
+  { name: 'Violet', hex: '#9333EA' },
+  { name: 'Marron', hex: '#92400E' },
+  { name: 'Beige', hex: '#D4B896' },
+];
+
+const SEASON_OPTIONS: Array<{ key: Season; label: string }> = [
+  { key: 'SUMMER', label: 'Été' },
+  { key: 'WINTER', label: 'Hiver' },
+  { key: 'ALL', label: 'Toutes saisons' },
+];
+
+const OCCASION_OPTIONS: Array<{ key: Occasion; label: string }> = [
+  { key: 'CASUAL', label: 'Décontracté' },
+  { key: 'WORK', label: 'Travail' },
+  { key: 'EVENING', label: 'Soirée' },
+  { key: 'SPORT', label: 'Sport' },
+];
+
+const countActiveFilters = (f: Filters): number => {
+  let count = 0;
+  if (f.categories.length) count++;
+  if (f.colors.length) count++;
+  if (f.seasons.length) count++;
+  if (f.occasions.length) count++;
+  if (f.wornStatus !== 'any') count++;
+  if (f.priceMin || f.priceMax) count++;
+  if (f.dateFrom || f.dateTo) count++;
+  return count;
+};
+
 export default function WardrobePage() {
   const { items, isLoading, loadItems } = useWardrobeStore();
   const [tab, setTab] = useState<WardrobeTab>('clothes');
@@ -49,6 +122,9 @@ export default function WardrobePage() {
   const [loadingArchived, setLoadingArchived] = useState(false);
   const [toast, setToast] = useState('');
   const [planInfo, setPlanInfo] = useState<{ plan: string; limit: number | null } | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [pendingFilters, setPendingFilters] = useState<Filters>(DEFAULT_FILTERS);
 
   useEffect(() => {
     loadItems();
@@ -82,6 +158,33 @@ export default function WardrobePage() {
     setTimeout(() => setToast(''), 2500);
   };
 
+  const activeCount = countActiveFilters(filters);
+
+  const openFilters = () => {
+    setPendingFilters({ ...filters });
+    setShowFilters(true);
+  };
+
+  const applyFilters = () => {
+    setFilters(pendingFilters);
+    if (pendingFilters.categories.length > 0) {
+      setCategoryFilter('ALL');
+    }
+    setShowFilters(false);
+  };
+
+  const resetPendingFilters = () => {
+    setPendingFilters(DEFAULT_FILTERS);
+  };
+
+  const togglePendingArray = <K extends keyof Filters>(key: K, value: Filters[K] extends Array<infer U> ? U : never) => {
+    setPendingFilters(prev => {
+      const arr = prev[key] as unknown[];
+      const next = arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value];
+      return { ...prev, [key]: next };
+    });
+  };
+
   const trimmedSearch = search.trim();
   const hasSearch = trimmedSearch.length > 0;
 
@@ -91,6 +194,16 @@ export default function WardrobePage() {
     ? archivedItems
     : items.filter((item) => {
         if (categoryFilter !== 'ALL' && item.category !== categoryFilter) return false;
+        if (filters.categories.length && !filters.categories.includes(item.category)) return false;
+        if (filters.colors.length && !item.colors.some(c => filters.colors.some(fc => c.toLowerCase().includes(fc.toLowerCase())))) return false;
+        if (filters.seasons.length && !filters.seasons.includes(item.season)) return false;
+        if (filters.occasions.length && !filters.occasions.includes(item.occasion)) return false;
+        if (filters.wornStatus === 'worn' && item.wear_count === 0) return false;
+        if (filters.wornStatus === 'never_worn' && item.wear_count > 0) return false;
+        if (filters.priceMin && item.purchase_price != null && item.purchase_price < Number(filters.priceMin)) return false;
+        if (filters.priceMax && item.purchase_price != null && item.purchase_price > Number(filters.priceMax)) return false;
+        if (filters.dateFrom && item.purchase_date && item.purchase_date < filters.dateFrom) return false;
+        if (filters.dateTo && item.purchase_date && item.purchase_date > filters.dateTo) return false;
         if (!hasSearch) return true;
         const q = trimmedSearch.toLowerCase();
         return (
@@ -179,7 +292,8 @@ export default function WardrobePage() {
           <button
             type="button"
             aria-label="Filtres"
-            className="flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#F0EDE8]"
+            onClick={openFilters}
+            className="relative flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#F0EDE8]"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <line x1="4" y1="21" x2="4" y2="14" />
@@ -192,6 +306,11 @@ export default function WardrobePage() {
               <line x1="9" y1="8" x2="15" y2="8" />
               <line x1="17" y1="16" x2="23" y2="16" />
             </svg>
+            {activeCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#111111] text-[10px] font-bold text-white">
+                {activeCount}
+              </span>
+            )}
           </button>
         </div>
 
@@ -456,6 +575,202 @@ export default function WardrobePage() {
           </div>
         )}
       </div>
+
+      {/* ============ FILTER PANEL ============ */}
+      {showFilters && (
+        <div className="fixed inset-0 z-50 flex flex-col">
+          <div
+            className="flex-shrink-0 bg-black/40"
+            style={{ height: '10%' }}
+            onClick={() => setShowFilters(false)}
+          />
+          <div className="flex flex-1 flex-col overflow-hidden rounded-t-3xl bg-white">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-[#F0EDE8] px-5 pb-3 pt-5">
+              <h2 className="font-serif text-lg font-semibold text-[#111111]">Filtres</h2>
+              <button
+                type="button"
+                onClick={() => setShowFilters(false)}
+                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#F0EDE8]"
+                aria-label="Fermer"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Scrollable sections */}
+            <div className="flex-1 space-y-6 overflow-y-auto px-5 py-4">
+              {/* Catégorie */}
+              <div>
+                <h3 className="mb-3 text-sm font-semibold text-[#111111]">Catégorie</h3>
+                <div className="flex flex-wrap gap-2">
+                  {FILTER_CATEGORIES.map((cat) => {
+                    const active = pendingFilters.categories.includes(cat.key);
+                    return (
+                      <button
+                        key={cat.key}
+                        type="button"
+                        onClick={() => togglePendingArray('categories', cat.key)}
+                        className={`cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${active ? 'bg-[#111111] text-white' : 'bg-[#F0EDE8] text-[#8A8A8A]'}`}
+                      >
+                        {cat.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Couleurs */}
+              <div>
+                <h3 className="mb-3 text-sm font-semibold text-[#111111]">Couleurs</h3>
+                <div className="flex flex-wrap gap-3">
+                  {COLOR_OPTIONS.map((color) => {
+                    const active = pendingFilters.colors.includes(color.name);
+                    return (
+                      <button
+                        key={color.name}
+                        type="button"
+                        onClick={() => togglePendingArray('colors', color.name)}
+                        className="flex cursor-pointer flex-col items-center gap-1"
+                        aria-label={color.name}
+                      >
+                        <div
+                          className={`h-8 w-8 rounded-full border-2 ${active ? 'border-[#111111] ring-2 ring-[#111111]/20' : 'border-[#E0E0E0]'}`}
+                          style={{ backgroundColor: color.hex }}
+                        />
+                        <span className="text-[10px] text-[#8A8A8A]">{color.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Saison */}
+              <div>
+                <h3 className="mb-3 text-sm font-semibold text-[#111111]">Saison</h3>
+                <div className="flex flex-wrap gap-2">
+                  {SEASON_OPTIONS.map((s) => {
+                    const active = pendingFilters.seasons.includes(s.key);
+                    return (
+                      <button
+                        key={s.key}
+                        type="button"
+                        onClick={() => togglePendingArray('seasons', s.key)}
+                        className={`cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${active ? 'bg-[#111111] text-white' : 'bg-[#F0EDE8] text-[#8A8A8A]'}`}
+                      >
+                        {s.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Occasion */}
+              <div>
+                <h3 className="mb-3 text-sm font-semibold text-[#111111]">Occasion</h3>
+                <div className="flex flex-wrap gap-2">
+                  {OCCASION_OPTIONS.map((o) => {
+                    const active = pendingFilters.occasions.includes(o.key);
+                    return (
+                      <button
+                        key={o.key}
+                        type="button"
+                        onClick={() => togglePendingArray('occasions', o.key)}
+                        className={`cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${active ? 'bg-[#111111] text-white' : 'bg-[#F0EDE8] text-[#8A8A8A]'}`}
+                      >
+                        {o.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* État de port */}
+              <div>
+                <h3 className="mb-3 text-sm font-semibold text-[#111111]">État de port</h3>
+                <div className="flex gap-2">
+                  {([['any', 'Tous'], ['worn', 'Déjà porté'], ['never_worn', 'Jamais porté']] as const).map(([val, label]) => {
+                    const active = pendingFilters.wornStatus === val;
+                    return (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setPendingFilters((prev) => ({ ...prev, wornStatus: val }))}
+                        className={`cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${active ? 'bg-[#111111] text-white' : 'bg-[#F0EDE8] text-[#8A8A8A]'}`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Prix d'achat */}
+              <div>
+                <h3 className="mb-3 text-sm font-semibold text-[#111111]">Prix d&rsquo;achat</h3>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number"
+                    placeholder="Min €"
+                    value={pendingFilters.priceMin}
+                    onChange={(e) => setPendingFilters((prev) => ({ ...prev, priceMin: e.target.value }))}
+                    className="w-24 rounded-xl border border-[#E0E0E0] px-3 py-2 text-sm text-[#111111] outline-none focus:border-[#111111]"
+                  />
+                  <span className="text-xs text-[#8A8A8A]">à</span>
+                  <input
+                    type="number"
+                    placeholder="Max €"
+                    value={pendingFilters.priceMax}
+                    onChange={(e) => setPendingFilters((prev) => ({ ...prev, priceMax: e.target.value }))}
+                    className="w-24 rounded-xl border border-[#E0E0E0] px-3 py-2 text-sm text-[#111111] outline-none focus:border-[#111111]"
+                  />
+                </div>
+              </div>
+
+              {/* Période d'achat */}
+              <div>
+                <h3 className="mb-3 text-sm font-semibold text-[#111111]">Période d&rsquo;achat</h3>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="date"
+                    value={pendingFilters.dateFrom}
+                    onChange={(e) => setPendingFilters((prev) => ({ ...prev, dateFrom: e.target.value }))}
+                    className="rounded-xl border border-[#E0E0E0] px-3 py-2 text-sm text-[#111111] outline-none focus:border-[#111111]"
+                  />
+                  <span className="text-xs text-[#8A8A8A]">à</span>
+                  <input
+                    type="date"
+                    value={pendingFilters.dateTo}
+                    onChange={(e) => setPendingFilters((prev) => ({ ...prev, dateTo: e.target.value }))}
+                    className="rounded-xl border border-[#E0E0E0] px-3 py-2 text-sm text-[#111111] outline-none focus:border-[#111111]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center gap-3 border-t border-[#F0EDE8] px-5 py-4">
+              <button
+                type="button"
+                onClick={resetPendingFilters}
+                className="flex-1 cursor-pointer rounded-full border border-[#111111] py-3 text-sm font-medium text-[#111111]"
+              >
+                Effacer tout
+              </button>
+              <button
+                type="button"
+                onClick={applyFilters}
+                className="flex-1 cursor-pointer rounded-full bg-[#111111] py-3 text-sm font-semibold text-white"
+              >
+                Appliquer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ============ TOAST ============ */}
       {toast && (
