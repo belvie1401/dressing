@@ -4,11 +4,14 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore, useWardrobeStore } from '@/lib/store';
 import StyleDNAProfile from '@/components/ai/StyleDNAProfile';
-import type { Subscription } from '@/types';
+import type { Dressing, Subscription } from '@/types';
 import { api } from '@/lib/api';
 
 const planLabels: Record<string, string> = {
   FREE: 'Gratuit',
+  ESSENTIAL: 'Essentiel',
+  FAMILY: 'Famille',
+  PREMIUM: 'Premium',
   CLIENT_PRO: 'Client Pro',
   STYLIST_PRO: 'Styliste Pro',
 };
@@ -20,15 +23,25 @@ export default function ProfilePage() {
   const [avatarBodyUrl, setAvatarBodyUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarToast, setAvatarToast] = useState('');
+  const [dressings, setDressings] = useState<Dressing[]>([]);
+  const [editingDressing, setEditingDressing] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editEmoji, setEditEmoji] = useState('');
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  const loadDressings = async () => {
+    const res = await api.get<Dressing[]>('/dressings');
+    if (res.success && res.data) setDressings(res.data);
+  };
 
   useEffect(() => {
     loadItems();
     // Refresh user from server so a freshly-uploaded avatar_body_url is
     // visible without a hard reload.
     loadUser();
+    loadDressings();
     const loadSub = async () => {
       const res = await api.get<Subscription>('/subscriptions');
       if (res.success && res.data) {
@@ -154,6 +167,99 @@ export default function ProfilePage() {
           </a>
         )}
       </div>
+
+      {/* ════════ MES DRESSINGS ════════ */}
+      {dressings.length > 0 && (
+        <div>
+          <h2 className="font-serif text-lg text-[#111111]">Mes dressings</h2>
+          <div className="mt-3 overflow-hidden rounded-3xl bg-white shadow-sm">
+            {dressings.map((d, i) => (
+              <div
+                key={d.id}
+                className={`flex items-center gap-3 px-5 py-4 ${
+                  i < dressings.length - 1 ? 'border-b border-[#F7F5F2]' : ''
+                }`}
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EDE5DC] text-xl">
+                  {d.emoji || '👗'}
+                </div>
+                <div className="flex-1">
+                  {editingDressing === d.id ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="flex-1 rounded-xl border border-[#EFEFEF] px-3 py-1.5 text-sm text-[#111111] outline-none focus:border-[#111111]"
+                      />
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await api.put(`/dressings/${d.id}`, { name: editName, emoji: editEmoji });
+                          setEditingDressing(null);
+                          loadDressings();
+                        }}
+                        className="cursor-pointer rounded-full bg-[#111111] px-3 py-1.5 text-xs text-white"
+                      >
+                        OK
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-sm font-semibold text-[#111111]">{d.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-[#8A8A8A]">{d._count?.items ?? 0} pièces</p>
+                        {d.is_primary && (
+                          <span className="rounded-full bg-[#F0EDE8] px-2 py-0.5 text-[9px] font-medium text-[#111111]">
+                            Principal
+                          </span>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+                {editingDressing !== d.id && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingDressing(d.id);
+                        setEditName(d.name);
+                        setEditEmoji(d.emoji || '👗');
+                      }}
+                      className="cursor-pointer p-1.5 text-[#8A8A8A] hover:text-[#111111]"
+                      aria-label="Modifier"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                    </button>
+                    {!d.is_primary && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (confirm(`Supprimer "${d.name}" ? Les vêtements seront déplacés dans votre dressing principal.`)) {
+                            await api.delete(`/dressings/${d.id}`);
+                            loadDressings();
+                          }
+                        }}
+                        className="cursor-pointer p-1.5 text-[#8A8A8A] hover:text-[#D4785C]"
+                        aria-label="Supprimer"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ════════ MON AVATAR ════════ */}
       <div id="avatar" className="scroll-mt-4">

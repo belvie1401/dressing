@@ -6,7 +6,7 @@ export type Occasion = 'CASUAL' | 'WORK' | 'EVENING' | 'SPORT';
 export type ConnectionStatus = 'PENDING' | 'ACTIVE' | 'ENDED';
 export type LookbookStatus = 'DRAFT' | 'SENT' | 'APPROVED' | 'REJECTED';
 export type MessageType = 'TEXT' | 'IMAGE' | 'LOOKBOOK' | 'OUTFIT' | 'ZOOM_LINK';
-export type Plan = 'FREE' | 'CLIENT_PRO' | 'STYLIST_PRO';
+export type Plan = 'FREE' | 'ESSENTIAL' | 'FAMILY' | 'PREMIUM' | 'CLIENT_PRO' | 'STYLIST_FREE' | 'STYLIST_PRO';
 
 // Models
 export interface User {
@@ -172,6 +172,17 @@ export interface Subscription {
   stripe_subscription_id?: string;
   status: string;
   current_period_end?: string;
+}
+
+export interface Dressing {
+  id: string;
+  user_id: string;
+  name: string;
+  owner_label?: string | null;
+  emoji?: string | null;
+  is_primary: boolean;
+  created_at: string;
+  _count?: { items: number };
 }
 
 export interface WeatherData {

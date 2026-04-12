@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useWardrobeStore } from '@/lib/store';
-import type { Category, ClothingItem, Occasion, Outfit, Season } from '@/types';
+import type { Category, ClothingItem, Dressing, Occasion, Outfit, Season } from '@/types';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/lib/store';
 import ClothingCard from '@/components/wardrobe/ClothingCard';
 
 const categoryLabels: Record<string, string> = {
@@ -126,8 +127,30 @@ export default function WardrobePage() {
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [pendingFilters, setPendingFilters] = useState<Filters>(DEFAULT_FILTERS);
 
+  // ── Multi-dressing ──
+  const [dressings, setDressings] = useState<Dressing[]>([]);
+  const [activeDressingId, setActiveDressingId] = useState<string | null>(null);
+  const [showAddDressing, setShowAddDressing] = useState(false);
+  const [newDressingName, setNewDressingName] = useState('');
+  const [newDressingEmoji, setNewDressingEmoji] = useState('');
+  const [newDressingLabel, setNewDressingLabel] = useState('');
+  const [dressingError, setDressingError] = useState('');
+  const [creatingSub, setCreatingSub] = useState(false);
+  const subscription = useAuthStore((s) => s.user);
+
+  const loadDressings = async () => {
+    const res = await api.get<Dressing[]>('/dressings');
+    if (res.success && res.data) {
+      setDressings(res.data);
+      if (!activeDressingId && res.data.length > 0) {
+        setActiveDressingId(res.data[0].id);
+      }
+    }
+  };
+
   useEffect(() => {
     loadItems();
+    loadDressings();
     const loadOutfits = async () => {
       const res = await api.get<Outfit[]>('/outfits');
       if (res.success && res.data) setOutfits(res.data);
@@ -313,6 +336,43 @@ export default function WardrobePage() {
             )}
           </button>
         </div>
+
+        {/* Dressing selector */}
+        {dressings.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto px-4 pb-2 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
+            {dressings.map((d) => {
+              const active = activeDressingId === d.id;
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => setActiveDressingId(d.id)}
+                  className={`flex flex-shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-4 py-2 text-sm transition-colors ${
+                    active
+                      ? 'border-[#111111] bg-[#111111] text-white'
+                      : 'border-[#EFEFEF] bg-white text-[#111111]'
+                  }`}
+                >
+                  {d.emoji && <span>{d.emoji}</span>}
+                  {d.name}
+                  <span className={`text-xs ${active ? 'opacity-70' : 'opacity-50'}`}>
+                    ({d._count?.items ?? 0})
+                  </span>
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              onClick={() => setShowAddDressing(true)}
+              className="flex flex-shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-[#C6A47E]/30 bg-[#F0EDE8] px-4 py-2 text-sm text-[#C6A47E]"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Ajouter
+            </button>
+          </div>
+        )}
 
         {/* Category filter pills */}
         {tab === 'clothes' && (
@@ -575,6 +635,93 @@ export default function WardrobePage() {
           </div>
         )}
       </div>
+
+      {/* ============ ADD DRESSING MODAL ============ */}
+      {showAddDressing && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowAddDressing(false)} />
+          <div className="relative w-full max-w-lg rounded-t-3xl bg-white p-6">
+            <h2 className="font-serif text-xl text-[#111111]">Nouveau dressing</h2>
+            <p className="mt-1 text-sm text-[#8A8A8A]">Pour qui est ce dressing ?</p>
+
+            {/* Preset options */}
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              {[
+                { emoji: '👗', label: 'Pour moi', desc: 'Dressing personnel' },
+                { emoji: '👔', label: 'Mon copain', desc: 'Dressing masculin' },
+                { emoji: '🧒', label: 'Mon enfant', desc: 'Dressing enfant' },
+                { emoji: '👨', label: 'Mon mari', desc: 'Dressing masculin' },
+                { emoji: '👩', label: 'Autre personne', desc: 'Dressing personnalisé' },
+                { emoji: '✨', label: 'Autre', desc: 'Nommez-le' },
+              ].map((opt) => (
+                <button
+                  key={opt.label}
+                  type="button"
+                  onClick={() => {
+                    setNewDressingEmoji(opt.emoji);
+                    setNewDressingLabel(opt.label === 'Autre' || opt.label === 'Autre personne' ? '' : opt.label);
+                    setNewDressingName(opt.label === 'Autre' || opt.label === 'Autre personne' ? '' : `Dressing ${opt.label.toLowerCase()}`);
+                  }}
+                  className={`cursor-pointer rounded-2xl border-2 bg-[#F7F5F2] p-4 text-center transition-colors ${
+                    newDressingEmoji === opt.emoji
+                      ? 'border-[#111111]'
+                      : 'border-transparent hover:border-[#111111]'
+                  }`}
+                >
+                  <span className="text-3xl">{opt.emoji}</span>
+                  <p className="mt-1 font-serif text-sm">{opt.label}</p>
+                  <p className="mt-0.5 text-xs text-[#8A8A8A]">{opt.desc}</p>
+                </button>
+              ))}
+            </div>
+
+            {/* Custom name */}
+            <label className="mt-4 block text-xs text-[#8A8A8A]">Nom du dressing</label>
+            <input
+              type="text"
+              value={newDressingName}
+              onChange={(e) => setNewDressingName(e.target.value)}
+              placeholder="Ex: Dressing Emma, Look été..."
+              className="mt-1 w-full rounded-2xl bg-[#F7F5F2] px-4 py-3 text-sm text-[#111111] placeholder-[#8A8A8A] outline-none focus:ring-1 focus:ring-[#111111]"
+            />
+
+            {dressingError && (
+              <div className="mt-3 rounded-2xl bg-[#FFF8F6] p-3">
+                <p className="text-xs text-[#D4785C]">{dressingError}</p>
+              </div>
+            )}
+
+            <button
+              type="button"
+              disabled={creatingSub || !newDressingName.trim()}
+              onClick={async () => {
+                setCreatingSub(true);
+                setDressingError('');
+                const res = await api.post<Dressing>('/dressings', {
+                  name: newDressingName.trim(),
+                  owner_label: newDressingLabel || null,
+                  emoji: newDressingEmoji || '👗',
+                });
+                if (res.success && res.data) {
+                  await loadDressings();
+                  setActiveDressingId(res.data.id);
+                  setShowAddDressing(false);
+                  setNewDressingName('');
+                  setNewDressingEmoji('');
+                  setNewDressingLabel('');
+                } else {
+                  const err = res as unknown as { error?: string; message?: string };
+                  setDressingError(err.error || err.message || 'Erreur lors de la création');
+                }
+                setCreatingSub(false);
+              }}
+              className="mt-4 w-full cursor-pointer rounded-full bg-[#111111] py-4 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              {creatingSub ? 'Création...' : 'Créer ce dressing'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ============ FILTER PANEL ============ */}
       {showFilters && (

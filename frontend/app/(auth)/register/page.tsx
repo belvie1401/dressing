@@ -138,7 +138,7 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <a href="/pricing" className="text-xs text-[#8A8A8A] underline text-center">
+        <a href={`/pricing${role ? `?role=${role}` : ''}`} className="text-xs text-[#8A8A8A] underline text-center">
           Voir les abonnements
         </a>
 

@@ -57,7 +57,11 @@ enum MessageType {
 
 enum Plan {
   FREE
+  ESSENTIAL
+  FAMILY
+  PREMIUM
   CLIENT_PRO
+  STYLIST_FREE
   STYLIST_PRO
 }
 
@@ -86,6 +90,7 @@ model User {
   created_at    DateTime @default(now())
 
   clothing_items      ClothingItem[]
+  dressings           Dressing[]
   outfits             Outfit[]
   calendar            CalendarEntry[]
   subscription        Subscription?
@@ -130,6 +135,9 @@ model ClothingItem {
   archived_at        DateTime?
   created_at         DateTime  @default(now())
 
+  dressing_id        String?
+  dressing           Dressing? @relation(fields: [dressing_id], references: [id])
+
   stylist_favorite    Boolean   @default(false)
   stylist_favorite_by String?
 
@@ -138,6 +146,7 @@ model ClothingItem {
 
   @@index([user_id, photo_hash])
   @@index([user_id, archived])
+  @@index([dressing_id])
 }
 
 model ClothingComment {
@@ -321,6 +330,21 @@ model Transaction {
 
   @@index([stylist_id])
   @@index([status])
+}
+
+// ─── DRESSING (Multi-wardrobe) ────────────────────────────────────────────────
+model Dressing {
+  id          String         @id @default(cuid())
+  user_id     String
+  user        User           @relation(fields: [user_id], references: [id])
+  name        String
+  owner_label String?
+  emoji       String?
+  is_primary  Boolean        @default(false)
+  created_at  DateTime       @default(now())
+  items       ClothingItem[]
+
+  @@index([user_id])
 }
 
 // ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
