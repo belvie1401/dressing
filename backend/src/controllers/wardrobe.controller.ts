@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import { uploadImage, removeBackground } from '../services/cloudinary.service';
+import { virtualTryOn } from '../services/ai.service';
 import { createNotification } from './notifications.controller';
 
 // ─── Plan limits ─────────────────────────────────────────────────────────────
@@ -671,5 +672,109 @@ export async function getWardrobeStats(req: Request, res: Response): Promise<voi
     });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Erreur lors du calcul des statistiques' });
+  }
+}
+
+/**
+ * POST /api/wardrobe/try-on
+ *
+ * Body: { item_id: string, force?: boolean }
+ *
+ * Generates a virtual try-on of the item on the user's reference avatar via
+ * Replicate's IDM-VTON. Caches the result on `clothing_item.try_on_url` so a
+ * second request returns instantly. Pass `force: true` to bypass the cache.
+ */
+export async function tryOnItem(req: Request, res: Response): Promise<void> {
+  try {
+    const { item_id, force } = req.body as { item_id?: string; force?: boolean };
+    const userId = req.user!.userId;
+
+    if (!item_id || typeof item_id !== 'string') {
+      res.status(400).json({
+        success: false,
+        error: 'MISSING_ITEM_ID',
+        message: 'item_id requis',
+      });
+      return;
+    }
+
+    // 1. Verify item ownership
+    const item = await prisma.clothingItem.findFirst({
+      where: { id: item_id, user_id: userId },
+    });
+    if (!item) {
+      res.status(404).json({
+        success: false,
+        error: 'ITEM_NOT_FOUND',
+        message: 'Vêtement introuvable',
+      });
+      return;
+    }
+
+    // 2. Verify user has uploaded a body reference photo
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { avatar_body_url: true },
+    });
+
+    if (!user?.avatar_body_url) {
+      res.status(400).json({
+        success: false,
+        error: 'NO_AVATAR',
+        message: 'Ajoutez une photo de référence dans votre profil',
+      });
+      return;
+    }
+
+    // 3. Cache hit — return existing try-on (unless force=true)
+    if (!force && item.try_on_url) {
+      res.json({
+        success: true,
+        data: { url: item.try_on_url, cached: true },
+      });
+      return;
+    }
+
+    // 4. Build a short garment description for the model
+    const garmentDesc = [
+      item.category,
+      Array.isArray(item.colors) ? item.colors.join(' ') : '',
+      item.material || '',
+      item.name || '',
+    ]
+      .filter(Boolean)
+      .join(', ');
+
+    const garmentPhoto = item.bg_removed_url || item.photo_url;
+
+    // 5. Generate via Replicate
+    let tryOnUrl: string;
+    try {
+      tryOnUrl = await virtualTryOn(user.avatar_body_url, garmentPhoto, garmentDesc);
+    } catch (err) {
+      const e = err as { message?: string };
+      console.error('Try-on error:', e);
+      res.status(500).json({
+        success: false,
+        error: 'TRYON_FAILED',
+        message: e.message || 'Essayage virtuel indisponible. Réessayez.',
+      });
+      return;
+    }
+
+    // 6. Persist to the item so future loads are instant
+    await prisma.clothingItem.update({
+      where: { id: item_id },
+      data: { try_on_url: tryOnUrl },
+    });
+
+    res.json({ success: true, data: { url: tryOnUrl, cached: false } });
+  } catch (error) {
+    console.error('tryOnItem error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'TRYON_FAILED',
+      message: 'Essayage virtuel indisponible. Réessayez.',
+    });
   }
 }

@@ -1,4 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
+import Replicate from 'replicate';
+import { v2 as cloudinary } from 'cloudinary';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -100,6 +102,100 @@ Suggest 3 outfits using ONLY items from the wardrobe. Return ONLY JSON with no a
   }
 
   return JSON.parse(textBlock.text);
+}
+
+/**
+ * Virtual try-on via Replicate's IDM-VTON model.
+ *
+ * Takes a person photo + a garment photo and returns a Cloudinary-hosted URL
+ * of the synthesized image. Throws on Replicate / Cloudinary failure with a
+ * user-readable French message — caller surfaces it via res.status(500).
+ */
+export async function virtualTryOn(
+  personImageUrl: string,
+  garmentImageUrl: string,
+  garmentDescription: string,
+): Promise<string> {
+  const token = process.env.REPLICATE_API_TOKEN;
+  if (!token) {
+    throw new Error('Essayage virtuel non configuré (REPLICATE_API_TOKEN manquant)');
+  }
+
+  const replicate = new Replicate({ auth: token });
+
+  let output: unknown;
+  try {
+    output = await replicate.run(
+      'cuuupid/idm-vton:906425dbca90663ff5427624839572cc56ea7d380343d13e2a4c4b09d3f0c30f',
+      {
+        input: {
+          human_img: personImageUrl,
+          garm_img: garmentImageUrl,
+          garment_des: garmentDescription,
+          is_checked: true,
+          is_checked_crop: false,
+          denoise_steps: 30,
+          seed: 42,
+        },
+      },
+    );
+  } catch (err) {
+    console.error('Replicate IDM-VTON error:', err);
+    throw new Error('Essayage virtuel indisponible');
+  }
+
+  // The Replicate JS client may return either a string URL or a ReadableStream
+  // wrapper depending on version. Normalize to a string URL.
+  let resultUrl: string | null = null;
+  if (typeof output === 'string') {
+    resultUrl = output;
+  } else if (Array.isArray(output) && output.length > 0) {
+    const first = output[0];
+    if (typeof first === 'string') {
+      resultUrl = first;
+    } else if (first && typeof (first as { url?: () => URL }).url === 'function') {
+      try {
+        resultUrl = (first as { url: () => URL }).url().toString();
+      } catch {
+        // ignore
+      }
+    }
+  } else if (output && typeof (output as { url?: () => URL }).url === 'function') {
+    try {
+      resultUrl = (output as { url: () => URL }).url().toString();
+    } catch {
+      // ignore
+    }
+  }
+
+  if (!resultUrl) {
+    throw new Error('Essayage virtuel : aucune image générée');
+  }
+
+  // Persist the generated image to Cloudinary so the temporary Replicate URL
+  // (which expires after ~1h) doesn't break our cached `try_on_url` field.
+  const cloudinaryConfigured =
+    process.env.CLOUDINARY_CLOUD_NAME &&
+    process.env.CLOUDINARY_CLOUD_NAME !== 'placeholder' &&
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_KEY !== 'placeholder';
+
+  if (cloudinaryConfigured) {
+    try {
+      const uploaded = await cloudinary.uploader.upload(resultUrl, {
+        folder: 'lien/tryon',
+        resource_type: 'image',
+      });
+      return uploaded.secure_url;
+    } catch (err) {
+      console.error('Cloudinary tryon upload error:', err);
+      // Fall back to the raw Replicate URL — it works for now, just not
+      // permanently. Better than a 500 to the user.
+      return resultUrl;
+    }
+  }
+
+  return resultUrl;
 }
 
 export async function analyzeStyleDNA(

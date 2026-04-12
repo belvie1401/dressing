@@ -9,6 +9,7 @@ import {
   markWorn,
   getItemsCount,
   getWardrobeStats,
+  tryOnItem,
 } from '../controllers/wardrobe.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { upload } from '../middleware/upload.middleware';
@@ -29,6 +30,8 @@ const bulkPhotoUpload = upload.any();
 router.get('/', getItems);
 router.get('/count', getItemsCount);
 router.get('/stats', getWardrobeStats);
+// Note: declared before `/:id` so the static segment isn't swallowed
+router.post('/try-on', tryOnItem);
 router.get('/:id', getItem);
 router.post('/', photoFields, createItem);
 router.post('/bulk', bulkPhotoUpload, bulkCreateItems);

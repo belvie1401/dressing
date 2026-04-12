@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import { useWardrobeStore } from '@/lib/store';
 import WearBadge from '@/components/wardrobe/WearBadge';
 import View360 from '@/components/wardrobe/View360';
+import TryOnSection from '@/components/wardrobe/TryOnSection';
 
 const categoryLabels: Record<string, string> = {
   TOP: 'Haut', BOTTOM: 'Bas', DRESS: 'Robe', JACKET: 'Veste', SHOES: 'Chaussures', ACCESSORY: 'Accessoire',
@@ -154,6 +155,14 @@ export default function WardrobeItemPage() {
           />
         </>
       )}
+
+      {/* Virtual try-on */}
+      <TryOnSection
+        itemId={item.id}
+        itemPhotoUrl={item.bg_removed_url || item.photo_url}
+        category={item.category}
+        initialTryOnUrl={item.try_on_url || null}
+      />
 
       {/* Product info card */}
       <div className="rounded-3xl bg-white p-5" style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.06)' }}>

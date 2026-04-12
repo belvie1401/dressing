@@ -14,6 +14,7 @@ export interface User {
   email: string;
   name: string;
   avatar_url?: string;
+  avatar_body_url?: string | null;
   role: Role;
   active_role?: 'CLIENT' | 'STYLIST';
   is_dual_role?: boolean;
@@ -46,6 +47,7 @@ export interface ClothingItem {
   wear_count: number;
   last_worn_at?: string;
   ai_tags?: Record<string, unknown>;
+  try_on_url?: string | null;
   created_at: string;
 }
 

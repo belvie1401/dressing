@@ -147,6 +147,11 @@ export default function ClothingCard({ item, onToast, searchQuery }: ClothingCar
     }
   };
 
+  const handleTryOn = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/wardrobe/${item.id}#tryon`);
+  };
+
   const displayName =
     item.name || item.brand || categoryAbbrev[item.category] || 'Vêtement';
 
@@ -327,6 +332,18 @@ export default function ClothingCard({ item, onToast, searchQuery }: ClothingCar
             <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
           </svg>
           Porter
+        </button>
+        <button
+          type="button"
+          onClick={handleTryOn}
+          aria-label="Essayer"
+          className="flex cursor-pointer items-center gap-1 px-1 font-medium text-[#111111]"
+          style={{ fontSize: '10px' }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
+          </svg>
+          Essayer
         </button>
       </div>
     </div>

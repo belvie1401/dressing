@@ -73,6 +73,7 @@ model User {
   email         String   @unique
   name          String
   avatar_url    String?
+  avatar_body_url String?
   role          Role     @default(CLIENT)
   active_role         String   @default("CLIENT")
   is_dual_role        Boolean  @default(false)
@@ -123,6 +124,7 @@ model ClothingItem {
   wear_count         Int       @default(0)
   last_worn_at       DateTime?
   ai_tags            Json?
+  try_on_url         String?
   created_at         DateTime  @default(now())
 
   outfit_items OutfitItem[]

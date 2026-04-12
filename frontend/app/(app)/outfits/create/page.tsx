@@ -232,6 +232,48 @@ export default function OutfitCreatePage() {
         </div>
       </div>
 
+      {/* ════════ "VOIR CE LOOK SUR VOUS" CTA ════════ */}
+      {selectedItems.length >= 2 && (
+        <button
+          type="button"
+          onClick={() =>
+            router.push(`/outfits/preview?items=${selectedItems.join(',')}`)
+          }
+          className="mx-5 mt-3 flex w-[calc(100%-2.5rem)] cursor-pointer items-center gap-3 rounded-2xl bg-[#EDE5DC] p-4 text-left transition-colors hover:bg-[#E5DCD0]"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#C6A47E"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="shrink-0"
+          >
+            <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
+          </svg>
+          <div className="flex flex-1 flex-col">
+            <p className="font-serif text-sm text-[#111111]">Voir ce look sur vous</p>
+            <p className="text-xs text-[#8A8A8A]">Essayage virtuel du look complet</p>
+          </div>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#CFCFCF"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="shrink-0"
+          >
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+      )}
+
       {/* ════════ OUTFIT DETAILS ════════ */}
       <div className="mx-5 mt-3 rounded-2xl bg-white p-4">
         {/* Name */}

@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { register, login, getMe, updateProfile, switchRole, activateStylist } from '../controllers/auth.controller';
+import { register, login, getMe, updateProfile, switchRole, activateStylist, uploadBodyPhoto } from '../controllers/auth.controller';
 import { googleRedirect, googleCallback } from '../controllers/google-auth.controller';
 import { requestMagicLink, verifyMagicLink } from '../controllers/magic-link.controller';
 import { forgotPassword, verifyResetToken, resetPassword } from '../controllers/password-reset.controller';
 import { authenticate } from '../middleware/auth.middleware';
+import { upload } from '../middleware/upload.middleware';
 
 const router = Router();
 
@@ -11,6 +12,7 @@ router.post('/register', register);
 router.post('/login', login);
 router.get('/me', authenticate, getMe);
 router.put('/profile', authenticate, updateProfile);
+router.post('/upload-body-photo', authenticate, upload.single('photo'), uploadBodyPhoto);
 router.put('/switch-role', authenticate, switchRole);
 router.post('/activate-stylist', authenticate, activateStylist);
 
