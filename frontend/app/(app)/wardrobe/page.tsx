@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useWardrobeStore } from '@/lib/store';
 import type { Outfit } from '@/types';
 import { api } from '@/lib/api';
@@ -44,6 +45,7 @@ export default function WardrobePage() {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('ALL');
   const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [toast, setToast] = useState('');
+  const [planInfo, setPlanInfo] = useState<{ plan: string; limit: number | null } | null>(null);
 
   useEffect(() => {
     loadItems();
@@ -51,7 +53,14 @@ export default function WardrobePage() {
       const res = await api.get<Outfit[]>('/outfits');
       if (res.success && res.data) setOutfits(res.data);
     };
+    const loadPlanInfo = async () => {
+      const res = await api.get<{ count: number; plan: string; limit: number | null }>('/wardrobe/count');
+      if (res.success && res.data) {
+        setPlanInfo({ plan: res.data.plan, limit: res.data.limit });
+      }
+    };
     loadOutfits();
+    loadPlanInfo();
   }, []);
 
   const showToast = (msg: string) => {
@@ -191,6 +200,62 @@ export default function WardrobePage() {
           </div>
         )}
       </div>
+
+      {/* ============ LIMIT BANNERS (FREE plan) ============ */}
+      {planInfo?.plan === 'FREE' && planInfo.limit && (() => {
+        const percentage = (items.length / planInfo.limit) * 100;
+        if (percentage >= 100) {
+          return (
+            <div className="mx-4 mt-3 rounded-2xl bg-[#111111] p-4">
+              <p className="font-serif text-sm text-white">Dressing complet</p>
+              <p className="mt-1 text-xs text-[#CFCFCF]">
+                Vous avez atteint la limite de {planInfo.limit} pi&egrave;ces du plan Gratuit.
+              </p>
+              <div className="mt-3 flex gap-2">
+                <Link
+                  href="/pricing"
+                  className="rounded-full bg-[#C6A47E] px-4 py-2 text-xs font-semibold text-[#111111] no-underline"
+                >
+                  Passer au Pro
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => showToast('Archivage bient&ocirc;t disponible')}
+                  className="cursor-pointer rounded-full border border-white px-4 py-2 text-xs text-white"
+                >
+                  Archiver des pi&egrave;ces
+                </button>
+              </div>
+            </div>
+          );
+        }
+        if (percentage >= 90) {
+          return (
+            <div className="mx-4 mt-3 rounded-2xl border border-[#D4785C]/20 bg-[#FFF8F6] px-4 py-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-[#D4785C]">
+                    {items.length}/{planInfo.limit} v&ecirc;tements utilis&eacute;s
+                  </p>
+                  <div className="mt-1 h-1.5 w-48 rounded-full bg-[#F0EDE8]">
+                    <div
+                      className="h-full rounded-full bg-[#D4785C]"
+                      style={{ width: `${Math.min(percentage, 100)}%` }}
+                    />
+                  </div>
+                </div>
+                <Link
+                  href="/pricing"
+                  className="rounded-full bg-[#D4785C] px-3 py-1.5 text-xs font-semibold text-white no-underline"
+                >
+                  Passer au Pro
+                </Link>
+              </div>
+            </div>
+          );
+        }
+        return null;
+      })()}
 
       {/* ============ SCROLLABLE CONTENT ============ */}
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-32">

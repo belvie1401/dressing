@@ -193,6 +193,8 @@ export async function createItem(req: Request, res: Response): Promise<void> {
         res.status(403).json({
           success: false,
           error: 'PLAN_LIMIT_REACHED',
+          current: currentCount,
+          limit: FREE_PLAN_ITEM_LIMIT,
           message: `Limite de ${FREE_PLAN_ITEM_LIMIT} vêtements atteinte sur le plan Gratuit.`,
         });
         return;
@@ -604,10 +606,13 @@ export async function markWorn(req: Request, res: Response): Promise<void> {
  */
 export async function getItemsCount(req: Request, res: Response): Promise<void> {
   try {
+    const userId = req.user!.userId;
     const count = await prisma.clothingItem.count({
-      where: { user_id: req.user!.userId },
+      where: { user_id: userId },
     });
-    res.json({ success: true, data: { count } });
+    const plan = await getUserPlan(userId);
+    const limit = plan === 'FREE' ? FREE_PLAN_ITEM_LIMIT : null;
+    res.json({ success: true, data: { count, plan, limit } });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Erreur lors du comptage' });
   }

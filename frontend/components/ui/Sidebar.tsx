@@ -170,7 +170,7 @@ export default function Sidebar() {
   return (
     <aside className="hidden lg:flex flex-col w-[220px] shrink-0 h-screen sticky top-0 border-r border-[#EFEFEF] bg-white py-6 px-4">
       {/* Logo */}
-      <Link href="/" className="font-serif text-xl text-[#111111] px-3 mb-8 no-underline">
+      <Link href="/dashboard" className="font-serif text-xl text-[#111111] px-3 mb-8 no-underline">
         LIEN
       </Link>
 

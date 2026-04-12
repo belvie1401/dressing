@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -137,6 +137,24 @@ export default function WardrobeAddPage() {
   // Upload mode selector — defaults to individual
   const [mode, setMode] = useState<UploadMode>('individual');
 
+  // Plan limit state
+  const [limitReached, setLimitReached] = useState(false);
+  const [limitCount, setLimitCount] = useState(0);
+  const [limitMax, setLimitMax] = useState(50);
+
+  // ── Check plan limit on mount ──
+  useEffect(() => {
+    api.get<{ count: number; plan: string; limit: number | null }>('/wardrobe/count').then((res) => {
+      if (res.success && res.data && res.data.limit !== null) {
+        setLimitCount(res.data.count);
+        setLimitMax(res.data.limit);
+        if (res.data.count >= res.data.limit) {
+          setLimitReached(true);
+        }
+      }
+    });
+  }, []);
+
   // ── Handle file selection ──
   const handleFileSelected = useCallback(async (selected: File) => {
     setError(null);
@@ -268,7 +286,11 @@ export default function WardrobeAddPage() {
       return;
     }
 
-    if (resAny.status === 409 && resAny.existing_item) {
+    if (resAny.error === 'PLAN_LIMIT_REACHED') {
+      setLimitReached(true);
+      setLimitCount(limitMax);
+      return;
+    } else if (resAny.status === 409 && resAny.existing_item) {
       setDuplicate(resAny.existing_item);
     } else {
       setError(resAny.message || resAny.error || "Une erreur est survenue lors de l'enregistrement.");
@@ -282,6 +304,69 @@ export default function WardrobeAddPage() {
   };
 
   // ─────────────────────────────────────────────────────────────────────────
+
+  // ── Upgrade screen when limit reached ──
+  if (limitReached) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#F7F5F2] px-5">
+        {/* Lock icon */}
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#CFCFCF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+
+        <h1 className="mt-4 font-serif text-2xl text-[#111111]">Limite atteinte</h1>
+        <p className="mt-1 text-sm text-[#D4785C]">{limitCount}/{limitMax} v&ecirc;tements</p>
+        <p className="mt-3 max-w-[280px] text-center text-sm leading-relaxed text-[#8A8A8A]">
+          Vous avez utilis&eacute; tous vos emplacements gratuits. Passez au plan Pro pour ajouter des v&ecirc;tements en illimit&eacute;.
+        </p>
+
+        {/* Pricing cards */}
+        <div className="mt-6 w-full max-w-sm">
+          {/* FREE card */}
+          <div className="rounded-2xl bg-[#F0EDE8] p-4">
+            <p className="text-xs text-[#8A8A8A]">Gratuit &mdash; Actuel</p>
+            <p className="mt-1 text-sm text-[#111111] line-through">{limitMax} v&ecirc;tements max</p>
+          </div>
+
+          {/* PRO card */}
+          <div className="mt-3 rounded-2xl bg-[#111111] p-5">
+            <p className="font-serif text-lg text-white">Cliente Pro</p>
+            <p className="mt-1 font-serif text-2xl text-[#C6A47E]">9,99&euro;/mois</p>
+            <div className="mt-3 flex flex-col gap-2">
+              {[
+                'V\u00eatements illimit\u00e9s',
+                'Suggestions IA illimit\u00e9es',
+                'Essayage virtuel',
+                '1 styliste connect\u00e9',
+              ].map((feat) => (
+                <div key={feat} className="flex items-center gap-2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span className="text-xs text-white">{feat}</span>
+                </div>
+              ))}
+            </div>
+            <Link
+              href="/pricing"
+              className="mt-4 block w-full rounded-full bg-[#C6A47E] py-3 text-center text-sm font-semibold text-[#111111] no-underline"
+            >
+              Passer au Pro
+            </Link>
+          </div>
+        </div>
+
+        <Link
+          href="/wardrobe"
+          className="mt-4 text-center text-xs text-[#8A8A8A] underline"
+        >
+          Ou archiver des pi&egrave;ces pour lib&eacute;rer de l&apos;espace
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="pb-24">
       {/* ============ HEADER ============ */}

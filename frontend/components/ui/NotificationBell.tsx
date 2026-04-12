@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { playNotificationSound } from '@/lib/notificationSound';
 import type {
   Notification,
   NotificationListResponse,
@@ -15,20 +16,29 @@ interface Props {
   variant?: 'light' | 'compact';
 }
 
-const POLL_INTERVAL_MS = 60_000;
+const POLL_INTERVAL_MS = 30_000;
 
 export default function NotificationBell({ variant = 'light' }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Notification[] | null>(null);
   const [unread, setUnread] = useState(0);
+  const prevUnreadRef = useRef(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
     const res = await api.get<NotificationListResponse>('/notifications?limit=5');
     if (res.success && res.data) {
+      const newUnread = res.data.unread_count;
+
+      // Play sound when new notifications arrive
+      if (newUnread > prevUnreadRef.current && prevUnreadRef.current >= 0) {
+        playNotificationSound();
+      }
+      prevUnreadRef.current = newUnread;
+
       setItems(res.data.items);
-      setUnread(res.data.unread_count);
+      setUnread(newUnread);
     } else {
       setItems([]);
       setUnread(0);
@@ -37,7 +47,12 @@ export default function NotificationBell({ variant = 'light' }: Props) {
 
   // Initial fetch + polling
   useEffect(() => {
-    load();
+    // Mark -1 so the very first load doesn't play a sound
+    prevUnreadRef.current = -1;
+    load().then(() => {
+      // After the first load, future increases will trigger the sound
+      // prevUnreadRef is already set inside `load`
+    });
     const id = setInterval(load, POLL_INTERVAL_MS);
     return () => clearInterval(id);
   }, [load]);
