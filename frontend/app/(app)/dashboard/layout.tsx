@@ -394,7 +394,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <NotificationBell variant="light" />
             <Link
               href="/wardrobe/add"
-              className="flex h-11 items-center gap-2 rounded-full bg-[#111111] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
+              className="flex h-11 items-center gap-2 rounded-full bg-[#111111] px-4 py-2.5 text-sm lg:px-5 lg:py-3 lg:text-xs lg:h-auto font-medium text-white transition-colors hover:bg-[#2a2a2a]"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19" />
