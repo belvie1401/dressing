@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { format, isSameDay } from 'date-fns';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
-import type { Outfit } from '@/types';
+import type { Outfit, CalendarEntry } from '@/types';
 import DashboardTutorial from '@/components/ui/DashboardTutorial';
 import TutorialHelpButton from '@/components/ui/TutorialHelpButton';
 
@@ -37,6 +38,9 @@ export default function DashboardPage() {
   // Recommandations — recent outfits
   const [recommendations, setRecommendations] = useState<Outfit[] | null>(null);
 
+  // Daily reminder banner
+  const [todayHasEntry, setTodayHasEntry] = useState<boolean | null>(null);
+
   // Tutorial visibility
   const [showTutorial, setShowTutorial] = useState(false);
 
@@ -56,11 +60,13 @@ export default function DashboardPage() {
     let mounted = true;
 
     const loadAll = async () => {
-      const [wardrobeRes, outfitsRes, sessionsRes, recsRes] = await Promise.all([
+      const now = new Date();
+      const [wardrobeRes, outfitsRes, sessionsRes, recsRes, calRes] = await Promise.all([
         api.get<CountResponse>('/wardrobe/count'),
         api.get<CountResponse>('/outfits/count'),
         api.get<CountResponse>('/stylists/sessions/count'),
         api.get<Outfit[]>('/outfits?limit=4&sort=recent'),
+        api.get<CalendarEntry[]>(`/calendar?month=${now.getMonth() + 1}&year=${now.getFullYear()}`),
       ]);
 
       if (!mounted) return;
@@ -69,6 +75,13 @@ export default function DashboardPage() {
       setOutfitsCount(outfitsRes.success && outfitsRes.data ? outfitsRes.data.count : 0);
       setSessionsCount(sessionsRes.success && sessionsRes.data ? sessionsRes.data.count : 0);
       setRecommendations(recsRes.success && recsRes.data ? recsRes.data : []);
+
+      if (calRes.success && calRes.data) {
+        const hasToday = calRes.data.some((e) => isSameDay(new Date(e.date), now));
+        setTodayHasEntry(hasToday);
+      } else {
+        setTodayHasEntry(false);
+      }
     };
 
     loadAll();
@@ -100,7 +113,7 @@ export default function DashboardPage() {
       <TutorialHelpButton onRestart={restartTutorial} />
 
       {/* ============ A. GREETING ============ */}
-      <div className="mb-10">
+      <div className="mb-6">
         <h1 className="font-serif text-4xl leading-tight text-[#111111]">
           Bonjour{firstName ? ` ${firstName}` : ''}{' '}
           <span className="inline-block" aria-hidden>
@@ -111,6 +124,32 @@ export default function DashboardPage() {
           Votre dressing, vos stylistes, votre style. Tout est connect&eacute;.
         </p>
       </div>
+
+      {/* ============ DAILY REMINDER BANNER ============ */}
+      {todayHasEntry === false && new Date().getHours() >= 8 && (
+        <div className="mb-6 rounded-2xl bg-[#EDE5DC] p-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white/60">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-[#111111]">Qu&apos;est-ce que vous portez aujourd&apos;hui&nbsp;?</p>
+              <p className="text-xs text-[#8A8A8A]">Enregistrez votre look du jour</p>
+            </div>
+            <Link
+              href="/calendar"
+              className="flex-shrink-0 rounded-full bg-[#111111] px-3 py-1.5 text-xs font-medium text-white"
+            >
+              Ajouter
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* ============ B. STAT CARDS ============ */}
       <div className="mb-12 grid grid-cols-1 gap-4 md:grid-cols-3">

@@ -53,24 +53,33 @@ export default function StylistDetailPage() {
     return <div className="py-16 text-center text-sm text-[#8A8A8A]">Styliste non trouvé</div>;
   }
 
-  const specs = (stylist.style_profile as Record<string, unknown>)?.specialties as string[] | undefined;
-  const rating = (stylist.style_profile as Record<string, unknown>)?.rating as number | undefined;
-  const reviews = (stylist.style_profile as Record<string, unknown>)?.reviews as number | undefined;
-  const bio = (stylist.style_profile as Record<string, unknown>)?.bio as string | undefined;
-  const looksCount = (stylist.style_profile as Record<string, unknown>)?.looks_count as number | undefined;
-  const satisfaction = (stylist.style_profile as Record<string, unknown>)?.satisfaction as number | undefined;
-  const experience = (stylist.style_profile as Record<string, unknown>)?.experience as string | undefined;
+  const sp = stylist.style_profile as Record<string, unknown> | undefined;
+  const specs = sp?.specialties as string[] | undefined;
+  const rating = sp?.rating as number | undefined;
+  const reviews = sp?.reviews as number | undefined;
+  const bio = sp?.bio as string | undefined;
+  const looksCount = sp?.looks_count as number | undefined;
+  const satisfaction = sp?.satisfaction as number | undefined;
+  const experience = sp?.experience as string | undefined;
 
   return (
-    <div className="space-y-5">
+    <div className="pb-28">
       {/* Back + favorite */}
       <div className="flex items-center justify-between pt-2">
-        <a href="/stylists" className="flex h-10 w-10 items-center justify-center rounded-full bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+        <a
+          href="/stylists"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white"
+          style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}
+        >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </a>
-        <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+        <button
+          type="button"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white"
+          style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}
+        >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
@@ -78,7 +87,7 @@ export default function StylistDetailPage() {
       </div>
 
       {/* Hero photo */}
-      <div className="relative aspect-[3/4] overflow-hidden rounded-3xl" style={{ background: 'var(--color-accent-light)' }}>
+      <div className="relative mt-3 aspect-[3/4] overflow-hidden rounded-3xl" style={{ background: 'var(--color-accent-light)' }}>
         {stylist.avatar_url ? (
           <Image src={stylist.avatar_url} alt={stylist.name} fill className="object-cover" sizes="100vw" />
         ) : (
@@ -89,7 +98,7 @@ export default function StylistDetailPage() {
       </div>
 
       {/* Info card */}
-      <div className="rounded-3xl bg-white p-5" style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.06)' }}>
+      <div className="mt-5 rounded-3xl bg-white p-5" style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.06)' }}>
         {/* Name + verified + location */}
         <div className="flex items-center gap-2">
           <h2 className="text-xl font-bold text-[#111111]">{stylist.name}</h2>
@@ -98,12 +107,12 @@ export default function StylistDetailPage() {
             <polyline points="9 12 11 14 15 10" />
           </svg>
         </div>
-        <p className="text-sm text-[#8A8A8A]">Styliste {stylist.location ? `· ${stylist.location}` : ''}</p>
+        <p className="text-sm text-[#8A8A8A]">Styliste{stylist.location ? ` · ${stylist.location}` : ''}</p>
 
         {/* Rating */}
         {rating && (
           <div className="mt-2 flex items-center gap-1">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#F59E0B" stroke="none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#C6A47E" stroke="#C6A47E" strokeWidth="1.5">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
             <span className="text-sm font-semibold text-[#111111]">{rating}</span>
@@ -122,47 +131,45 @@ export default function StylistDetailPage() {
           </div>
         )}
 
-        {/* Bio */}
-        {bio && (
-          <p className="mt-4 text-sm leading-relaxed text-[#8A8A8A]">{bio}</p>
-        )}
-
         {/* Stats */}
-        <div className="mt-5 grid grid-cols-3 gap-3">
+        <div className="mt-5 grid grid-cols-3 gap-3 border-t border-[#F0F0F0] pt-4">
           <div className="text-center">
             <p className="text-lg font-bold text-[#111111]">{looksCount || 0}</p>
             <p className="text-[11px] text-[#8A8A8A]">looks créés</p>
           </div>
           <div className="text-center">
             <p className="text-lg font-bold text-[#111111]">{satisfaction || 0}%</p>
-            <p className="text-[11px] text-[#8A8A8A]">clients satisfaits</p>
+            <p className="text-[11px] text-[#8A8A8A]">satisfaits</p>
           </div>
           <div className="text-center">
             <p className="text-lg font-bold text-[#111111]">{experience || '0'}</p>
-            <p className="text-[11px] text-[#8A8A8A]">ans d&apos;expérience</p>
+            <p className="text-[11px] text-[#8A8A8A]">ans exp.</p>
           </div>
         </div>
+      </div>
 
-        {/* Looks récents */}
-        <div className="mt-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-[#111111]">Looks récents</h3>
-          </div>
+      {/* Bio section */}
+      {bio && (
+        <div className="mt-6">
+          <h3 className="px-5 font-serif text-lg text-[#111111]">À propos</h3>
+          <p className="mt-2 px-5 text-sm leading-relaxed text-[#8A8A8A]">{bio}</p>
+        </div>
+      )}
+
+      {/* Portfolio section */}
+      <div className="mt-6">
+        <h3 className="px-5 font-serif text-lg text-[#111111]">Portfolio</h3>
+        <div className="mt-3 px-5">
           {lookbooks === null ? (
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            <div className="grid grid-cols-2 gap-3">
               {[0, 1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-28 w-20 shrink-0 rounded-xl bg-[#F0EDE8] animate-pulse"
-                />
+                <div key={i} className="h-[180px] animate-pulse rounded-2xl bg-[#F0EDE8]" />
               ))}
             </div>
           ) : lookbooks.length === 0 ? (
-            <p className="text-xs text-[#8A8A8A]">
-              Aucun look public pour l&apos;instant
-            </p>
+            <p className="text-xs text-[#8A8A8A]">Aucun lookbook public pour l&apos;instant</p>
           ) : (
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            <div className="grid grid-cols-2 gap-3">
               {lookbooks.map((lb) => {
                 const firstPhoto =
                   lb.photos?.[0] ||
@@ -170,33 +177,49 @@ export default function StylistDetailPage() {
                   lb.outfits?.[0]?.outfit?.items?.[0]?.item?.photo_url ||
                   null;
                 return (
-                  <div
-                    key={lb.id}
-                    className="relative h-28 w-20 shrink-0 overflow-hidden rounded-xl bg-[#EDE5DC]"
-                  >
-                    {firstPhoto ? (
+                  <div key={lb.id} className="relative h-[180px] overflow-hidden rounded-2xl bg-[#EDE5DC]">
+                    {firstPhoto && (
                       <Image
                         src={firstPhoto}
                         alt={lb.title}
                         fill
                         className="object-cover"
-                        sizes="80px"
+                        sizes="(max-width: 640px) 50vw, 200px"
                       />
-                    ) : null}
+                    )}
+                    {/* Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                      <p className="truncate text-xs font-medium text-white">{lb.title}</p>
+                      {lb.type && (
+                        <span className="mt-1 inline-block rounded-full bg-white/20 px-2 py-0.5 text-[10px] text-white">
+                          {lb.type}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 );
               })}
             </div>
           )}
         </div>
+      </div>
 
-        {/* CTA */}
-        <a
-          href={`/stylists/${id}/booking`}
-          className="mt-5 block w-full rounded-full bg-[#D4785C] py-3.5 text-center text-sm font-semibold text-white transition-opacity hover:opacity-90"
-        >
-          D&eacute;marrer une session
-        </a>
+      {/* Sticky bottom contact buttons */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-[#EFEFEF] bg-white px-5 py-4">
+        <div className="mx-auto grid max-w-lg grid-cols-2 gap-3">
+          <a
+            href={`/messages/${id}`}
+            className="flex items-center justify-center rounded-full border border-[#111111] py-3 text-sm font-semibold text-[#111111]"
+          >
+            Envoyer un message
+          </a>
+          <a
+            href={`/stylists/${id}/booking`}
+            className="flex items-center justify-center rounded-full bg-[#D4785C] py-3 text-sm font-semibold text-white"
+          >
+            R&eacute;server une session
+          </a>
+        </div>
       </div>
     </div>
   );
