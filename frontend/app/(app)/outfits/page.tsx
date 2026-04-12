@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import type { Outfit } from '@/types';
+import type { Outfit, OutfitItem } from '@/types';
 
 export default function OutfitsPage() {
   const [outfits, setOutfits] = useState<Outfit[] | null>(null);
@@ -55,38 +55,21 @@ export default function OutfitsPage() {
           <EmptyState />
         ) : (
           outfits.map((look) => {
-            const firstItem = look.items?.[0]?.item;
-            const cover =
-              firstItem?.bg_removed_url || firstItem?.photo_url || null;
             const pieces = look.items?.length ?? 0;
             return (
               <div
                 key={look.id}
                 className="overflow-hidden rounded-3xl bg-white shadow-sm"
               >
-                {/* Image section */}
-                <div className="relative aspect-[4/3] bg-[#F0EDE8]">
-                  {cover ? (
-                    <Image
-                      src={cover}
-                      alt={look.name}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 600px"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center">
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                      </svg>
-                    </div>
-                  )}
+                {/* Image section — collage */}
+                <div className="relative h-[240px] overflow-hidden bg-[#F0EDE8]">
+                  <OutfitCollage items={look.items ?? []} name={look.name} />
 
                   {/* Heart — top-right */}
                   <button
                     type="button"
                     onClick={() => toggleLike(look.id)}
-                    className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm"
+                    className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm"
                   >
                     <svg
                       width="16"
@@ -103,7 +86,7 @@ export default function OutfitsPage() {
                   </button>
 
                   {look.ai_generated ? (
-                    <div className="absolute bottom-3 left-3">
+                    <div className="absolute bottom-3 left-3 z-10">
                       <span
                         className="rounded-full px-2.5 py-1 text-xs font-medium"
                         style={{ background: 'rgba(198,164,126,0.2)', color: '#C6A47E' }}
@@ -173,6 +156,70 @@ export default function OutfitsPage() {
           })
         )}
       </div>
+    </div>
+  );
+}
+
+function OutfitCollage({ items, name }: { items: OutfitItem[]; name: string }) {
+  const photos = items.slice(0, 4).map(
+    (oi) => oi.item?.bg_removed_url || oi.item?.photo_url || null,
+  );
+
+  if (photos.length === 0) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      </div>
+    );
+  }
+
+  if (photos.length === 1) {
+    return photos[0] ? (
+      <Image src={photos[0]} alt={name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 600px" />
+    ) : (
+      <div className="h-full w-full bg-[#EDE5DC]" />
+    );
+  }
+
+  if (photos.length === 2) {
+    return (
+      <div className="grid h-full grid-cols-2 gap-0.5">
+        {photos.map((p, i) => (
+          <div key={i} className="relative overflow-hidden bg-[#EDE5DC]">
+            {p && <Image src={p} alt="" fill className="object-cover" sizes="50vw" />}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (photos.length === 3) {
+    return (
+      <div className="flex h-full gap-0.5">
+        <div className="relative flex-1 overflow-hidden bg-[#EDE5DC]">
+          {photos[0] && <Image src={photos[0]} alt="" fill className="object-cover" sizes="50vw" />}
+        </div>
+        <div className="flex w-1/2 flex-col gap-0.5">
+          {([photos[1], photos[2]] as (string | null)[]).map((p, i) => (
+            <div key={i} className="relative flex-1 overflow-hidden bg-[#EDE5DC]">
+              {p && <Image src={p} alt="" fill className="object-cover" sizes="25vw" />}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // 4 items: 2×2 grid
+  return (
+    <div className="grid h-full grid-cols-2 grid-rows-2 gap-0.5">
+      {photos.map((p, i) => (
+        <div key={i} className="relative overflow-hidden bg-[#EDE5DC]">
+          {p && <Image src={p} alt="" fill className="object-cover" sizes="50vw" />}
+        </div>
+      ))}
     </div>
   );
 }

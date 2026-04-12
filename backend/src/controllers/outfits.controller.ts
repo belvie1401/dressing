@@ -170,7 +170,7 @@ export async function updateOutfit(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const { name, occasion, season, item_ids } = req.body;
+    const { name, occasion, season, item_ids, notes } = req.body;
 
     if (item_ids) {
       await prisma.outfitItem.deleteMany({ where: { outfit_id: id } });
@@ -188,6 +188,7 @@ export async function updateOutfit(req: Request, res: Response): Promise<void> {
         ...(name && { name }),
         ...(occasion && { occasion }),
         ...(season && { season }),
+        ...(notes !== undefined && { notes }),
       },
       include: {
         items: {

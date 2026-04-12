@@ -1,9 +1,11 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/store';
+import { api } from '@/lib/api';
 
 interface NavItem {
   href: string;
@@ -46,7 +48,6 @@ const clientNavItems: NavItem[] = [
   {
     href: '/messages',
     label: 'Messages',
-    badge: 2,
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -122,7 +123,6 @@ const stylistNavItems: NavItem[] = [
   {
     href: '/messages',
     label: 'Messages',
-    badge: 3,
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -159,8 +159,20 @@ export default function Sidebar() {
   const user = useAuthStore((s) => s.user);
   const activeRole = useAuthStore((s) => s.activeRole);
   const isStylist = activeRole === 'STYLIST';
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
-  const navItems = isStylist ? stylistNavItems : clientNavItems;
+  useEffect(() => {
+    api.get<{ count: number }>('/messages/unread-count').then((res) => {
+      if (res.success && res.data) setUnreadMessages(res.data.count);
+    });
+  }, []);
+
+  const baseItems = isStylist ? stylistNavItems : clientNavItems;
+  const navItems: NavItem[] = baseItems.map((item) =>
+    item.href === '/messages' && unreadMessages > 0
+      ? { ...item, badge: unreadMessages }
+      : item,
+  );
   const profileHref = isStylist ? '/stylist-profile' : '/profile';
   const exactMatches = new Set(['/dashboard', '/stylist-dashboard']);
 
@@ -170,7 +182,7 @@ export default function Sidebar() {
   return (
     <aside className="hidden lg:flex flex-col w-[220px] shrink-0 h-screen sticky top-0 border-r border-[#EFEFEF] bg-white py-6 px-4">
       {/* Logo */}
-      <Link href="/" className="font-serif text-xl text-[#111111] px-3 mb-8 no-underline">
+      <Link href="/dashboard" className="font-serif text-xl text-[#111111] px-3 mb-8 no-underline">
         LIEN
       </Link>
 

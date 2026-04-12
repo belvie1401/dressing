@@ -176,6 +176,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const user = useAuthStore((s) => s.user);
   const [showShare, setShowShare] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showSessionModal, setShowSessionModal] = useState(false);
+  const [cancellingSession, setCancellingSession] = useState(false);
 
   // Real data state
   const [unreadMessages, setUnreadMessages] = useState<number>(0);
@@ -485,12 +487,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                       </div>
                     );
                   })()}
-                  <Link
-                    href="/calendar"
+                  <button
+                    type="button"
+                    onClick={() => setShowSessionModal(true)}
                     className="mt-4 inline-flex w-fit rounded-full bg-white px-5 py-2 text-xs font-semibold text-[#111111] transition-colors hover:bg-[#F0EDE8]"
                   >
                     Voir les d&eacute;tails
-                  </Link>
+                  </button>
                 </div>
               )}
             </div>
@@ -742,6 +745,159 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <BottomNav />
 
       {showShare && <ShareModal onClose={() => setShowShare(false)} />}
+
+      {/* Session detail modal */}
+      {showSessionModal && nextSession && (
+        <SessionDetailModal
+          session={nextSession}
+          onClose={() => setShowSessionModal(false)}
+          onCancelled={() => {
+            setShowSessionModal(false);
+            setNextSession(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ─── Session Detail Modal ─────────────────────────────────────────────────
+function SessionDetailModal({
+  session,
+  onClose,
+  onCancelled,
+}: {
+  session: CalendarEntry;
+  onClose: () => void;
+  onCancelled: () => void;
+}) {
+  const [cancelling, setCancelling] = useState(false);
+  const [confirmCancel, setConfirmCancel] = useState(false);
+
+  const { label, time } = formatUpcomingDate(session.date);
+  const stylistName = session.client?.name ?? extractNameFromTitle(session.title ?? '');
+  const stylistAvatar = session.client?.avatar_url ?? null;
+  const durationLabel = session.duration_min ? `${session.duration_min} min` : '—';
+  const typeLabel = session.event_type === 'VIDEO' ? 'Visio' : session.event_type === 'PHONE' ? 'Téléphone' : session.event_type ?? '—';
+  const isConfirmed = !!session.zoom_link;
+
+  async function handleCancel() {
+    setCancelling(true);
+    const res = await api.delete(`/calendar/${session.id}`);
+    setCancelling(false);
+    if (res.success) onCancelled();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+
+      {/* Panel */}
+      <div className="relative w-full max-w-lg rounded-t-3xl bg-white p-6 shadow-xl">
+        {/* Handle */}
+        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-[#EFEFEF]" />
+
+        <h2 className="mb-6 font-serif text-xl text-[#111111]">Détail de la session</h2>
+
+        {/* Stylist info */}
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#EDE5DC]">
+            {stylistAvatar ? (
+              <Image src={stylistAvatar} alt={stylistName} width={56} height={56} className="h-full w-full object-cover" />
+            ) : (
+              <span className="text-xl font-semibold text-[#C6A47E]">{stylistName.charAt(0) || 'S'}</span>
+            )}
+          </div>
+          <div>
+            <p className="font-serif text-lg text-[#111111]">{stylistName}</p>
+            <span className="inline-block rounded-full bg-[#F0EDE8] px-2 py-0.5 text-[11px] font-medium text-[#C6A47E]">
+              Styliste certifiée
+            </span>
+          </div>
+        </div>
+
+        {/* Status badge */}
+        <div className="mb-4">
+          {isConfirmed ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-600">
+              <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+              Confirmé
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-600">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+              En attente
+            </span>
+          )}
+        </div>
+
+        {/* Session info rows */}
+        <div className="mb-6 rounded-2xl bg-[#F7F5F2] p-4">
+          {[
+            { label: 'Date', value: label },
+            { label: 'Heure', value: time },
+            { label: 'Durée', value: durationLabel },
+            { label: 'Type', value: typeLabel },
+          ].map((row, i, arr) => (
+            <div
+              key={row.label}
+              className={`flex justify-between py-2 text-sm ${i < arr.length - 1 ? 'border-b border-[#EFEFEF]' : ''}`}
+            >
+              <span className="text-[#8A8A8A]">{row.label}</span>
+              <span className="font-medium text-[#111111]">{row.value}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Zoom link */}
+        {session.zoom_link && (
+          <a
+            href={session.zoom_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mb-4 flex w-full items-center justify-center gap-2 rounded-full bg-[#111111] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#333333]"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="23 7 16 12 23 17 23 7" />
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+            </svg>
+            Rejoindre la visio
+          </a>
+        )}
+
+        {/* Cancel action */}
+        {!confirmCancel ? (
+          <button
+            type="button"
+            onClick={() => setConfirmCancel(true)}
+            className="w-full py-2 text-sm text-[#D4785C] transition-colors hover:text-[#b85a3e]"
+          >
+            Annuler la session
+          </button>
+        ) : (
+          <div className="rounded-xl border border-[#F0EDE8] bg-[#FFF8F6] p-4">
+            <p className="mb-3 text-sm text-[#111111]">Confirmer l&apos;annulation de cette session ?</p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmCancel(false)}
+                className="flex-1 rounded-full border border-[#EFEFEF] py-2 text-sm font-medium text-[#8A8A8A] transition-colors hover:bg-[#F7F5F2]"
+              >
+                Non, garder
+              </button>
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={cancelling}
+                className="flex-1 rounded-full bg-[#D4785C] py-2 text-sm font-semibold text-white transition-colors hover:bg-[#b85a3e] disabled:opacity-60"
+              >
+                {cancelling ? '...' : 'Oui, annuler'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

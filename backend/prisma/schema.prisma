@@ -100,6 +100,7 @@ model User {
   client_transactions  Transaction[]  @relation("ClientTransactions")
   notifications       Notification[]
   sent_broadcasts     AdminBroadcast[] @relation("BroadcastSender")
+  clothing_comments   ClothingComment[] @relation("StylistComments")
 }
 
 model ClothingItem {
@@ -125,11 +126,33 @@ model ClothingItem {
   last_worn_at       DateTime?
   ai_tags            Json?
   try_on_url         String?
+  archived           Boolean   @default(false)
+  archived_at        DateTime?
   created_at         DateTime  @default(now())
 
+  stylist_favorite    Boolean   @default(false)
+  stylist_favorite_by String?
+
   outfit_items OutfitItem[]
+  comments     ClothingComment[]
 
   @@index([user_id, photo_hash])
+  @@index([user_id, archived])
+}
+
+model ClothingComment {
+  id          String       @id @default(cuid())
+  item_id     String
+  item        ClothingItem @relation(fields: [item_id], references: [id], onDelete: Cascade)
+  stylist_id  String
+  stylist     User         @relation("StylistComments", fields: [stylist_id], references: [id])
+  content     String
+  is_favorite Boolean      @default(false)
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+
+  @@index([item_id])
+  @@index([stylist_id])
 }
 
 model Outfit {
@@ -143,6 +166,7 @@ model Outfit {
   worn_count   Int       @default(0)
   last_worn_at DateTime?
   try_on_url   String?
+  notes        String?
   created_at   DateTime  @default(now())
 
   items          OutfitItem[]

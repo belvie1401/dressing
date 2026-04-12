@@ -48,7 +48,23 @@ export interface ClothingItem {
   last_worn_at?: string;
   ai_tags?: Record<string, unknown>;
   try_on_url?: string | null;
+  archived?: boolean;
+  archived_at?: string | null;
+  stylist_favorite?: boolean;
+  stylist_favorite_by?: string | null;
+  comments?: ClothingComment[];
   created_at: string;
+}
+
+export interface ClothingComment {
+  id: string;
+  item_id: string;
+  stylist_id: string;
+  stylist?: { id: string; name: string; avatar_url?: string | null };
+  content: string;
+  is_favorite: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Outfit {
@@ -61,6 +77,7 @@ export interface Outfit {
   worn_count: number;
   last_worn_at?: string;
   try_on_url?: string;
+  notes?: string | null;
   created_at: string;
   items?: OutfitItem[];
 }
@@ -180,6 +197,15 @@ export interface AIOutfitSuggestion {
   items: string[];
   reasoning: string;
   score: number;
+}
+
+export interface StyleAnalysis {
+  dominant_style: string;
+  style_tags: string[];
+  color_palette: string[];
+  strengths: string[];
+  suggestions: string[];
+  capsule_score: number;
 }
 
 export interface StyleDNA {
