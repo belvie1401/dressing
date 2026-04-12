@@ -5,9 +5,8 @@ export default function OfflinePage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#F9F8F6] px-8 text-center">
       {/* Logo */}
       <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#1A1A1A]">
-        <svg width="32" height="32" viewBox="0 0 100 100" fill="none">
-          <rect x="22" y="12" width="22" height="70" rx="4" fill="#C6A47E" />
-          <rect x="22" y="60" width="58" height="22" rx="4" fill="#C6A47E" />
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none">
+          <path d="M 60,78 C 38,90 8,72 12,45 C 16,18 48,8 66,28 C 78,42 68,62 50,58 C 34,54 38,36 52,34 C 62,32 60,20 54,12 C 48,4 62,4 68,16" stroke="#C6A47E" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </div>
 

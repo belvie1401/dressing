@@ -71,8 +71,10 @@ export default function PWAInstallPrompt() {
         </button>
 
         <div className="flex items-start gap-3 pr-6">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#C6A47E]">
-            <span className="font-serif text-lg font-bold text-white">L</span>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1A1A1A] border border-white/10">
+            <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+              <path d="M 60,78 C 38,90 8,72 12,45 C 16,18 48,8 66,28 C 78,42 68,62 50,58 C 34,54 38,36 52,34 C 62,32 60,20 54,12 C 48,4 62,4 68,16" stroke="#C6A47E" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
           <div>
             <p className="text-sm font-semibold text-white">Installer Lien</p>
@@ -106,8 +108,10 @@ export default function PWAInstallPrompt() {
       </button>
 
       <div className="flex items-center gap-3 pr-6">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#C6A47E]">
-          <span className="font-serif text-lg font-bold text-white">L</span>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1A1A1A] border border-white/10">
+          <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+            <path d="M 60,78 C 38,90 8,72 12,45 C 16,18 48,8 66,28 C 78,42 68,62 50,58 C 34,54 38,36 52,34 C 62,32 60,20 54,12 C 48,4 62,4 68,16" stroke="#C6A47E" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-white">Installer Lien</p>

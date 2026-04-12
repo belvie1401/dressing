@@ -21,38 +21,30 @@ const splashSizes = [
   { w: 1536, h: 2048, name: 'splash-1536x2048' },
 ];
 
+// Same calligraphic logo path as generate-icons.js
+const LOGO_PATH =
+  'M 60,78 C 38,90 8,72 12,45 C 16,18 48,8 66,28 C 78,42 68,62 50,58 ' +
+  'C 34,54 38,36 52,34 C 62,32 60,20 54,12 C 48,4 62,4 68,16';
+
 function makeSplashSvg(w, h) {
   const minDim = Math.min(w, h);
-  const iconSize = Math.round(minDim * 0.22);
-  const iconR = Math.round(iconSize * 0.25);
+  const logoSize = Math.round(minDim * 0.22);
+  const scale = logoSize / 100;
+  const sw = 2.8 / scale; // consistent stroke weight
 
-  // L geometry
-  const pad = Math.round(iconSize * 0.20);
-  const inner = iconSize - 2 * pad;
-  const sw = Math.round(inner * 0.30);
-  const lH = inner;
-  const lW = Math.round(inner * 0.68);
-  const lx = pad + Math.round((inner - lW) / 2);
-  const ly = pad;
-  const br = Math.round(sw * 0.18);
+  const lx = Math.round((w - logoSize) / 2);
+  const ly = Math.round(h / 2 - logoSize * 0.65);
 
-  // Icon position: slightly above center
-  const ix = Math.round((w - iconSize) / 2);
-  const iy = Math.round(h / 2 - iconSize * 0.65);
-
-  // L bars offset by icon position
-  const vlx = ix + lx, vly = iy + ly, vlw = sw, vlh = lH;
-  const hlx = ix + lx, hly = iy + ly + lH - sw, hlw = lW, hlh = sw;
-
-  // "Lien" text below icon
-  const fontSize = Math.round(iconSize * 0.30);
-  const textY = iy + iconSize + Math.round(fontSize * 1.6);
+  const fontSize = Math.round(logoSize * 0.30);
+  const textY = ly + logoSize + Math.round(fontSize * 1.6);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
   <rect width="${w}" height="${h}" fill="#F9F8F6"/>
-  <rect x="${ix}" y="${iy}" width="${iconSize}" height="${iconSize}" rx="${iconR}" fill="#1A1A1A"/>
-  <rect x="${vlx}" y="${vly}" width="${vlw}" height="${vlh}" rx="${br}" fill="#C6A47E"/>
-  <rect x="${hlx}" y="${hly}" width="${hlw}" height="${hlh}" rx="${br}" fill="#C6A47E"/>
+  <g transform="translate(${lx},${ly}) scale(${scale})">
+    <path d="${LOGO_PATH}"
+      fill="none" stroke="#1A1A1A" stroke-width="${sw}"
+      stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
   <text
     x="${w / 2}" y="${textY}"
     font-family="Georgia, 'Times New Roman', serif"

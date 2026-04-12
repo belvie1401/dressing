@@ -9,33 +9,30 @@ if (!fs.existsSync(outDir)) {
   fs.mkdirSync(outDir, { recursive: true });
 }
 
+// Calligraphic logo path — stylized cursive "a" from brand mark
+// Drawn in a 0-100 coordinate space
+const LOGO_PATH =
+  'M 60,78 C 38,90 8,72 12,45 C 16,18 48,8 66,28 C 78,42 68,62 50,58 ' +
+  'C 34,54 38,36 52,34 C 62,32 60,20 54,12 C 48,4 62,4 68,16';
+
 function makeSvg(size, maskable = false) {
-  const gold = '#C6A47E';
   const bg = '#1A1A1A';
+  const stroke = '#C6A47E';
   const r = maskable ? 0 : Math.round(size * 0.22);
-  // Inner padding: more for maskable (safe zone)
-  const pad = maskable ? Math.round(size * 0.20) : Math.round(size * 0.18);
+  const pad = maskable ? Math.round(size * 0.24) : Math.round(size * 0.14);
 
   const inner = size - 2 * pad;
-  const sw = Math.round(inner * 0.30); // stroke width of the L bars
-  const lH = inner;                    // letter height = full inner
-  const lW = Math.round(inner * 0.68); // letter total width
-
-  // Center the L horizontally
-  const lx = pad + Math.round((inner - lW) / 2);
-  const ly = pad;
-
-  // Vertical bar: left side of L
-  const vx = lx, vy = ly, vw = sw, vh = lH;
-  // Horizontal bar: bottom of L
-  const hx = lx, hy = ly + lH - sw, hw = lW, hh = sw;
-
-  const br = Math.round(sw * 0.18); // bar corner radius
+  const scale = inner / 100;
+  // Keep stroke visually consistent: thicker for small icons
+  const sw = size <= 96 ? 4 : size <= 192 ? 3.2 : 2.8;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
   <rect width="${size}" height="${size}" rx="${r}" fill="${bg}"/>
-  <rect x="${vx}" y="${vy}" width="${vw}" height="${vh}" rx="${br}" fill="${gold}"/>
-  <rect x="${hx}" y="${hy}" width="${hw}" height="${hh}" rx="${br}" fill="${gold}"/>
+  <g transform="translate(${pad},${pad}) scale(${scale})">
+    <path d="${LOGO_PATH}"
+      fill="none" stroke="${stroke}" stroke-width="${sw / scale}"
+      stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
 </svg>`;
 }
 
