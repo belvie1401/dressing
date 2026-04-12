@@ -839,10 +839,13 @@ export async function tryOnItem(req: Request, res: Response): Promise<void> {
     } catch (err) {
       const e = err as { message?: string };
       console.error('Try-on error:', e);
-      res.status(500).json({
+      const isTokenMissing = e.message?.includes('REPLICATE_API_TOKEN');
+      res.status(isTokenMissing ? 503 : 500).json({
         success: false,
-        error: 'TRYON_FAILED',
-        message: e.message || 'Essayage virtuel indisponible. Réessayez.',
+        error: isTokenMissing ? 'TRYON_NOT_CONFIGURED' : 'TRYON_FAILED',
+        message: isTokenMissing
+          ? "Le service d'essayage virtuel n'est pas encore configuré."
+          : (e.message || 'Essayage virtuel indisponible. Réessayez.'),
       });
       return;
     }

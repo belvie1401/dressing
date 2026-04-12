@@ -9,6 +9,7 @@ import { useAuthStore } from '@/lib/store';
 type TryOnState =
   | 'idle' // has avatar, hasn't generated yet (or cleared)
   | 'no_avatar' // user hasn't uploaded a body photo yet
+  | 'not_configured' // REPLICATE_API_TOKEN not set on the server
   | 'generating'
   | 'done'
   | 'error';
@@ -97,7 +98,12 @@ export default function TryOnSection({
       setState('no_avatar');
       return;
     }
-    setErrorMsg(err.message || err.error || 'Essayage virtuel indisponible');
+    if (err.error === 'TRYON_NOT_CONFIGURED') {
+      setState('not_configured');
+      return;
+    }
+    const msg = err.message || err.error || 'Essayage virtuel indisponible';
+    setErrorMsg(msg.includes('timeout') ? 'Délai dépassé. Réessayez.' : msg);
     setState('error');
   };
 
@@ -184,6 +190,23 @@ export default function TryOnSection({
           >
             Configurer mon avatar
           </button>
+        </div>
+      )}
+
+      {/* ── Not configured (token missing on server) ── */}
+      {state === 'not_configured' && (
+        <div className="mx-5 mb-5 rounded-2xl bg-[#FFF8F6] p-5">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4785C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          <p className="font-serif text-base text-[#111111]">
+            Essayage virtuel non disponible
+          </p>
+          <p className="mt-2 text-xs text-[#8A8A8A]">
+            Le service d&rsquo;essayage n&rsquo;est pas encore configur&eacute;. Revenez bientôt !
+          </p>
         </div>
       )}
 
