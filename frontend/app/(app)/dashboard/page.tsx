@@ -136,7 +136,7 @@ export default function DashboardPage() {
   const challengePct = Math.round((challenge.current / challenge.target) * 100);
 
   return (
-    <div className="bg-[#F2F0EB] md:bg-transparent min-h-screen pb-24 md:pb-0 overflow-x-hidden">
+    <div className="bg-[#F2F0EB] md:bg-transparent min-h-screen pb-24 md:pb-0 overflow-x-hidden max-w-[100vw]">
       {/* ============ TUTORIAL ============ */}
       {showTutorial && (
         <DashboardTutorial
@@ -222,7 +222,7 @@ export default function DashboardPage() {
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
-            <span className="text-[11px] text-[#9B9B9B]">Mon dressing</span>
+            <span className="truncate text-[11px] text-[#9B9B9B]">Mon dressing</span>
           </div>
           <p className="font-serif text-3xl md:text-4xl text-[#111111] leading-none">{stats.wardrobe}</p>
           <p className="text-[10px] text-[#9B9B9B] mt-0.5 md:mt-2">vêtements</p>
@@ -237,7 +237,7 @@ export default function DashboardPage() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
-            <span className="text-[11px] text-[#9B9B9B]">Mes looks</span>
+            <span className="truncate text-[11px] text-[#9B9B9B]">Mes looks</span>
           </div>
           <p className="font-serif text-3xl md:text-4xl text-[#111111] leading-none">{stats.looks}</p>
           <p className="text-[10px] text-[#9B9B9B] mt-0.5 md:mt-2">créés</p>
@@ -255,7 +255,7 @@ export default function DashboardPage() {
               <line x1="8" y1="2" x2="8" y2="6" />
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
-            <span className="text-[11px] text-[#9B9B9B]">Sessions</span>
+            <span className="truncate text-[11px] text-[#9B9B9B]">Sessions</span>
           </div>
           <p className="font-serif text-3xl md:text-4xl text-[#111111] leading-none">{stats.sessions}</p>
           <p className="text-[10px] text-[#9B9B9B] mt-0.5 md:mt-2">en cours</p>
@@ -460,11 +460,7 @@ export default function DashboardPage() {
               </p>
               <div className="mt-6">
                 <p className="mb-2 text-xs text-[#8A8A8A]">
-                  {outfitsCount === null ? (
-                    <span className="inline-block h-3 w-24 rounded bg-[#F0EDE8] animate-pulse align-middle" />
-                  ) : (
-                    `${challenge.current} / ${challenge.target} looks créés`
-                  )}
+                  {`${challenge.current} / ${challenge.target} looks créés`}
                 </p>
                 <div className="h-1.5 w-full rounded-full bg-[#F0EDE8]">
                   <div
