@@ -87,7 +87,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   // Other stylist-facing routes reuse the client shell but skip the mobile bottom nav
   const isStylistRoute =
-    pathname?.startsWith('/stylist') ||
+    pathname?.startsWith('/stylist-') ||
     pathname === '/my-clients' ||
     pathname?.startsWith('/my-clients/') ||
     pathname === '/agenda' ||

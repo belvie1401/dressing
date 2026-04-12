@@ -51,7 +51,7 @@ export default function StylistsPage() {
   });
 
   return (
-    <div className="space-y-4 pb-10">
+    <div className="space-y-4 pb-24 md:pb-10">
       {/* Header — mobile: hamburger + centered + bell */}
       <div className="flex items-center justify-between px-5 py-4 md:px-0 md:pt-2">
         <button className="flex h-9 w-9 cursor-pointer items-center justify-center md:hidden" aria-label="Menu">
