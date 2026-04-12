@@ -297,6 +297,9 @@ CREATE TABLE IF NOT EXISTS "ClothingComment" (
 CREATE INDEX IF NOT EXISTS "ClothingComment_item_id_idx" ON "ClothingComment"("item_id");
 CREATE INDEX IF NOT EXISTS "ClothingComment_stylist_id_idx" ON "ClothingComment"("stylist_id");
 
+-- Outfit notes
+ALTER TABLE "Outfit" ADD COLUMN IF NOT EXISTS "notes" TEXT;
+
 -- Password reset tokens
 CREATE TABLE IF NOT EXISTS "PasswordReset" (
   "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,

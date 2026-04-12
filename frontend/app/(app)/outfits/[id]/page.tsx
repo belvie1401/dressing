@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { Outfit } from '@/types';
 import { api } from '@/lib/api';
@@ -10,14 +10,20 @@ import VirtualTryOn from '@/components/outfits/VirtualTryOn';
 
 export default function OutfitDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const [outfit, setOutfit] = useState<Outfit | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notes, setNotes] = useState('');
+  const [savingNotes, setSavingNotes] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       const res = await api.get<Outfit>(`/outfits/${id}`);
       if (res.success && res.data) {
         setOutfit(res.data);
+        setNotes(res.data.notes ?? '');
       }
       setLoading(false);
     };
@@ -30,6 +36,21 @@ export default function OutfitDetailPage() {
     if (res.success && res.data) {
       setOutfit({ ...outfit, worn_count: res.data.worn_count, last_worn_at: res.data.last_worn_at });
     }
+  };
+
+  const handleSaveNotes = async () => {
+    if (!outfit || notes === (outfit.notes ?? '')) return;
+    setSavingNotes(true);
+    const res = await api.put<Outfit>(`/outfits/${id}`, { notes });
+    if (res.success && res.data) setOutfit({ ...outfit, notes: res.data.notes });
+    setSavingNotes(false);
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    const res = await api.delete(`/outfits/${id}`);
+    if (res.success) router.push('/outfits');
+    else setDeleting(false);
   };
 
   if (loading) {
@@ -55,7 +76,13 @@ export default function OutfitDetailPage() {
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </a>
-        <h1 className="text-lg font-semibold text-[#111111]">{outfit.name}</h1>
+        <div>
+          <h1 className="text-lg font-semibold text-[#111111]">{outfit.name}</h1>
+          <p className="text-xs text-[#8A8A8A]">
+            Créé le{' '}
+            {new Date(outfit.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
+        </div>
         {outfit.ai_generated && (
           <span className="ml-auto rounded-full bg-gradient-to-r from-purple-100 to-pink-100 px-3 py-1 text-xs font-medium text-purple-700">IA</span>
         )}
@@ -106,6 +133,54 @@ export default function OutfitDetailPage() {
             Planifier
           </a>
         </div>
+
+        {/* Notes */}
+        <div className="mt-4">
+          <div className="mb-1 flex items-center justify-between">
+            <label className="text-xs font-medium text-[#8A8A8A]">Notes</label>
+            {savingNotes && <span className="text-[10px] text-[#8A8A8A]">Enregistrement…</span>}
+          </div>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            onBlur={handleSaveNotes}
+            placeholder="Ajoutez des notes sur ce look…"
+            rows={3}
+            className="w-full resize-none rounded-xl bg-[#F7F5F2] px-4 py-3 text-sm text-[#111111] placeholder-[#C6C6C6] outline-none focus:ring-1 focus:ring-[#C6A47E]"
+          />
+        </div>
+
+        {/* Delete */}
+        {!confirmDelete ? (
+          <button
+            type="button"
+            onClick={() => setConfirmDelete(true)}
+            className="mt-3 w-full py-2 text-sm text-[#D4785C] transition-colors hover:text-[#b85a3e]"
+          >
+            Supprimer ce look
+          </button>
+        ) : (
+          <div className="mt-3 rounded-xl border border-[#F0EDE8] bg-[#FFF8F6] p-4">
+            <p className="mb-3 text-sm text-[#111111]">Confirmer la suppression de ce look ?</p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="flex-1 rounded-full border border-[#EFEFEF] py-2 text-sm font-medium text-[#8A8A8A] transition-colors hover:bg-[#F7F5F2]"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 rounded-full bg-[#D4785C] py-2 text-sm font-semibold text-white transition-colors hover:bg-[#b85a3e] disabled:opacity-60"
+              >
+                {deleting ? '...' : 'Supprimer'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <VirtualTryOn outfitId={outfit.id} tryOnUrl={outfit.try_on_url} />

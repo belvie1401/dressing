@@ -166,6 +166,7 @@ model Outfit {
   worn_count   Int       @default(0)
   last_worn_at DateTime?
   try_on_url   String?
+  notes        String?
   created_at   DateTime  @default(now())
 
   items          OutfitItem[]

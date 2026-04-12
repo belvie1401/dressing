@@ -77,6 +77,7 @@ export interface Outfit {
   worn_count: number;
   last_worn_at?: string;
   try_on_url?: string;
+  notes?: string | null;
   created_at: string;
   items?: OutfitItem[];
 }

@@ -69,6 +69,18 @@ export async function getConversations(req: Request, res: Response): Promise<voi
   }
 }
 
+export async function getUnreadCount(req: Request, res: Response): Promise<void> {
+  try {
+    const userId = req.user!.userId;
+    const count = await prisma.message.count({
+      where: { to_id: userId, read_at: null },
+    });
+    res.json({ success: true, data: { count } });
+  } catch {
+    res.status(500).json({ success: false, error: 'Erreur' });
+  }
+}
+
 export async function getMessages(req: Request, res: Response): Promise<void> {
   try {
     const userId = req.user!.userId;
