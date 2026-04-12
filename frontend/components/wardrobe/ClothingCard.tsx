@@ -23,6 +23,8 @@ interface ClothingCardProps {
   searchQuery?: string;
   /** Called after an item is deleted or archived so the parent can refresh. */
   onRemoved?: () => void;
+  /** When true, the card renders an "Archivé" overlay and the dropdown shows "Désarchiver". */
+  isArchived?: boolean;
 }
 
 /**
@@ -34,7 +36,7 @@ interface ClothingCardProps {
  *    (40px threshold) without triggering navigation
  *  - Desktop hover reveals a quick-action bar (Voir / Favori / Porter)
  */
-export default function ClothingCard({ item, onToast, searchQuery, onRemoved }: ClothingCardProps) {
+export default function ClothingCard({ item, onToast, searchQuery, onRemoved, isArchived }: ClothingCardProps) {
   const router = useRouter();
   const markWornInStore = useWardrobeStore((s) => s.markWorn);
   const removeItemFromStore = useWardrobeStore((s) => s.removeItem);
@@ -330,54 +332,22 @@ export default function ClothingCard({ item, onToast, searchQuery, onRemoved }: 
           >
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); setShowMenu(false); router.push(`/wardrobe/${item.id}`); }}
-              className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-2.5 text-sm text-[#111111] hover:bg-[#F7F5F2]"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-              Voir le d&eacute;tail
-            </button>
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setShowMenu(false); handleFavorite(e); }}
-              className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-2.5 text-sm text-[#111111] hover:bg-[#F7F5F2]"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
-              Ajouter aux favoris
-            </button>
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setShowMenu(false); handleWear(e); }}
-              className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-2.5 text-sm text-[#111111] hover:bg-[#F7F5F2]"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
-              </svg>
-              Marquer comme port&eacute;
-            </button>
-            <div className="my-1 border-t border-[#EFEFEF]" />
-            <button
-              type="button"
               onClick={(e) => { e.stopPropagation(); setShowMenu(false); setConfirmAction('archive'); }}
-              className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-2.5 text-sm text-[#8A8A8A] hover:bg-[#F7F5F2]"
+              className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-sm text-[#111111] hover:bg-[#F7F5F2]"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="21 8 21 21 3 21 3 8" />
                 <rect x="1" y="3" width="22" height="5" />
                 <line x1="10" y1="12" x2="14" y2="12" />
               </svg>
-              Archiver
+              {isArchived ? 'D\u00e9sarchiver' : 'Archiver'}
             </button>
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setShowMenu(false); setConfirmAction('delete'); }}
-              className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-2.5 text-sm text-[#D4785C] hover:bg-[#F7F5F2]"
+              className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-sm text-[#D4785C] hover:bg-[#FFF8F6]"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4785C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="3 6 5 6 21 6" />
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
               </svg>
@@ -390,22 +360,31 @@ export default function ClothingCard({ item, onToast, searchQuery, onRemoved }: 
       {/* Archive/Delete confirm modal */}
       {confirmAction && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-5"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
           onClick={(e) => { e.stopPropagation(); setConfirmAction(null); }}
         >
           <div
-            className="w-full max-w-[280px] rounded-2xl bg-white p-4 shadow-xl"
+            className="mx-5 w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="font-serif text-base text-[#111111]">
-              {confirmAction === 'archive' ? 'Archiver ce v\u00eatement ?' : 'Supprimer ce v\u00eatement ?'}
-            </p>
-            <p className="mt-1 text-xs text-[#8A8A8A]">
+            <p className="font-serif text-lg text-[#111111]">
               {confirmAction === 'archive'
-                ? 'Il sera masqu\u00e9 mais pas supprim\u00e9.'
+                ? (isArchived ? 'D\u00e9sarchiver ce v\u00eatement ?' : 'Archiver ce v\u00eatement ?')
+                : 'Supprimer ce v\u00eatement ?'}
+            </p>
+            <p className="mt-2 text-sm text-[#8A8A8A]">
+              {confirmAction === 'archive'
+                ? (isArchived ? 'Il sera de nouveau visible dans votre dressing.' : 'Il sera masqu\u00e9 mais pas supprim\u00e9.')
                 : 'Cette action est irr\u00e9versible.'}
             </p>
-            <div className="mt-4 flex gap-2">
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setConfirmAction(null); }}
+                className="flex-1 cursor-pointer rounded-full border border-[#EFEFEF] py-3 text-sm font-medium text-[#8A8A8A] transition-colors hover:bg-[#F7F5F2]"
+              >
+                Annuler
+              </button>
               <button
                 type="button"
                 onClick={(e) => {
@@ -413,21 +392,25 @@ export default function ClothingCard({ item, onToast, searchQuery, onRemoved }: 
                   if (confirmAction === 'archive') handleArchive();
                   else handleDelete();
                 }}
-                className={`flex-1 cursor-pointer rounded-full py-2 text-xs font-semibold text-white ${
+                className={`flex-1 cursor-pointer rounded-full py-3 text-sm font-semibold text-white ${
                   confirmAction === 'delete' ? 'bg-[#D4785C]' : 'bg-[#111111]'
                 }`}
               >
-                {confirmAction === 'archive' ? 'Archiver' : 'Supprimer'}
-              </button>
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); setConfirmAction(null); }}
-                className="flex-1 cursor-pointer rounded-full border border-[#EFEFEF] py-2 text-xs font-medium text-[#111111]"
-              >
-                Annuler
+                {confirmAction === 'archive'
+                  ? (isArchived ? 'D\u00e9sarchiver' : 'Archiver')
+                  : 'Supprimer'}
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Archived overlay */}
+      {isArchived && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-black/25">
+          <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[#8A8A8A] backdrop-blur-sm">
+            Archiv&eacute;
+          </span>
         </div>
       )}
 

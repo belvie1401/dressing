@@ -124,7 +124,7 @@ function getUploadedFile(
 
 export async function getItems(req: Request, res: Response): Promise<void> {
   try {
-    const { category, season, occasion, color, search, limit, include_archived } = req.query;
+    const { category, season, occasion, color, search, limit, include_archived, archived } = req.query;
 
     const take = limit ? Math.max(1, Math.min(100, Number(limit))) : undefined;
 
@@ -142,8 +142,15 @@ export async function getItems(req: Request, res: Response): Promise<void> {
         }
       : {};
 
-    // By default, exclude archived items unless explicitly requested
-    const archivedFilter = include_archived === 'true' ? {} : { archived: false };
+    // ?archived=true  → only archived items
+    // ?include_archived=true → all items (archived + non-archived)
+    // default → only non-archived items
+    const archivedFilter =
+      archived === 'true'
+        ? { archived: true }
+        : include_archived === 'true'
+          ? {}
+          : { archived: false };
 
     const items = await prisma.clothingItem.findMany({
       where: {

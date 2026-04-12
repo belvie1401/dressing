@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useWardrobeStore } from '@/lib/store';
-import type { Outfit } from '@/types';
+import type { ClothingItem, Outfit } from '@/types';
 import { api } from '@/lib/api';
 import ClothingCard from '@/components/wardrobe/ClothingCard';
 
@@ -20,7 +20,7 @@ const occasionLabels: Record<string, string> = {
 };
 
 type WardrobeTab = 'clothes' | 'looks' | 'favorites';
-type CategoryFilter = 'ALL' | 'TOP' | 'BOTTOM' | 'DRESS' | 'JACKET' | 'SHOES' | 'ACCESSORY';
+type CategoryFilter = 'ALL' | 'TOP' | 'BOTTOM' | 'DRESS' | 'JACKET' | 'SHOES' | 'ACCESSORY' | 'ARCHIVED';
 
 const TABS: Array<{ key: WardrobeTab; label: string }> = [
   { key: 'clothes', label: 'Vêtements' },
@@ -36,6 +36,7 @@ const CATEGORY_PILLS: Array<{ key: CategoryFilter; label: string }> = [
   { key: 'JACKET', label: 'Vestes' },
   { key: 'SHOES', label: 'Chaussures' },
   { key: 'ACCESSORY', label: 'Accessoires' },
+  { key: 'ARCHIVED', label: 'Archivés' },
 ];
 
 export default function WardrobePage() {
@@ -44,6 +45,8 @@ export default function WardrobePage() {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('ALL');
   const [outfits, setOutfits] = useState<Outfit[]>([]);
+  const [archivedItems, setArchivedItems] = useState<ClothingItem[]>([]);
+  const [loadingArchived, setLoadingArchived] = useState(false);
   const [toast, setToast] = useState('');
   const [planInfo, setPlanInfo] = useState<{ plan: string; limit: number | null } | null>(null);
 
@@ -63,6 +66,17 @@ export default function WardrobePage() {
     loadPlanInfo();
   }, []);
 
+  const loadArchivedItems = async () => {
+    setLoadingArchived(true);
+    const res = await api.get<ClothingItem[]>('/wardrobe?archived=true');
+    if (res.success && res.data) setArchivedItems(res.data);
+    setLoadingArchived(false);
+  };
+
+  useEffect(() => {
+    if (categoryFilter === 'ARCHIVED') loadArchivedItems();
+  }, [categoryFilter]);
+
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(''), 2500);
@@ -71,19 +85,23 @@ export default function WardrobePage() {
   const trimmedSearch = search.trim();
   const hasSearch = trimmedSearch.length > 0;
 
-  const filteredItems = items.filter((item) => {
-    if (categoryFilter !== 'ALL' && item.category !== categoryFilter) return false;
-    if (!hasSearch) return true;
-    const q = trimmedSearch.toLowerCase();
-    return (
-      item.name?.toLowerCase().includes(q) ||
-      item.brand?.toLowerCase().includes(q) ||
-      item.material?.toLowerCase().includes(q) ||
-      categoryLabels[item.category]?.toLowerCase().includes(q) ||
-      occasionLabels[item.occasion]?.toLowerCase().includes(q) ||
-      item.colors.some((c) => c.toLowerCase().includes(q))
-    );
-  });
+  const isArchivedView = categoryFilter === 'ARCHIVED';
+
+  const filteredItems = isArchivedView
+    ? archivedItems
+    : items.filter((item) => {
+        if (categoryFilter !== 'ALL' && item.category !== categoryFilter) return false;
+        if (!hasSearch) return true;
+        const q = trimmedSearch.toLowerCase();
+        return (
+          item.name?.toLowerCase().includes(q) ||
+          item.brand?.toLowerCase().includes(q) ||
+          item.material?.toLowerCase().includes(q) ||
+          categoryLabels[item.category]?.toLowerCase().includes(q) ||
+          occasionLabels[item.occasion]?.toLowerCase().includes(q) ||
+          item.colors.some((c) => c.toLowerCase().includes(q))
+        );
+      });
 
   return (
     // -mb-24 lg:-mb-8 cancels the parent <main>'s bottom padding so the
@@ -263,6 +281,43 @@ export default function WardrobePage() {
           <div className="flex justify-center py-16">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#111111] border-t-transparent" />
           </div>
+        ) : tab === 'clothes' && isArchivedView ? (
+          // ─── ARCHIVED VIEW ─────────────────────────────────────────
+          loadingArchived ? (
+            <div className="flex justify-center py-16">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#111111] border-t-transparent" />
+            </div>
+          ) : archivedItems.length === 0 ? (
+            <div className="flex flex-col items-center py-16 text-center">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#EDE5DC]">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="21 8 21 21 3 21 3 8" />
+                  <rect x="1" y="3" width="22" height="5" />
+                  <line x1="10" y1="12" x2="14" y2="12" />
+                </svg>
+              </div>
+              <p className="font-serif text-base text-[#111111]">Aucun v&ecirc;tement archiv&eacute;</p>
+              <p className="mt-1 text-xs text-[#8A8A8A]">Les pi&egrave;ces archiv&eacute;es apparaîtront ici</p>
+            </div>
+          ) : (
+            <div
+              className="grid gap-2"
+              style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}
+            >
+              {archivedItems.map((item) => (
+                <ClothingCard
+                  key={item.id}
+                  item={item}
+                  isArchived
+                  onToast={showToast}
+                  onRemoved={() => {
+                    loadArchivedItems();
+                    loadItems();
+                  }}
+                />
+              ))}
+            </div>
+          )
         ) : tab === 'clothes' ? (
           hasSearch ? (
             // ─── SEARCH MODE ───────────────────────────────────────────
