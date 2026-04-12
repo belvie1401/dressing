@@ -235,7 +235,7 @@ export default function WardrobeEditPage() {
               : 'Choisissez une ou plusieurs'
           }
         >
-          <div className="grid grid-cols-8 gap-3">
+          <div className="grid grid-cols-8 gap-2 md:gap-3">
             {COLORS.map((c) => {
               const selected = selectedColors.includes(c.name);
               return (
@@ -245,7 +245,7 @@ export default function WardrobeEditPage() {
                   onClick={() => toggleColor(c.name)}
                   title={c.name}
                   aria-label={c.name}
-                  className={`relative h-9 w-9 cursor-pointer rounded-full transition-transform ${
+                  className={`relative aspect-square w-full max-w-[36px] cursor-pointer rounded-full transition-transform ${
                     selected
                       ? 'scale-110 ring-2 ring-[#111111] ring-offset-2'
                       : 'ring-1 ring-[#EFEFEF]'

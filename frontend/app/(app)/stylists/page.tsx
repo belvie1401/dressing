@@ -106,7 +106,7 @@ export default function StylistsPage() {
       </div>
 
       {/* Filter pills — horizontal scroll */}
-      <div className="-mx-5 overflow-x-auto scrollbar-hide">
+      <div className="overflow-x-auto scrollbar-hide">
         <div className="flex gap-2 px-5 pb-1">
           {styleFilters.map((f) => (
             <button
@@ -159,7 +159,7 @@ export default function StylistsPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#1A1A1A]">{stylist.name}</p>
+                  <p className="text-sm font-semibold text-[#1A1A1A] truncate">{stylist.name}</p>
                   {stylist.location && (
                     <p className="mt-0.5 text-xs text-[#9B9B9B]">{stylist.location}</p>
                   )}

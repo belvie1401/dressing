@@ -91,12 +91,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <GlobalSearchProvider>
-      <div className="flex min-h-screen" style={{ background: 'var(--color-app-bg)' }}>
+      <div className="flex min-h-screen w-full max-w-[100vw] overflow-x-hidden" style={{ background: 'var(--color-app-bg)' }}>
         {/* Desktop sidebar — hidden on mobile */}
         <Sidebar />
 
         {/* Main content */}
-        <main className="flex-1 min-w-0 pb-24 lg:pb-8">
+        <main className="flex-1 min-w-0 w-full overflow-x-hidden pb-24 lg:pb-8">
           {children}
         </main>
 

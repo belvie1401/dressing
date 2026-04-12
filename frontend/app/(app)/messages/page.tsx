@@ -62,7 +62,7 @@ export default function MessagesPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-[#111111]">{conv.contact.name}</p>
+                  <p className="text-sm font-semibold text-[#111111] truncate">{conv.contact.name}</p>
                   {conv.lastMessage && (
                     <span className="text-xs text-[#CFCFCF]">
                       {format(new Date(conv.lastMessage.created_at), 'HH:mm', { locale: fr })}

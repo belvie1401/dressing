@@ -135,9 +135,9 @@ export default function ProfilePage() {
             user?.name?.charAt(0) || '?'
           )}
         </div>
-        <div>
-          <h1 className="text-lg font-bold text-[#111111]">{user?.name}</h1>
-          <p className="text-sm text-[#8A8A8A]">{user?.email}</p>
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg font-bold text-[#111111] truncate">{user?.name}</h1>
+          <p className="text-sm text-[#8A8A8A] truncate">{user?.email}</p>
           <span className="mt-1 inline-block rounded-full bg-[#F0EDE8] px-2.5 py-0.5 text-xs font-medium text-[#111111]">
             {user?.role === 'STYLIST' ? 'Styliste' : 'Client'}
           </span>

@@ -113,8 +113,8 @@ export default function DashboardPage() {
       <TutorialHelpButton onRestart={restartTutorial} />
 
       {/* ============ A. GREETING ============ */}
-      <div className="mb-6">
-        <h1 className="font-serif text-4xl leading-tight text-[#111111]">
+      <div className="mb-6 px-5 md:px-0">
+        <h1 className="font-serif text-2xl md:text-4xl leading-tight text-[#111111]">
           Bonjour{firstName ? ` ${firstName}` : ''}{' '}
           <span className="inline-block" aria-hidden>
             &#128075;
@@ -127,7 +127,7 @@ export default function DashboardPage() {
 
       {/* ============ DAILY REMINDER BANNER ============ */}
       {todayHasEntry === false && new Date().getHours() >= 8 && (
-        <div className="mb-6 rounded-2xl bg-[#EDE5DC] p-3">
+        <div className="mb-6 mx-5 md:mx-0 rounded-2xl bg-[#EDE5DC] p-3">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white/60">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -152,7 +152,7 @@ export default function DashboardPage() {
       )}
 
       {/* ============ B. STAT CARDS ============ */}
-      <div className="mb-12 grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="mb-8 md:mb-12 grid grid-cols-3 gap-2 md:gap-4 px-5 md:px-0">
         <StatCardShell
           icon={
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -200,10 +200,10 @@ export default function DashboardPage() {
       </div>
 
       {/* ============ C. RECOMMANDATIONS POUR VOUS ============ */}
-      <section className="mb-12" data-tour="look-du-jour">
+      <section className="mb-8 md:mb-12 px-5 md:px-0" data-tour="look-du-jour">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="font-serif text-2xl text-[#111111]">
+            <h2 className="font-serif text-lg md:text-2xl text-[#111111]">
               Recommandations pour vous
             </h2>
             <p className="mt-1 text-sm text-[#8A8A8A]">
@@ -296,7 +296,7 @@ export default function DashboardPage() {
       {/* ============ D. TWO BOTTOM CARDS ============ */}
       <section
         data-tour="cette-semaine"
-        className="grid grid-cols-1 gap-4 md:grid-cols-2"
+        className="grid grid-cols-1 gap-4 md:grid-cols-2 px-5 md:px-0"
       >
         {/* ----- Besoin d'inspiration ----- */}
         <div className="relative overflow-hidden rounded-2xl bg-[#EDE5DC] p-6">
@@ -376,26 +376,26 @@ function StatCardShell({
   ctaHref,
 }: StatCardShellProps) {
   return (
-    <div className="rounded-2xl border border-[#EFEFEF] bg-white p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#F7F5F2]">
+    <div className="rounded-2xl border border-[#EFEFEF] bg-white p-3 md:p-5">
+      <div className="flex items-start justify-between gap-2 md:gap-3">
+        <div className="flex items-center gap-1.5 md:gap-2">
+          <div className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-full bg-[#F7F5F2]">
             {icon}
           </div>
-          <span className="text-xs text-[#8A8A8A]">{label}</span>
+          <span className="text-[10px] md:text-xs text-[#8A8A8A] truncate">{label}</span>
         </div>
       </div>
       {value === null ? (
-        <div className="mt-5 h-10 w-20 rounded bg-[#F0EDE8] animate-pulse" />
+        <div className="mt-3 md:mt-5 h-8 md:h-10 w-14 md:w-20 rounded bg-[#F0EDE8] animate-pulse" />
       ) : (
-        <p className="mt-5 font-serif text-4xl leading-none text-[#111111]">
+        <p className="mt-3 md:mt-5 font-serif text-2xl md:text-4xl leading-none text-[#111111]">
           {value}
         </p>
       )}
-      <p className="mt-2 text-xs text-[#8A8A8A]">{unit}</p>
+      <p className="mt-1 md:mt-2 text-[10px] md:text-xs text-[#8A8A8A]">{unit}</p>
       <Link
         href={ctaHref}
-        className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[#111111]"
+        className="mt-2 md:mt-3 inline-flex items-center gap-1 text-[10px] md:text-xs font-medium text-[#111111]"
       >
         {ctaLabel} &rarr;
       </Link>

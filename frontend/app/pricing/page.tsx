@@ -221,7 +221,7 @@ function PricingInner() {
 
       {/* ══ Title ══ */}
       <div className="text-center mt-8 px-5">
-        <h1 className="font-serif text-4xl text-[#111111]">Choisissez votre formule</h1>
+        <h1 className="font-serif text-2xl md:text-4xl text-[#111111]">Choisissez votre formule</h1>
         <p className="text-sm text-[#8A8A8A] mt-2">
           Commencez gratuitement. Évoluez à votre rythme.
         </p>

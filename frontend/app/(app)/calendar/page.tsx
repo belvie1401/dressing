@@ -144,7 +144,7 @@ export default function CalendarPage() {
               key={i}
               type="button"
               onClick={() => setSelectedDay(d)}
-              className={`relative min-h-[70px] cursor-pointer overflow-hidden rounded-xl border transition-colors ${
+              className={`relative min-h-[56px] md:min-h-[70px] cursor-pointer overflow-hidden rounded-xl border transition-colors ${
                 selected
                   ? 'border-[#C6A47E]'
                   : today

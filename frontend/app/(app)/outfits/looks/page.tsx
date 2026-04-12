@@ -165,13 +165,13 @@ function LookCard({ lookbook }: { lookbook: Lookbook }) {
         <div className="mt-3 flex gap-2">
           <button
             type="button"
-            className="flex-1 cursor-pointer rounded-full border border-[#1A1A1A] py-2.5 text-center text-xs text-[#1A1A1A]"
+            className="flex-1 cursor-pointer rounded-full border border-[#1A1A1A] py-2 md:py-2.5 text-center text-[11px] md:text-xs text-[#1A1A1A]"
           >
             Demander une modification
           </button>
           <button
             type="button"
-            className="flex-1 cursor-pointer rounded-full bg-[#1A1A1A] py-2.5 text-center text-xs text-white"
+            className="flex-1 cursor-pointer rounded-full bg-[#1A1A1A] py-2 md:py-2.5 text-center text-[11px] md:text-xs text-white"
           >
             J&apos;adore ce look
           </button>

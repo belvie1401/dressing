@@ -181,12 +181,12 @@ export default function BookingPage() {
       {/* ── SECTION 1: Durée ── */}
       <div className="mx-5 mb-6">
         <h2 className="font-serif text-[16px] font-semibold text-[#111111] mb-3">Choisissez une dur&eacute;e</h2>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2 md:gap-3">
           {durations.map((d, i) => (
             <button
               key={d.label}
               onClick={() => setSelectedDuration(i)}
-              className={`cursor-pointer rounded-2xl bg-white p-4 text-center border-2 transition-all ${
+              className={`cursor-pointer rounded-2xl bg-white p-3 md:p-4 text-center border-2 transition-all ${
                 selectedDuration === i ? 'border-[#C6A47E] bg-[#FBF7F3]' : 'border-transparent'
               }`}
             >

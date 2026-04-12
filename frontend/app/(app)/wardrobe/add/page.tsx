@@ -655,7 +655,7 @@ export default function WardrobeAddPage() {
               : 'Choisissez une ou plusieurs couleurs'
           }
         >
-          <div className="grid grid-cols-8 gap-3">
+          <div className="grid grid-cols-8 gap-2 md:gap-3">
             {COLORS.map((c) => {
               const selected = selectedColors.includes(c.name);
               return (
@@ -666,7 +666,7 @@ export default function WardrobeAddPage() {
                   title={c.name}
                   aria-label={c.name}
                   aria-pressed={selected}
-                  className={`relative h-10 w-10 cursor-pointer rounded-full transition-transform ${
+                  className={`relative aspect-square w-full max-w-[40px] cursor-pointer rounded-full transition-transform ${
                     selected ? 'scale-110 ring-2 ring-[#111111] ring-offset-2' : 'ring-1 ring-[#EFEFEF]'
                   }`}
                   style={{
