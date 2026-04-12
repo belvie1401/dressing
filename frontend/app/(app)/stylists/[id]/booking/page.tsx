@@ -127,16 +127,17 @@ export default function BookingPage() {
   return (
     <div className="pb-36">
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 pt-4 mb-5">
+      <div className="flex items-center px-5 py-4 mb-2">
         <Link
           href={`/stylists/${id}`}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </Link>
-        <h1 className="font-serif text-[18px] font-semibold text-[#111111]">R&eacute;server une session</h1>
+        <h1 className="flex-1 text-center font-serif text-lg text-[#1A1A1A]" style={{ fontWeight: 500 }}>Réserver une session</h1>
+        <div className="w-9" />
       </div>
 
       {/* Stylist summary card */}
@@ -185,12 +186,12 @@ export default function BookingPage() {
             <button
               key={d.label}
               onClick={() => setSelectedDuration(i)}
-              className={`rounded-2xl bg-white p-3 text-center border-2 transition-all shadow-sm ${
-                selectedDuration === i ? 'border-[#111111]' : 'border-transparent'
+              className={`cursor-pointer rounded-2xl bg-white p-4 text-center border-2 transition-all ${
+                selectedDuration === i ? 'border-[#C6A47E] bg-[#FBF7F3]' : 'border-transparent'
               }`}
             >
-              <p className="text-[14px] font-bold text-[#111111]">{d.label}</p>
-              <p className="text-[12px] text-[#8A8A8A]">{d.price}&euro;</p>
+              <p className="text-sm font-semibold text-[#1A1A1A]">{d.label}</p>
+              <p className="mt-0.5 text-xs text-[#9B9B9B]">{d.price}&euro;</p>
             </button>
           ))}
         </div>
@@ -263,10 +264,10 @@ export default function BookingPage() {
               <button
                 key={slot}
                 onClick={() => setSelectedSlot(slot)}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                className={`cursor-pointer rounded-xl border px-5 py-3 text-sm transition-all ${
                   selectedSlot === slot
-                    ? 'bg-[#111111] text-white'
-                    : 'bg-[#F0EDE8] text-[#111111]'
+                    ? 'border-[#C6A47E] bg-[#C6A47E]/10 font-medium text-[#C6A47E]'
+                    : 'border-[#EFEFEF] bg-white text-[#1A1A1A]'
                 }`}
               >
                 {slot}
@@ -277,12 +278,11 @@ export default function BookingPage() {
       )}
 
       {/* ── CTA Fixed bottom ── */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#F0EDE8] px-5 py-4" style={{ background: '#F7F5F2' }}>
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#F2F0EC] bg-white px-5 py-4">
         <button
           onClick={handleContinue}
           disabled={submitting}
-          className="w-full rounded-full py-4 text-base font-semibold text-white disabled:opacity-60"
-          style={{ background: '#D4785C' }}
+          className="w-full cursor-pointer rounded-full bg-[#1A1A1A] py-4 text-sm font-medium text-white disabled:opacity-60"
         >
           {submitting ? 'Réservation...' : 'Continuer'}
         </button>

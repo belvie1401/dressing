@@ -64,44 +64,39 @@ export default function StylistDetailPage() {
 
   return (
     <div className="pb-28">
-      {/* Back + favorite */}
-      <div className="flex items-center justify-between pt-2">
-        <a
-          href="/stylists"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white"
-          style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </a>
-        <button
-          type="button"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white"
-          style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Hero photo */}
-      <div className="relative mt-3 aspect-[3/4] overflow-hidden rounded-3xl" style={{ background: 'var(--color-accent-light)' }}>
+      {/* Hero photo (mobile: full-width; desktop: rounded) */}
+      <div className="relative h-[280px] overflow-hidden md:mt-3 md:aspect-[3/4] md:h-auto md:rounded-3xl" style={{ background: 'var(--color-accent-light)' }}>
         {stylist.avatar_url ? (
-          <Image src={stylist.avatar_url} alt={stylist.name} fill className="object-cover" sizes="100vw" />
+          <Image src={stylist.avatar_url} alt={stylist.name} fill className="object-cover object-top" sizes="100vw" />
         ) : (
           <div className="flex h-full items-center justify-center text-6xl font-bold text-[#C4A882]">
             {stylist.name.charAt(0)}
           </div>
         )}
+        {/* Back + favorite overlay on hero (mobile) */}
+        <a
+          href="/stylists"
+          className="absolute left-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </a>
+        <button
+          type="button"
+          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+        </button>
       </div>
 
-      {/* Info card */}
-      <div className="mt-5 rounded-3xl bg-white p-5" style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.06)' }}>
+      {/* Info card — overlaps hero on mobile */}
+      <div className="-mt-6 relative rounded-t-3xl bg-white px-5 pt-5 md:mt-5 md:rounded-3xl md:p-5" style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.06)' }}>
         {/* Name + verified + location */}
         <div className="flex items-center gap-2">
-          <h2 className="text-xl font-bold text-[#111111]">{stylist.name}</h2>
+          <h2 className="font-serif text-lg text-[#1A1A1A] md:text-xl md:font-bold">{stylist.name}</h2>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="#3B82F6" stroke="white" strokeWidth="2">
             <circle cx="12" cy="12" r="10" />
             <polyline points="9 12 11 14 15 10" />
@@ -124,7 +119,7 @@ export default function StylistDetailPage() {
         {specs && specs.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
             {specs.map((s) => (
-              <span key={s} className="rounded-full border border-[#E0DCD5] px-3 py-1 text-xs font-medium text-[#111111]">
+              <span key={s} className="rounded-full bg-[#F2F0EC] px-3 py-1.5 text-xs text-[#1A1A1A] md:border md:border-[#E0DCD5] md:bg-transparent">
                 {s}
               </span>
             ))}
@@ -134,16 +129,16 @@ export default function StylistDetailPage() {
         {/* Stats */}
         <div className="mt-5 grid grid-cols-3 gap-3 border-t border-[#F0F0F0] pt-4">
           <div className="text-center">
-            <p className="text-lg font-bold text-[#111111]">{looksCount || 0}</p>
-            <p className="text-[11px] text-[#8A8A8A]">looks créés</p>
+            <p className="font-serif text-xl text-[#1A1A1A]">{looksCount || 0}</p>
+            <p className="mt-0.5 text-[10px] text-[#9B9B9B]">looks créés</p>
           </div>
           <div className="text-center">
-            <p className="text-lg font-bold text-[#111111]">{satisfaction || 0}%</p>
-            <p className="text-[11px] text-[#8A8A8A]">satisfaits</p>
+            <p className="font-serif text-xl text-[#1A1A1A]">{satisfaction || 0}%</p>
+            <p className="mt-0.5 text-[10px] text-[#9B9B9B]">satisfaits</p>
           </div>
           <div className="text-center">
-            <p className="text-lg font-bold text-[#111111]">{experience || '0'}</p>
-            <p className="text-[11px] text-[#8A8A8A]">ans exp.</p>
+            <p className="font-serif text-xl text-[#1A1A1A]">{experience || '0'}</p>
+            <p className="mt-0.5 text-[10px] text-[#9B9B9B]">ans exp.</p>
           </div>
         </div>
       </div>
@@ -169,7 +164,7 @@ export default function StylistDetailPage() {
           ) : lookbooks.length === 0 ? (
             <p className="text-xs text-[#8A8A8A]">Aucun lookbook public pour l&apos;instant</p>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-2 md:grid-cols-2 md:gap-3">
               {lookbooks.map((lb) => {
                 const firstPhoto =
                   lb.photos?.[0] ||
@@ -177,7 +172,7 @@ export default function StylistDetailPage() {
                   lb.outfits?.[0]?.outfit?.items?.[0]?.item?.photo_url ||
                   null;
                 return (
-                  <div key={lb.id} className="relative h-[180px] overflow-hidden rounded-2xl bg-[#EDE5DC]">
+                  <div key={lb.id} className="relative aspect-square overflow-hidden rounded-xl bg-[#EDE5DC] md:h-[180px] md:aspect-auto md:rounded-2xl">
                     {firstPhoto && (
                       <Image
                         src={firstPhoto}
@@ -205,8 +200,14 @@ export default function StylistDetailPage() {
       </div>
 
       {/* Sticky bottom contact buttons */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-[#EFEFEF] bg-white px-5 py-4">
-        <div className="mx-auto grid max-w-lg grid-cols-2 gap-3">
+      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-[#F2F0EC] bg-white px-5 py-4">
+        <a
+          href={`/stylists/${id}/booking`}
+          className="flex w-full items-center justify-center rounded-full bg-[#C6A47E] py-4 font-serif text-base font-medium text-white md:hidden"
+        >
+          Démarrer une session
+        </a>
+        <div className="mx-auto hidden max-w-lg grid-cols-2 gap-3 md:grid">
           <a
             href={`/messages/${id}`}
             className="flex items-center justify-center rounded-full border border-[#111111] py-3 text-sm font-semibold text-[#111111]"
@@ -217,7 +218,7 @@ export default function StylistDetailPage() {
             href={`/stylists/${id}/booking`}
             className="flex items-center justify-center rounded-full bg-[#D4785C] py-3 text-sm font-semibold text-white"
           >
-            R&eacute;server une session
+            Réserver une session
           </a>
         </div>
       </div>

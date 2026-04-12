@@ -217,9 +217,9 @@ export default function ClothingCard({ item, onToast, searchQuery, onRemoved, is
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
-      className="group relative cursor-pointer select-none overflow-hidden rounded-xl bg-white shadow-sm"
+      className="group relative cursor-pointer select-none overflow-hidden rounded-xl bg-white"
       style={{
-        height: '180px',
+        aspectRatio: '1 / 1',
         width: '100%',
         touchAction: has360 ? 'pan-y' : undefined,
         cursor: isDragging ? 'grabbing' : 'pointer',
@@ -239,8 +239,8 @@ export default function ClothingCard({ item, onToast, searchQuery, onRemoved, is
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
-                objectPosition: 'center 15%',
-                transform: 'scale(1.1)',
+                objectPosition: 'center 20%',
+                transform: 'scale(1.05)',
                 transformOrigin: 'center 20%',
                 opacity: showBack ? 0 : 1,
               }}
@@ -255,8 +255,8 @@ export default function ClothingCard({ item, onToast, searchQuery, onRemoved, is
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
-                objectPosition: 'center 15%',
-                transform: 'scale(1.1)',
+                objectPosition: 'center 20%',
+                transform: 'scale(1.05)',
                 transformOrigin: 'center 20%',
                 opacity: showBack ? 1 : 0,
               }}
@@ -299,9 +299,9 @@ export default function ClothingCard({ item, onToast, searchQuery, onRemoved, is
         </span>
       )}
 
-      {/* Category badge (top-right, shifts left when menu is visible) */}
+      {/* Category badge (top-right, hidden on mobile) */}
       <span
-        className="pointer-events-none absolute z-10 rounded-full bg-white/80 font-medium text-[#111111] backdrop-blur-sm"
+        className="pointer-events-none absolute z-10 hidden rounded-full bg-white/80 font-medium text-[#111111] backdrop-blur-sm md:block"
         style={{ top: '6px', right: showMenu ? '34px' : '6px', fontSize: '9px', padding: '1px 6px', transition: 'right 0.15s' }}
       >
         {categoryAbbrev[item.category] || item.category}
@@ -442,9 +442,9 @@ export default function ClothingCard({ item, onToast, searchQuery, onRemoved, is
         </span>
       )}
 
-      {/* Bottom info overlay (hidden on hover to reveal action bar) */}
+      {/* Bottom info overlay (hidden on mobile, visible on desktop until hover) */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 transition-opacity duration-200 group-hover:opacity-0"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden transition-opacity duration-200 group-hover:opacity-0 md:block"
         style={{
           background: 'linear-gradient(transparent, rgba(0,0,0,0.6))',
           padding: '4px 8px 6px',

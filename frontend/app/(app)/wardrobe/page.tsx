@@ -246,27 +246,25 @@ export default function WardrobePage() {
       {/* ============ FIXED HEADER ============ */}
       <div className="flex-shrink-0 border-b border-[#EFEFEF] bg-white">
         {/* Top row: menu + title + notif */}
-        <div className="flex items-center justify-between px-4 pt-3">
-          <div className="flex items-center gap-3">
-            <button className="flex h-10 w-10 cursor-pointer items-center justify-center" aria-label="Menu">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round">
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
-            </button>
-            <h1 className="font-serif text-xl font-semibold text-[#111111]">Mon dressing</h1>
-          </div>
-          <a href="/messages" className="flex h-10 w-10 items-center justify-center" aria-label="Messages">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <div className="flex items-center justify-between px-5 py-4">
+          <button className="flex h-9 w-9 cursor-pointer items-center justify-center" aria-label="Menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="1.5" strokeLinecap="round">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <h1 className="font-serif text-xl text-[#1A1A1A]" style={{ fontWeight: 500 }}>Mon dressing</h1>
+          <a href="/messages" className="flex h-9 w-9 items-center justify-center" aria-label="Messages">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
               <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
           </a>
         </div>
 
-        {/* Tabs row */}
-        <div className="mt-3 grid h-12 grid-cols-3">
+        {/* Tabs row — pill style */}
+        <div className="flex items-center justify-center gap-1 px-5 pb-3">
           {TABS.map((t) => {
             const active = tab === t.key;
             return (
@@ -274,10 +272,10 @@ export default function WardrobePage() {
                 key={t.key}
                 type="button"
                 onClick={() => setTab(t.key)}
-                className={`flex cursor-pointer items-center justify-center text-sm font-medium transition-colors duration-150 ${
+                className={`cursor-pointer rounded-full px-5 py-2 text-sm font-medium transition-colors duration-150 ${
                   active
-                    ? 'bg-[#111111] text-white'
-                    : 'bg-transparent text-[#8A8A8A] hover:text-[#111111]'
+                    ? 'bg-[#1A1A1A] text-white'
+                    : 'text-[#9B9B9B]'
                 }`}
               >
                 {t.label}
@@ -480,8 +478,7 @@ export default function WardrobePage() {
             </div>
           ) : (
             <div
-              className="grid gap-2"
-              style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}
+              className="grid grid-cols-3 gap-2 md:grid-cols-4 lg:grid-cols-5"
             >
               {archivedItems.map((item) => (
                 <ClothingCard
@@ -577,16 +574,17 @@ export default function WardrobePage() {
                 </div>
               )}
 
-              {/* + Ajouter button */}
+              {/* + Ajouter button — gold fixed on mobile */}
               <a
                 href="/wardrobe/add"
-                className="mt-5 flex items-center justify-center gap-2 rounded-full border border-[#111111] py-3 text-sm font-semibold text-[#111111] transition-colors hover:bg-[#111111] hover:text-white"
+                className="fixed bottom-20 left-5 right-5 z-20 flex items-center justify-center gap-2 rounded-full bg-[#C6A47E] py-4 text-sm font-medium text-white md:relative md:bottom-auto md:left-auto md:right-auto md:mt-5 md:bg-transparent md:border md:border-[#111111] md:py-3 md:text-[#111111]"
+                style={{ boxShadow: '0 4px 16px rgba(198,164,126,0.3)' }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                Ajouter
+                + Ajouter
               </a>
             </>
           )

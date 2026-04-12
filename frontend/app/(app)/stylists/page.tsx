@@ -53,8 +53,8 @@ export default function StylistsPage() {
   return (
     <div className="space-y-4 pb-10">
       {/* Header */}
-      <div className="flex items-center justify-between pt-2">
-        <h1 className="font-serif text-xl font-semibold text-[#111111]">Nos stylistes</h1>
+      <div className="flex items-center justify-between px-5 pt-2 md:px-0">
+        <h1 className="font-serif text-lg text-[#1A1A1A] md:text-xl md:font-semibold" style={{ fontWeight: 500 }}>Nos stylistes</h1>
         <a
           href="/messages"
           className="flex h-10 w-10 items-center justify-center rounded-full bg-white"
@@ -115,7 +115,61 @@ export default function StylistsPage() {
       ) : filtered.length === 0 ? (
         <div className="py-16 text-center text-sm text-[#8A8A8A]">Aucun styliste trouvé</div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+        <>
+        {/* Mobile: list layout / Desktop: grid */}
+        <div className="flex flex-col gap-0 md:hidden">
+          {filtered.map((stylist) => {
+            const sp = stylist.style_profile as Record<string, unknown> | undefined;
+            const specs = sp?.specialties as string[] | undefined;
+            const rating = sp?.rating as number | undefined;
+            const reviews = sp?.reviews as number | undefined;
+            const price = sp?.price as number | undefined;
+
+            return (
+              <a
+                key={stylist.id}
+                href={`/stylists/${stylist.id}`}
+                className="flex items-center gap-3 border-b border-[#F2F0EC] bg-white px-5 py-4"
+              >
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl">
+                  {stylist.avatar_url ? (
+                    <Image src={stylist.avatar_url} alt={stylist.name} fill className="object-cover object-top" sizes="64px" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-[#EDE5DC] text-xl font-bold text-[#C4A882]">
+                      {stylist.name.charAt(0)}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-[#1A1A1A]">{stylist.name}</p>
+                  {stylist.location && (
+                    <p className="mt-0.5 text-xs text-[#9B9B9B]">{stylist.location}</p>
+                  )}
+                  {specs && specs.length > 0 && (
+                    <p className="mt-0.5 text-xs text-[#9B9B9B]">
+                      Spécialité: {specs.slice(0, 3).join(', ')}
+                    </p>
+                  )}
+                  {rating != null && (
+                    <div className="mt-1 flex items-center gap-1">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="#C6A47E" stroke="#C6A47E" strokeWidth="1.5">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                      <span className="text-xs font-semibold">{rating}</span>
+                      {reviews != null && <span className="text-xs text-[#9B9B9B]">({reviews})</span>}
+                    </div>
+                  )}
+                  {price != null && (
+                    <p className="mt-1 text-xs font-medium text-[#1A1A1A]">À partir de {price}€</p>
+                  )}
+                </div>
+              </a>
+            );
+          })}
+        </div>
+
+        {/* Desktop: card grid */}
+        <div className="hidden grid-cols-2 gap-4 md:grid lg:grid-cols-3">
           {filtered.map((stylist) => {
             const sp = stylist.style_profile as Record<string, unknown> | undefined;
             const specs = sp?.specialties as string[] | undefined;
@@ -130,26 +184,15 @@ export default function StylistsPage() {
                 href={`/stylists/${stylist.id}`}
                 className="block cursor-pointer overflow-hidden rounded-3xl bg-white shadow-sm"
               >
-                {/* Photo area */}
                 <div className="relative h-[200px] overflow-hidden">
                   {stylist.avatar_url ? (
-                    <Image
-                      src={stylist.avatar_url}
-                      alt={stylist.name}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 50vw, 33vw"
-                    />
+                    <Image src={stylist.avatar_url} alt={stylist.name} fill className="object-cover" sizes="33vw" />
                   ) : (
                     <div className="flex h-full items-center justify-center bg-[#EDE5DC] text-4xl font-bold text-[#C4A882]">
                       {stylist.name.charAt(0)}
                     </div>
                   )}
-
-                  {/* Gradient overlay */}
                   <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-[80px] bg-gradient-to-t from-black/70 to-transparent" />
-
-                  {/* Name + city */}
                   <div className="absolute bottom-0 left-0 right-0 p-3">
                     <p className="font-serif text-base font-medium leading-tight text-white">{stylist.name}</p>
                     {stylist.location && (
@@ -162,24 +205,13 @@ export default function StylistsPage() {
                       </p>
                     )}
                   </div>
-
-                  {/* Client count badge */}
                   {clientsCount != null && (
                     <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 backdrop-blur">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                      </svg>
                       <span className="text-[10px] font-medium text-[#111111]">{clientsCount} clients</span>
                     </div>
                   )}
                 </div>
-
-                {/* Bottom info */}
                 <div className="p-3">
-                  {/* Style tags */}
                   {specs && specs.length > 0 && (
                     <div className="mb-2 flex flex-wrap gap-1">
                       {specs.slice(0, 3).map((t) => (
@@ -187,24 +219,18 @@ export default function StylistsPage() {
                       ))}
                     </div>
                   )}
-
-                  {/* Rating + price */}
                   <div className="flex items-center justify-between">
                     {rating ? (
                       <div className="flex items-center gap-1">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="#C6A47E" stroke="#C6A47E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="#C6A47E" stroke="#C6A47E" strokeWidth="1.5">
                           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                         </svg>
                         <span className="text-xs font-semibold text-[#111111]">{rating}</span>
                         {reviews && <span className="text-[10px] text-[#8A8A8A]">({reviews})</span>}
                       </div>
                     ) : <div />}
-                    {price && (
-                      <span className="text-xs font-medium text-[#C6A47E]">Dès {price}€</span>
-                    )}
+                    {price && <span className="text-xs font-medium text-[#C6A47E]">Dès {price}€</span>}
                   </div>
-
-                  {/* CTA */}
                   <div className="mt-2 w-full rounded-full bg-[#111111] py-2 text-center text-xs font-medium text-white">
                     Voir le profil
                   </div>
@@ -213,6 +239,7 @@ export default function StylistsPage() {
             );
           })}
         </div>
+        </>
       )}
     </div>
   );
