@@ -199,6 +199,15 @@ export interface AIOutfitSuggestion {
   score: number;
 }
 
+export interface StyleAnalysis {
+  dominant_style: string;
+  style_tags: string[];
+  color_palette: string[];
+  strengths: string[];
+  suggestions: string[];
+  capsule_score: number;
+}
+
 export interface StyleDNA {
   style_archetype: string;
   dominant_colors: string[];

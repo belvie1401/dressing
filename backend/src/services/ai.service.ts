@@ -6,6 +6,14 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+// Startup checks
+if (!process.env.REPLICATE_API_TOKEN) {
+  console.warn('WARNING: REPLICATE_API_TOKEN not set — virtual try-on will be unavailable');
+}
+if (!process.env.ANTHROPIC_API_KEY) {
+  console.warn('WARNING: ANTHROPIC_API_KEY not set — AI features will be unavailable');
+}
+
 export async function scanClothing(imageBase64: string): Promise<Record<string, unknown>> {
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
@@ -196,6 +204,46 @@ export async function virtualTryOn(
   }
 
   return resultUrl;
+}
+
+/**
+ * analyzeStyle — returns the "Style DNA card" shape used by the profile page.
+ * Returns:
+ *   { dominant_style, style_tags, color_palette, strengths, suggestions, capsule_score }
+ */
+export async function analyzeStyle(
+  wardrobeStats: Record<string, unknown>
+): Promise<Record<string, unknown>> {
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1024,
+    messages: [
+      {
+        role: 'user',
+        content: `Analyze this wardrobe data and return a style DNA card as JSON.
+Wardrobe stats: ${JSON.stringify(wardrobeStats)}
+
+Return ONLY valid JSON with no additional text or markdown:
+{
+  "dominant_style": "string (e.g. Minimaliste, Bohème, Classic, Streetwear, Chic Casual)",
+  "style_tags": ["string (3-6 short style tags in French, e.g. 'épuré', 'intemporel', 'polyvalent')"],
+  "color_palette": ["string (top 4 colors in French, e.g. 'Noir', 'Blanc', 'Camel', 'Bleu marine')"],
+  "strengths": ["string (2-4 wardrobe strengths in French, e.g. 'Bonne base de basiques', 'Palette cohérente')"],
+  "suggestions": ["string (2-4 improvement suggestions in French, e.g. 'Ajouter une pièce couleur')"],
+  "capsule_score": 0
+}
+capsule_score is 0-100 reflecting how close the wardrobe is to a cohesive capsule wardrobe.`,
+      },
+    ],
+  });
+
+  const textBlock = response.content.find((b) => b.type === 'text');
+  if (!textBlock || textBlock.type !== 'text') {
+    throw new Error('No text response from AI');
+  }
+
+  const raw = textBlock.text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+  return JSON.parse(raw);
 }
 
 export async function analyzeStyleDNA(
