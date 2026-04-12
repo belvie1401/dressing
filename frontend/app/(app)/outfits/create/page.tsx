@@ -358,11 +358,11 @@ export default function OutfitCreatePage() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-3 gap-2 px-5">
+        <div className="grid gap-2 px-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
           {[0, 1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
-              className="h-[140px] animate-pulse rounded-xl bg-[#F0EDE8]"
+              className="h-[180px] animate-pulse rounded-xl bg-[#F0EDE8]"
             />
           ))}
         </div>
@@ -395,7 +395,7 @@ export default function OutfitCreatePage() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-2 px-5">
+        <div className="grid gap-2 px-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
           {filteredWardrobe.map((item) => {
             const isSelected = selectedItems.includes(item.id);
             const src = item.bg_removed_url || item.photo_url;
@@ -404,7 +404,7 @@ export default function OutfitCreatePage() {
                 key={item.id}
                 type="button"
                 onClick={() => toggleItem(item.id)}
-                className={`relative h-[140px] cursor-pointer overflow-hidden rounded-xl border-2 bg-white shadow-sm transition-all ${
+                className={`relative h-[180px] cursor-pointer overflow-hidden rounded-xl border-2 bg-white shadow-sm transition-all ${
                   isSelected ? 'border-[#111111]' : 'border-transparent'
                 }`}
               >
