@@ -409,7 +409,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         {/* CENTER + RIGHT PANEL row */}
         <div className="flex min-h-0 flex-1">
           {/* ZONE 2 — CENTER CONTENT */}
-          <main className="flex min-w-0 flex-1 flex-col overflow-y-auto px-5 pb-24 lg:px-10 lg:pb-10">
+          <main className="flex min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden pb-24 lg:px-10 lg:pb-10">
             {children}
           </main>
 

@@ -242,8 +242,8 @@ export default function DashboardPage() {
 
       {/* ============ C. RECOMMANDATIONS POUR VOUS ============ */}
       <section className="mb-5 md:mb-12 px-5 md:px-0" data-tour="look-du-jour">
-        <div className="mb-3 flex items-start justify-between">
-          <div>
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div className="min-w-0">
             <h2 className="font-serif text-xl md:text-2xl text-[#111111]">
               Recommandations
             </h2>
@@ -401,10 +401,10 @@ export default function DashboardPage() {
       {/* ============ F. TWO BOTTOM CARDS ============ */}
       <section
         data-tour="cette-semaine"
-        className="grid grid-cols-1 gap-4 md:grid-cols-2 px-5 md:px-0"
+        className="grid grid-cols-1 gap-3 md:gap-4 md:grid-cols-2 px-5 md:px-0"
       >
         {/* ----- Besoin d'inspiration ----- */}
-        <div className="relative overflow-hidden rounded-2xl bg-[#EDE5DC] p-6">
+        <div className="relative overflow-hidden rounded-2xl bg-[#EDE5DC] p-4 md:p-6">
           <div className="relative z-10">
             <h3 className="font-serif text-lg text-[#111111]">
               Besoin d&rsquo;inspiration&nbsp;?
@@ -423,7 +423,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ----- Défi du mois ----- */}
-        <div className="rounded-2xl bg-[#F0EDE8] p-6">
+        <div className="rounded-2xl bg-[#F0EDE8] p-4 md:p-6">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <h3 className="font-serif text-lg text-[#111111]">
