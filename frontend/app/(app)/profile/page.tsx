@@ -155,9 +155,6 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Style DNA */}
-      <StyleDNAProfile />
-
       {/* ════════ MON AVATAR ════════ */}
       <div id="avatar" className="scroll-mt-4">
         <h2 className="font-serif text-lg text-[#111111]">Mon avatar</h2>
@@ -285,6 +282,9 @@ export default function ProfilePage() {
           className="hidden"
         />
       </div>
+
+      {/* Style DNA */}
+      <StyleDNAProfile />
 
       {/* Wardrobe stats */}
       <div className="rounded-2xl bg-white p-4 shadow-sm">

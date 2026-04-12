@@ -145,6 +145,7 @@ export async function login(req: Request, res: Response): Promise<void> {
           referral_count: user.referral_count,
           free_months_earned: user.free_months_earned,
           avatar_url: user.avatar_url,
+          avatar_body_url: user.avatar_body_url,
           location: user.location,
         },
         token,
