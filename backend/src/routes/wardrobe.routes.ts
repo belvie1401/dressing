@@ -11,6 +11,11 @@ import {
   getItemsCount,
   getWardrobeStats,
   tryOnItem,
+  getComments,
+  addComment,
+  updateComment,
+  deleteComment,
+  toggleFavorite,
 } from '../controllers/wardrobe.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { upload } from '../middleware/upload.middleware';
@@ -40,5 +45,10 @@ router.put('/:id', photoFields, updateItem);
 router.delete('/:id', deleteItem);
 router.post('/:id/wear', markWorn);
 router.put('/:id/archive', archiveItem);
+router.get('/:id/comments', getComments);
+router.post('/:id/comments', addComment);
+router.put('/:id/comments/:commentId', updateComment);
+router.delete('/:id/comments/:commentId', deleteComment);
+router.put('/:id/favorite', toggleFavorite);
 
 export default router;

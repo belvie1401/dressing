@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import type { ClothingItem } from '@/types';
+import type { ClothingItem, ClothingComment } from '@/types';
 import { api } from '@/lib/api';
 import { useWardrobeStore } from '@/lib/store';
 import WearBadge from '@/components/wardrobe/WearBadge';
@@ -218,6 +218,9 @@ export default function WardrobeItemPage() {
         </div>
       </div>
 
+      {/* ============ STYLIST FEEDBACK SECTION ============ */}
+      <StylistFeedback itemId={item.id} comments={item.comments} />
+
       {/* Toast */}
       {toast && (
         <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#111111] px-5 py-2.5 text-sm font-medium text-white shadow-lg">
@@ -226,4 +229,114 @@ export default function WardrobeItemPage() {
       )}
     </div>
   );
+}
+
+// ─── Stylist Feedback sub-component ─────────────────────────────────────────
+function StylistFeedback({
+  itemId,
+  comments: initialComments,
+}: {
+  itemId: string;
+  comments?: ClothingComment[];
+}) {
+  const [comments, setComments] = useState<ClothingComment[]>(initialComments || []);
+  const [hasStylist, setHasStylist] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // Check if user has an active stylist connection
+    api
+      .get<Array<{ status: string }>>('/stylists/my-stylist')
+      .then((res) => {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          setHasStylist(true);
+        } else {
+          setHasStylist(false);
+        }
+      })
+      .catch(() => setHasStylist(false));
+
+    // Fetch comments if not provided via initial load
+    if (!initialComments || initialComments.length === 0) {
+      api
+        .get<ClothingComment[]>(`/wardrobe/${itemId}/comments`)
+        .then((res) => {
+          if (res.success && Array.isArray(res.data)) {
+            setComments(res.data);
+          }
+        });
+    }
+  }, [itemId, initialComments]);
+
+  return (
+    <div className="mt-6">
+      <h3 className="px-5 font-serif text-base text-[#111111]">Avis de votre styliste</h3>
+
+      {comments.length === 0 && hasStylist === false ? (
+        <div className="mx-5 mt-3 rounded-2xl bg-[#F0EDE8] p-4">
+          <p className="text-xs leading-relaxed text-[#8A8A8A]">
+            Connectez-vous &agrave; un styliste pour recevoir des conseils personnalis&eacute;s sur vos pi&egrave;ces.
+          </p>
+          <a href="/stylists" className="mt-2 inline-block text-xs text-[#C6A47E]">
+            Trouver un styliste
+          </a>
+        </div>
+      ) : comments.length === 0 ? (
+        <p className="mt-2 px-5 text-xs text-[#8A8A8A]">Aucun commentaire pour l&apos;instant.</p>
+      ) : (
+        <div className="mt-3 flex flex-col gap-3 px-5">
+          {comments.map((c) => (
+            <div key={c.id} className="rounded-2xl bg-white p-4 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#EDE5DC]">
+                  {c.stylist?.avatar_url ? (
+                    <Image
+                      src={c.stylist.avatar_url}
+                      alt={c.stylist.name}
+                      width={32}
+                      height={32}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xs font-semibold text-[#C6A47E]">
+                      {c.stylist?.name?.charAt(0) || 'S'}
+                    </span>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between">
+                    <p className="text-xs font-semibold text-[#111111]">{c.stylist?.name || 'Styliste'}</p>
+                    <span className="text-[10px] text-[#CFCFCF]">{formatCommentDate(c.created_at)}</span>
+                  </div>
+                  <p className="mt-1 text-sm leading-relaxed text-[#8A8A8A]">{c.content}</p>
+                </div>
+              </div>
+              {c.is_favorite && (
+                <div className="mt-3 flex items-center gap-1">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#D4785C" stroke="#D4785C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                  <span className="text-xs font-medium text-[#D4785C]">
+                    Coup de coeur de {c.stylist?.name || 'votre styliste'}
+                  </span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function formatCommentDate(iso: string): string {
+  const then = new Date(iso).getTime();
+  const now = Date.now();
+  const diffMin = Math.round((now - then) / 60000);
+  if (diffMin < 1) return "\u00c0 l'instant";
+  if (diffMin < 60) return `Il y a ${diffMin} min`;
+  const diffH = Math.round(diffMin / 60);
+  if (diffH < 24) return `Il y a ${diffH} h`;
+  const diffD = Math.round(diffH / 24);
+  if (diffD < 30) return `Il y a ${diffD} j`;
+  return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 }

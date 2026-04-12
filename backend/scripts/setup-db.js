@@ -277,6 +277,26 @@ ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "archived" BOOLEAN NOT NULL 
 ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "archived_at" TIMESTAMP(3);
 CREATE INDEX IF NOT EXISTS "ClothingItem_user_id_archived_idx" ON "ClothingItem"("user_id", "archived");
 
+-- Stylist favorite
+ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "stylist_favorite" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "stylist_favorite_by" TEXT;
+
+-- Stylist comments on clothing items
+CREATE TABLE IF NOT EXISTS "ClothingComment" (
+  "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
+  "item_id" TEXT NOT NULL,
+  "stylist_id" TEXT NOT NULL,
+  "content" TEXT NOT NULL,
+  "is_favorite" BOOLEAN NOT NULL DEFAULT false,
+  "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "ClothingComment_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "ClothingComment_item_id_fkey" FOREIGN KEY ("item_id") REFERENCES "ClothingItem"("id") ON DELETE CASCADE,
+  CONSTRAINT "ClothingComment_stylist_id_fkey" FOREIGN KEY ("stylist_id") REFERENCES "User"("id") ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS "ClothingComment_item_id_idx" ON "ClothingComment"("item_id");
+CREATE INDEX IF NOT EXISTS "ClothingComment_stylist_id_idx" ON "ClothingComment"("stylist_id");
+
 -- Password reset tokens
 CREATE TABLE IF NOT EXISTS "PasswordReset" (
   "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,

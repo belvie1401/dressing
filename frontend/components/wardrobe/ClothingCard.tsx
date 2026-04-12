@@ -431,6 +431,34 @@ export default function ClothingCard({ item, onToast, searchQuery, onRemoved }: 
         </div>
       )}
 
+      {/* Stylist favorite heart badge */}
+      {item.stylist_favorite && (
+        <span
+          className="group/heart pointer-events-auto absolute z-10 flex h-7 w-7 items-center justify-center rounded-full bg-[#D4785C] shadow-md"
+          style={{ bottom: '36px', right: '8px' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+          <span className="pointer-events-none absolute bottom-full right-0 mb-1 hidden whitespace-nowrap rounded-full bg-[#111111] px-3 py-1 text-[10px] text-white group-hover/heart:block">
+            Coup de coeur de votre styliste
+          </span>
+        </span>
+      )}
+
+      {/* Comment count badge */}
+      {(item.comments?.length ?? 0) > 0 && (
+        <span
+          className="pointer-events-none absolute z-10 flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 backdrop-blur"
+          style={{ bottom: '8px', right: '8px' }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          <span className="text-[10px] font-medium text-[#111111]">{item.comments!.length}</span>
+        </span>
+      )}
+
       {/* Bottom info overlay (hidden on hover to reveal action bar) */}
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 z-10 transition-opacity duration-200 group-hover:opacity-0"

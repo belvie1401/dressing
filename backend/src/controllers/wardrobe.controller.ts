@@ -177,6 +177,12 @@ export async function getItem(req: Request, res: Response): Promise<void> {
         outfit_items: {
           include: { outfit: true },
         },
+        comments: {
+          include: {
+            stylist: { select: { id: true, name: true, avatar_url: true } },
+          },
+          orderBy: { created_at: 'desc' },
+        },
       },
     });
 
@@ -880,5 +886,200 @@ export async function archiveItem(req: Request, res: Response): Promise<void> {
   } catch (error) {
     console.error('Archive item error:', error);
     res.status(500).json({ success: false, error: "Erreur lors de l'archivage" });
+  }
+}
+
+// ─── Stylist comments + favorites ───────────────────────────────────────────
+
+/**
+ * Verifies the requesting user is a stylist with an ACTIVE connection
+ * to the owner of the given clothing item. Returns the item if valid.
+ */
+async function verifyStylistAccess(
+  userId: string,
+  itemId: string,
+): Promise<{ item: any; error?: string; status?: number } | null> {
+  const item = await prisma.clothingItem.findUnique({
+    where: { id: itemId },
+    select: { id: true, user_id: true },
+  });
+  if (!item) return { item: null, error: 'V\u00eatement introuvable', status: 404 };
+
+  const connection = await prisma.stylistClient.findFirst({
+    where: {
+      stylist_id: userId,
+      client_id: item.user_id,
+      status: 'ACTIVE',
+    },
+  });
+  if (!connection) return { item: null, error: 'Acc\u00e8s non autoris\u00e9', status: 403 };
+
+  return { item };
+}
+
+/**
+ * GET /api/wardrobe/:id/comments
+ */
+export async function getComments(req: Request, res: Response): Promise<void> {
+  try {
+    const { id } = req.params as { id: string };
+    const comments = await prisma.clothingComment.findMany({
+      where: { item_id: id },
+      include: {
+        stylist: { select: { id: true, name: true, avatar_url: true } },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+    res.json({ success: true, data: comments });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Erreur serveur' });
+  }
+}
+
+/**
+ * POST /api/wardrobe/:id/comments
+ */
+export async function addComment(req: Request, res: Response): Promise<void> {
+  try {
+    const { id } = req.params as { id: string };
+    const userId = req.user!.userId;
+    const { content, is_favorite } = req.body;
+
+    if (!content || typeof content !== 'string' || !content.trim()) {
+      res.status(400).json({ success: false, error: 'Contenu requis' });
+      return;
+    }
+
+    const access = await verifyStylistAccess(userId, id);
+    if (access?.error) {
+      res.status(access.status || 403).json({ success: false, error: access.error });
+      return;
+    }
+
+    const comment = await prisma.clothingComment.create({
+      data: {
+        item_id: id,
+        stylist_id: userId,
+        content: content.trim(),
+        is_favorite: !!is_favorite,
+      },
+      include: {
+        stylist: { select: { id: true, name: true, avatar_url: true } },
+      },
+    });
+
+    // If marked as favorite, also set the stylist_favorite flag on the item
+    if (is_favorite) {
+      await prisma.clothingItem.update({
+        where: { id },
+        data: { stylist_favorite: true, stylist_favorite_by: userId },
+      });
+    }
+
+    res.status(201).json({ success: true, data: comment });
+  } catch (error) {
+    console.error('Add comment error:', error);
+    res.status(500).json({ success: false, error: 'Erreur serveur' });
+  }
+}
+
+/**
+ * PUT /api/wardrobe/:id/comments/:commentId
+ */
+export async function updateComment(req: Request, res: Response): Promise<void> {
+  try {
+    const { commentId } = req.params as { id: string; commentId: string };
+    const userId = req.user!.userId;
+    const { content, is_favorite } = req.body;
+
+    const existing = await prisma.clothingComment.findUnique({
+      where: { id: commentId },
+    });
+    if (!existing) {
+      res.status(404).json({ success: false, error: 'Commentaire introuvable' });
+      return;
+    }
+    if (existing.stylist_id !== userId) {
+      res.status(403).json({ success: false, error: 'Non autoris\u00e9' });
+      return;
+    }
+
+    const updated = await prisma.clothingComment.update({
+      where: { id: commentId },
+      data: {
+        ...(content !== undefined && { content: content.trim() }),
+        ...(is_favorite !== undefined && { is_favorite }),
+      },
+      include: {
+        stylist: { select: { id: true, name: true, avatar_url: true } },
+      },
+    });
+
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Erreur serveur' });
+  }
+}
+
+/**
+ * DELETE /api/wardrobe/:id/comments/:commentId
+ */
+export async function deleteComment(req: Request, res: Response): Promise<void> {
+  try {
+    const { commentId } = req.params as { id: string; commentId: string };
+    const userId = req.user!.userId;
+
+    const existing = await prisma.clothingComment.findUnique({
+      where: { id: commentId },
+    });
+    if (!existing) {
+      res.status(404).json({ success: false, error: 'Commentaire introuvable' });
+      return;
+    }
+    if (existing.stylist_id !== userId) {
+      res.status(403).json({ success: false, error: 'Non autoris\u00e9' });
+      return;
+    }
+
+    await prisma.clothingComment.delete({ where: { id: commentId } });
+    res.json({ success: true, data: { message: 'Supprim\u00e9' } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Erreur serveur' });
+  }
+}
+
+/**
+ * PUT /api/wardrobe/:id/favorite
+ * Stylist toggles their "coup de coeur" on a client's item.
+ */
+export async function toggleFavorite(req: Request, res: Response): Promise<void> {
+  try {
+    const { id } = req.params as { id: string };
+    const userId = req.user!.userId;
+
+    const access = await verifyStylistAccess(userId, id);
+    if (access?.error) {
+      res.status(access.status || 403).json({ success: false, error: access.error });
+      return;
+    }
+
+    const item = await prisma.clothingItem.findUnique({
+      where: { id },
+      select: { stylist_favorite: true },
+    });
+
+    const newVal = !item?.stylist_favorite;
+    const updated = await prisma.clothingItem.update({
+      where: { id },
+      data: {
+        stylist_favorite: newVal,
+        stylist_favorite_by: newVal ? userId : null,
+      },
+    });
+
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    console.error('Toggle favorite error:', error);
+    res.status(500).json({ success: false, error: 'Erreur serveur' });
   }
 }
