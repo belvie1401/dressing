@@ -39,6 +39,12 @@ export default function DashboardPage() {
   // Tutorial visibility
   const [showTutorial, setShowTutorial] = useState(false);
 
+  // Wardrobe preview
+  const [wardrobeItems, setWardrobeItems] = useState<any[]>([]);
+
+  // Next session
+  const [nextSession, setNextSession] = useState<any>(null);
+
   useEffect(() => {
     if (!_hasHydrated) return;
     if (!tutorials.client_dashboard) {
@@ -98,6 +104,28 @@ export default function DashboardPage() {
     })
       .then((r) => r.json())
       .then((d) => setRecommendations(d.data || []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('lien_token');
+    const API = process.env.NEXT_PUBLIC_API_URL;
+    fetch(`${API}/api/wardrobe?limit=4&sort=recent`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((d) => setWardrobeItems(d.data || []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('lien_token');
+    const API = process.env.NEXT_PUBLIC_API_URL;
+    fetch(`${API}/api/calendar?upcoming=true&limit=1`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((d) => setNextSession(d.data?.[0] || null))
       .catch(() => {});
   }, []);
 
@@ -309,7 +337,93 @@ export default function DashboardPage() {
         )}
       </section>
 
-      {/* ============ D. TWO BOTTOM CARDS ============ */}
+      {/* ============ D. WARDROBE PREVIEW ============ */}
+      <div className="px-5 mb-5">
+        <div className="rounded-2xl bg-white p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-serif text-base text-[#111111]">Mon Dressing</h2>
+            <span className="text-sm text-[#9B9B9B]">{stats.wardrobe} pièces</span>
+          </div>
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            {wardrobeItems.slice(0, 4).map((item: any) => {
+              const photo = item.bg_removed_url || item.photo_url || null;
+              return (
+                <div
+                  key={item.id}
+                  className="h-[95px] w-[80px] flex-shrink-0 overflow-hidden rounded-xl bg-[#F7F5F2]"
+                >
+                  {photo && (
+                    <img
+                      src={photo}
+                      alt={item.name || ''}
+                      className="h-full w-full object-cover"
+                      style={{ objectPosition: 'center 15%' }}
+                    />
+                  )}
+                </div>
+              );
+            })}
+            <Link
+              href="/wardrobe/add"
+              className="flex h-[95px] w-[80px] flex-shrink-0 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#CFCFCF] bg-[#F2F0EB]"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span className="mt-1 text-[10px] text-[#9B9B9B]">+ Ajouter</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* ============ E. PROCHAINE SESSION ============ */}
+      <div className="px-5 mb-6">
+        <div className="rounded-2xl bg-[#111111] p-4">
+          {!nextSession ? (
+            <>
+              <p className="text-[9px] uppercase tracking-widest text-[#C6A47E]">PROCHAINE SESSION</p>
+              <p className="mt-1 font-serif text-xl text-white">Aucune session prévue</p>
+              <p className="mt-1 text-xs text-[#9B9B9B]">Réservez un rendez-vous avec un styliste.</p>
+              <Link
+                href="/stylists"
+                className="mt-3 inline-block rounded-full bg-white px-4 py-2.5 text-xs font-semibold text-[#111111]"
+              >
+                Trouvez un styliste
+              </Link>
+            </>
+          ) : (
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <p className="text-[9px] uppercase tracking-widest text-[#C6A47E]">PROCHAINE SESSION</p>
+                <p className="mt-1 font-serif text-xl text-white">
+                  {new Date(nextSession.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </p>
+                <p className="mt-1 text-sm text-white">
+                  {nextSession.time || ''}{nextSession.stylist?.name ? ` · ${nextSession.stylist.name}` : ''}
+                </p>
+                <Link
+                  href="/calendar"
+                  className="mt-3 inline-block rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white"
+                >
+                  Voir les détails
+                </Link>
+              </div>
+              {nextSession.stylist?.avatar_url && (
+                <div className="ml-4 h-14 w-14 flex-shrink-0 overflow-hidden rounded-full ring-2 ring-[#C6A47E]">
+                  <img
+                    src={nextSession.stylist.avatar_url}
+                    alt={nextSession.stylist.name || ''}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ============ F. TWO BOTTOM CARDS ============ */}
       <section
         data-tour="cette-semaine"
         className="grid grid-cols-1 gap-4 md:grid-cols-2 px-5 md:px-0"
