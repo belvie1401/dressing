@@ -148,32 +148,6 @@ export default function DashboardPage() {
       {/* ============ HELP BUTTON ============ */}
       <TutorialHelpButton onRestart={restartTutorial} />
 
-      {/* ============ MOBILE TOP BAR ============ */}
-      <div className="flex items-center justify-between px-5 pt-6 pb-4 md:hidden">
-        <button type="button" className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-white shadow-sm" aria-label="Menu">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-        </button>
-        <div className="flex items-center gap-3">
-          <button type="button" className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm" aria-label="Notifications">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-            </svg>
-          </button>
-          <Link href="/wardrobe/add" className="flex h-12 items-center gap-2 rounded-full bg-[#111111] px-5 text-sm font-medium text-white">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            Ajouter
-          </Link>
-        </div>
-      </div>
-
       {/* ============ A. GREETING ============ */}
       <div className="px-5 mt-2 mb-4 md:px-0 md:mt-0 md:mb-6">
         <h1 className="font-serif text-4xl md:text-4xl font-semibold leading-tight text-[#111111]">
