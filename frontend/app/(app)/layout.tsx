@@ -77,7 +77,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // /dashboard and /stylist-dashboard have their own dedicated layouts
   // (sidebar + main + right panel/top bar + mobile nav fallback)
   if (pathname === '/dashboard' || pathname === '/stylist-dashboard') {
-    return <GlobalSearchProvider>{children}</GlobalSearchProvider>;
+    return (
+      <GlobalSearchProvider>
+        {children}
+        <BottomNav />
+      </GlobalSearchProvider>
+    );
   }
 
   // Other stylist-facing routes reuse the client shell but skip the mobile bottom nav

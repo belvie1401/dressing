@@ -14,21 +14,25 @@ const clientTabs: Tab[] = [
   {
     href: '/dashboard',
     label: 'Accueil',
-    icon: (active) => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill={active ? '#1A1A1A' : 'none'} stroke={active ? '#1A1A1A' : '#C4C4C4'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-        {!active && <polyline points="9 22 9 12 15 12 15 22" />}
-      </svg>
-    ),
+    icon: (active) =>
+      active ? (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="#111111">
+          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+        </svg>
+      ) : (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+      ),
   },
   {
     href: '/wardrobe',
     label: 'Dressing',
     icon: (active) => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill={active ? '#1A1A1A' : 'none'} stroke={active ? '#1A1A1A' : '#C4C4C4'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2C12 2 8 2 8 6H4l1 14h14l1-14h-4c0-4-4-4-4-4z" />
-        <line x1="8" y1="6" x2="8" y2="8" />
-        <line x1="16" y1="6" x2="16" y2="8" />
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke={active ? '#111111' : '#9B9B9B'} strokeWidth={active ? '2' : '1.5'} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.38-1 1.72V8l8 6H3l8-6V5.72A2 2 0 0 1 12 2z" />
+        <path d="M3 14v5a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-5" />
       </svg>
     ),
   },
@@ -36,9 +40,9 @@ const clientTabs: Tab[] = [
     href: '/stylists',
     label: 'Styliste',
     icon: (active) => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#1A1A1A' : '#C4C4C4'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke={active ? '#111111' : '#9B9B9B'} strokeWidth={active ? '2' : '1.5'} strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="7" r="4" />
+        <path d="M4 21v-1a8 8 0 0 1 16 0v1" />
       </svg>
     ),
   },
@@ -46,7 +50,7 @@ const clientTabs: Tab[] = [
     href: '/messages',
     label: 'Messages',
     icon: (active) => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill={active ? '#1A1A1A' : 'none'} stroke={active ? '#1A1A1A' : '#C4C4C4'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill={active ? '#111111' : 'none'} stroke={active ? '#111111' : '#9B9B9B'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </svg>
     ),
@@ -55,10 +59,10 @@ const clientTabs: Tab[] = [
     href: '/profile',
     label: 'Profil',
     icon: (active) => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#1A1A1A' : '#C4C4C4'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" fill={active ? '#1A1A1A' : 'none'} />
-        <path d="M12 14c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill={active ? 'white' : 'none'} stroke={active ? 'white' : '#C4C4C4'} />
-        <path d="M6 20.5c0-2.5 2.5-4.5 6-4.5s6 2 6 4.5" stroke={active ? 'white' : '#C4C4C4'} fill="none" />
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke={active ? '#111111' : '#9B9B9B'} strokeWidth={active ? '2' : '1.5'} strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="10" r="3" />
+        <path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662" />
       </svg>
     ),
   },
@@ -73,18 +77,23 @@ const stylistLeftTabs: Tab[] = [
   {
     href: '/stylist-dashboard',
     label: 'Accueil',
-    icon: (active) => (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#111111' : 'none'} stroke={active ? '#111111' : '#8A8A8A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-        {!active && <polyline points="9 22 9 12 15 12 15 22" />}
-      </svg>
-    ),
+    icon: (active) =>
+      active ? (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="#111111">
+          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+        </svg>
+      ) : (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+      ),
   },
   {
     href: '/my-clients',
     label: 'Clientes',
     icon: (active) => (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#111111' : '#8A8A8A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke={active ? '#111111' : '#9B9B9B'} strokeWidth={active ? '2' : '1.5'} strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
         <circle cx="9" cy="7" r="4" />
         <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -99,7 +108,7 @@ const stylistRightTabs: Tab[] = [
     href: '/messages',
     label: 'Messages',
     icon: (active) => (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#111111' : 'none'} stroke={active ? '#111111' : '#8A8A8A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill={active ? '#111111' : 'none'} stroke={active ? '#111111' : '#9B9B9B'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </svg>
     ),
@@ -108,10 +117,10 @@ const stylistRightTabs: Tab[] = [
     href: '/stylist-profile',
     label: 'Profil',
     icon: (active) => (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#111111' : '#8A8A8A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" fill={active ? '#111111' : 'none'} />
-        <path d="M12 14c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill={active ? 'white' : 'none'} stroke={active ? 'white' : '#8A8A8A'} />
-        <path d="M6 20.5c0-2.5 2.5-4.5 6-4.5s6 2 6 4.5" stroke={active ? 'white' : '#8A8A8A'} fill="none" />
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke={active ? '#111111' : '#9B9B9B'} strokeWidth={active ? '2' : '1.5'} strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="10" r="3" />
+        <path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662" />
       </svg>
     ),
   },
@@ -137,11 +146,9 @@ export default function BottomNav() {
   const renderTab = (tab: Tab) => {
     const active = checkActive(tab.href);
     return (
-      <a key={tab.href} href={tab.href} className="flex flex-col items-center gap-0.5">
-        <div className="flex h-8 w-8 items-center justify-center">
-          {tab.icon(!!active)}
-        </div>
-        <span className={`text-[10px] mt-0.5 ${active ? 'text-[#1A1A1A]' : 'text-[#C4C4C4]'}`}>
+      <a key={tab.href} href={tab.href} className="flex flex-col items-center gap-1 cursor-pointer py-2 px-3">
+        {tab.icon(!!active)}
+        <span className={`text-[11px] ${active ? 'text-[#111111] font-medium' : 'text-[#9B9B9B]'}`}>
           {tab.label}
         </span>
       </a>
@@ -149,8 +156,8 @@ export default function BottomNav() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#F2F0EC] bg-white pb-safe lg:hidden">
-      <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#F2F0EB] bg-white pb-safe lg:hidden">
+      <div className="flex h-[72px] items-center justify-around px-2">
         {allTabs.map(renderTab)}
       </div>
     </nav>
