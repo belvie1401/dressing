@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { StylistClient, User, LookbookType } from '@/types';
 import { api } from '@/lib/api';
@@ -71,6 +71,10 @@ const PRESET_TAGS = [
 ];
 
 export default function CreateLookbookPage() {
+  return <Suspense><CreateLookbookInner /></Suspense>;
+}
+
+function CreateLookbookInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const presetClientId = searchParams.get('client') || '';

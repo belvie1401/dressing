@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -24,6 +24,10 @@ interface ItemTryOnRecord {
  * Replicate calls would all fail with NO_AVATAR anyway.
  */
 export default function OutfitPreviewPage() {
+  return <Suspense><OutfitPreviewInner /></Suspense>;
+}
+
+function OutfitPreviewInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const user = useAuthStore((s) => s.user);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
@@ -23,6 +23,10 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export default function WardrobePairPage() {
+  return <Suspense><WardrobePairInner /></Suspense>;
+}
+
+function WardrobePairInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
 

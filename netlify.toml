@@ -5,3 +5,33 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# Service worker: must not be cached by CDN so browsers always get the latest
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/workbox-*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Web app manifest
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Content-Type = "application/manifest+json"
+
+# Icons — long cache, content-addressed filenames
+[[headers]]
+  for = "/icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Splash screens
+[[headers]]
+  for = "/splash/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

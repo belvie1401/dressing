@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/store';
@@ -146,6 +146,14 @@ const STYLIST_PLANS: PlanDef[] = [
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function PricingPage() {
+  return (
+    <Suspense>
+      <PricingInner />
+    </Suspense>
+  );
+}
+
+function PricingInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const user = useAuthStore((s) => s.user);
