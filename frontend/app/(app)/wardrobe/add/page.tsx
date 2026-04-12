@@ -376,7 +376,7 @@ export default function WardrobeAddPage() {
               ))}
             </div>
             <p className="mt-2 font-serif text-sm text-[#111111]">Plusieurs vêtements</p>
-            <p className="mt-1 text-xs text-[#8A8A8A]">Jusqu&rsquo;à 20 photos</p>
+            <p className="mt-1 text-xs text-[#8A8A8A]">Tri devant / dos rapide</p>
           </div>
         </button>
       </div>

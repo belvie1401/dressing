@@ -3,32 +3,11 @@
 import { useCallback, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
-import type { Category, Season, Occasion, ClothingItem } from '@/types';
+import type { Category, ClothingItem } from '@/types';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
-const MAX_PHOTOS = 20;
+const MAX_PHOTOS = 30;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-const ANALYSIS_DELAY_MS = 500;
-
-const COLOR_HEXES: Record<string, string> = {
-  Blanc: '#FFFFFF',
-  Noir: '#111111',
-  Gris: '#9CA3AF',
-  Beige: '#E8D9C4',
-  Marron: '#6B4423',
-  Rouge: '#DC2626',
-  Rose: '#F9A8D4',
-  Orange: '#F97316',
-  Jaune: '#FACC15',
-  Vert: '#16A34A',
-  Bleu: '#2563EB',
-  'Bleu marine': '#1E3A8A',
-  Violet: '#7C3AED',
-  Camel: '#C19A6B',
-  Kaki: '#78866B',
-  Multicolore: '#999999',
-};
-const COLOR_NAMES = Object.keys(COLOR_HEXES);
 
 const CATEGORIES: Array<{ value: Category; label: string }> = [
   { value: 'TOP', label: 'Haut' },
@@ -39,55 +18,17 @@ const CATEGORIES: Array<{ value: Category; label: string }> = [
   { value: 'ACCESSORY', label: 'Accessoire' },
 ];
 
-const SEASONS: Array<{ value: Season; label: string }> = [
-  { value: 'SUMMER', label: 'Été' },
-  { value: 'WINTER', label: 'Hiver' },
-  { value: 'ALL', label: 'Toutes' },
-];
-
-const OCCASIONS: Array<{ value: Occasion; label: string }> = [
-  { value: 'CASUAL', label: 'Décontracté' },
-  { value: 'WORK', label: 'Travail' },
-  { value: 'EVENING', label: 'Soirée' },
-  { value: 'SPORT', label: 'Sport' },
-];
-
 // ─── Types ───────────────────────────────────────────────────────────────────
-type AIScan = {
-  name?: string;
-  category?: Category;
-  primary_color?: string;
-  colors?: string[];
-  material?: string;
-  season?: Season;
-  occasion?: Occasion;
-  brand?: string | null;
-  style_tags?: string[];
-};
-
-type PhotoStatus = 'pending' | 'analyzing' | 'done' | 'error' | 'skipped';
-
-interface BulkPhoto {
+interface BulkItem {
   id: string;
-  file: File;
-  preview: string;
-  // Optional back photo (unlocks 360° view on the saved item)
+  frontFile: File;
+  frontPreview: string;
   backFile?: File;
   backPreview?: string;
-  status: PhotoStatus;
-  errorMessage?: string;
-  ai?: AIScan;
-  // Editable fields (start as AI defaults)
-  name: string;
   category: Category;
-  colors: string[];
-  material: string;
-  season: Season;
-  occasion: Occasion;
-  brand: string;
 }
 
-type Phase = 'select' | 'analyzing' | 'review' | 'saving';
+type Phase = 'select' | 'triage' | 'saving';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function readDataUrl(file: File): Promise<string> {
@@ -99,64 +40,6 @@ function readDataUrl(file: File): Promise<string> {
   });
 }
 
-/**
- * Compress + transcode a user-supplied image to a small JPEG and return its
- * base64 payload (without the data: prefix). Used for the AI scan call so the
- * request body stays well under the Express JSON limit and the server-side
- * `media_type: 'image/jpeg'` matches the actual bytes — even for source PNGs
- * or HEIC files.
- */
-async function compressImageToBase64(
-  file: File,
-  maxDim = 1024,
-  quality = 0.85
-): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const objectUrl = URL.createObjectURL(file);
-    const img = new window.Image();
-    img.onload = () => {
-      try {
-        let { width, height } = img;
-        if (width > maxDim || height > maxDim) {
-          if (width >= height) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('Canvas non disponible'));
-          return;
-        }
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        resolve(dataUrl.split(',')[1] ?? '');
-      } catch (err) {
-        reject(err);
-      } finally {
-        URL.revokeObjectURL(objectUrl);
-      }
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(objectUrl);
-      reject(new Error('Image illisible'));
-    };
-    img.src = objectUrl;
-  });
-}
-
-function normalizeColor(raw: string): string | null {
-  const t = raw.trim().toLowerCase();
-  if (!t) return null;
-  return COLOR_NAMES.find((n) => n.toLowerCase() === t) ?? null;
-}
-
 function makeId(): string {
   return Math.random().toString(36).slice(2, 11);
 }
@@ -166,19 +49,20 @@ export default function BulkUploadFlow() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [photos, setPhotos] = useState<BulkPhoto[]>([]);
+  const [items, setItems] = useState<BulkItem[]>([]);
   const [phase, setPhase] = useState<Phase>('select');
-  const [analyzeIndex, setAnalyzeIndex] = useState(0);
   const [saveIndex, setSaveIndex] = useState(0);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  // The id of the item the user has tapped to start a pairing flow.
+  // The next item they tap becomes its back photo.
+  const [pairingSource, setPairingSource] = useState<string | null>(null);
 
   // ─── File selection ──────────────────────────────────────────────────────
   const addFiles = useCallback(
     async (incoming: File[]) => {
       setError(null);
-      const remaining = MAX_PHOTOS - photos.length;
+      const remaining = MAX_PHOTOS - items.length;
       if (remaining <= 0) {
         setError(`Vous avez atteint la limite de ${MAX_PHOTOS} photos.`);
         return;
@@ -194,24 +78,17 @@ export default function BulkUploadFlow() {
         })
         .slice(0, remaining);
 
-      const next: BulkPhoto[] = await Promise.all(
+      const next: BulkItem[] = await Promise.all(
         accepted.map(async (file) => ({
           id: makeId(),
-          file,
-          preview: await readDataUrl(file),
-          status: 'pending' as PhotoStatus,
-          name: '',
+          frontFile: file,
+          frontPreview: await readDataUrl(file),
           category: 'TOP' as Category,
-          colors: [],
-          material: '',
-          season: 'ALL' as Season,
-          occasion: 'CASUAL' as Occasion,
-          brand: '',
         }))
       );
-      setPhotos((prev) => [...prev, ...next]);
+      setItems((prev) => [...prev, ...next]);
     },
-    [photos.length]
+    [items.length]
   );
 
   const onFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -225,175 +102,71 @@ export default function BulkUploadFlow() {
     if (e.dataTransfer.files) addFiles(Array.from(e.dataTransfer.files));
   };
 
-  const removePhoto = (id: string) => {
-    setPhotos((prev) => prev.filter((p) => p.id !== id));
+  const removeItem = (id: string) => {
+    setItems((prev) => prev.filter((p) => p.id !== id));
+    if (pairingSource === id) setPairingSource(null);
   };
 
   const clearAll = () => {
-    setPhotos([]);
+    setItems([]);
     setError(null);
+    setPairingSource(null);
   };
 
-  // ─── Per-photo AI scan (used by both the loop and single-item retry) ─────
-  const analyzeOne = useCallback(async (photoId: string): Promise<boolean> => {
-    setPhotos((prev) =>
+  // ─── Pairing logic ───────────────────────────────────────────────────────
+  /**
+   * Click-to-pair: tap one card to mark it as the source, then tap another
+   * to merge that other card's front photo into the source as a back photo.
+   * The merged card disappears from the grid.
+   */
+  const handleCardTap = (id: string) => {
+    setError(null);
+    if (pairingSource === null) {
+      setPairingSource(id);
+      return;
+    }
+    if (pairingSource === id) {
+      setPairingSource(null);
+      return;
+    }
+    setItems((prev) => {
+      const source = prev.find((p) => p.id === pairingSource);
+      const target = prev.find((p) => p.id === id);
+      if (!source || !target) return prev;
+      if (source.backFile) {
+        setError(
+          "Cet article a déjà une photo de dos. Retirez-la avant d'en ajouter une autre.",
+        );
+        return prev;
+      }
+      const merged: BulkItem = {
+        ...source,
+        backFile: target.frontFile,
+        backPreview: target.frontPreview,
+      };
+      return prev
+        .filter((p) => p.id !== target.id)
+        .map((p) => (p.id === pairingSource ? merged : p));
+    });
+    setPairingSource(null);
+  };
+
+  const removeBackPhoto = (id: string) => {
+    setItems((prev) =>
       prev.map((p) =>
-        p.id === photoId ? { ...p, status: 'analyzing', errorMessage: undefined } : p
+        p.id === id ? { ...p, backFile: undefined, backPreview: undefined } : p
       )
     );
-
-    // Snapshot the current file from the latest state to avoid stale closures
-    const currentFile = await new Promise<File | null>((resolve) => {
-      setPhotos((prev) => {
-        const found = prev.find((p) => p.id === photoId);
-        resolve(found?.file ?? null);
-        return prev;
-      });
-    });
-    if (!currentFile) return false;
-
-    try {
-      // Compress + transcode to JPEG so the payload stays small AND matches
-      // the hardcoded media_type the backend AI service sends to Anthropic.
-      let base64: string;
-      try {
-        base64 = await compressImageToBase64(currentFile);
-      } catch (err) {
-        const msg =
-          (err instanceof Error && err.message) ||
-          "Impossible de lire ce fichier image (format non supporté ?)";
-        setPhotos((prev) =>
-          prev.map((p) =>
-            p.id === photoId ? { ...p, status: 'error', errorMessage: msg } : p
-          )
-        );
-        return false;
-      }
-
-      const res = await api.post<AIScan>('/ai/scan-clothing', {
-        image_base64: base64,
-      });
-
-      if (res.success && res.data) {
-        const ai = res.data;
-        const aiColors = (ai.colors ?? (ai.primary_color ? [ai.primary_color] : []))
-          .filter((c): c is string => typeof c === 'string')
-          .map(normalizeColor)
-          .filter((c): c is string => c !== null);
-
-        setPhotos((prev) =>
-          prev.map((p) =>
-            p.id === photoId
-              ? {
-                  ...p,
-                  status: 'done',
-                  errorMessage: undefined,
-                  ai,
-                  name: ai.name ?? p.name,
-                  category: ai.category ?? p.category,
-                  colors: aiColors.length > 0 ? Array.from(new Set(aiColors)) : p.colors,
-                  material: ai.material ?? p.material,
-                  season: ai.season ?? p.season,
-                  occasion: ai.occasion ?? p.occasion,
-                  brand: ai.brand ?? p.brand,
-                }
-              : p
-          )
-        );
-        return true;
-      }
-
-      // Surface the actual server error (status code + message) so the user
-      // knows whether it's a missing API key, rate limit, image issue, etc.
-      const failedRes = res as unknown as {
-        error?: string;
-        message?: string;
-        status?: number;
-      };
-      const reason =
-        failedRes.message ||
-        failedRes.error ||
-        (failedRes.status ? `Erreur HTTP ${failedRes.status}` : 'Erreur inconnue');
-      setPhotos((prev) =>
-        prev.map((p) =>
-          p.id === photoId ? { ...p, status: 'error', errorMessage: reason } : p
-        )
-      );
-      return false;
-    } catch (err) {
-      const msg =
-        (err instanceof Error && err.message) ||
-        'Erreur de connexion au serveur';
-      setPhotos((prev) =>
-        prev.map((p) =>
-          p.id === photoId ? { ...p, status: 'error', errorMessage: msg } : p
-        )
-      );
-      return false;
-    }
-  }, []);
-
-  // ─── Analysis loop ───────────────────────────────────────────────────────
-  const startAnalysis = async () => {
-    if (photos.length === 0) return;
-    setPhase('analyzing');
-    setError(null);
-
-    // Snapshot ids up-front so removing a photo mid-loop doesn't shift indexes
-    const ids = photos.map((p) => p.id);
-    for (let i = 0; i < ids.length; i++) {
-      setAnalyzeIndex(i);
-      await analyzeOne(ids[i]);
-      // Small delay between requests
-      await new Promise((r) => setTimeout(r, ANALYSIS_DELAY_MS));
-    }
-
-    setPhase('review');
   };
 
-  // ─── Retry a single failed item from the review screen ──────────────────
-  const retryOne = async (id: string) => {
-    await analyzeOne(id);
-  };
-
-  // ─── Review-screen edits ─────────────────────────────────────────────────
-  const updatePhoto = <K extends keyof BulkPhoto>(
-    id: string,
-    key: K,
-    value: BulkPhoto[K]
-  ) => {
-    setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, [key]: value } : p)));
-  };
-
-  const toggleColor = (id: string, color: string) => {
-    setPhotos((prev) =>
-      prev.map((p) => {
-        if (p.id !== id) return p;
-        const next = p.colors.includes(color)
-          ? p.colors.filter((c) => c !== color)
-          : [...p.colors, color];
-        return { ...p, colors: next };
-      })
-    );
+  const updateCategory = (id: string, category: Category) => {
+    setItems((prev) => prev.map((p) => (p.id === id ? { ...p, category } : p)));
   };
 
   // ─── Bulk save ───────────────────────────────────────────────────────────
   const saveAll = async () => {
-    // Save EVERY photo — errored items are still uploaded with whatever
-    // metadata the user filled in manually. Only items still actively
-    // being analyzed are excluded so we don't race the AI loop.
-    const toSave = photos.filter((p) => p.status !== 'analyzing');
-    if (toSave.length === 0) {
+    if (items.length === 0) {
       setError('Aucun vêtement à enregistrer.');
-      return;
-    }
-
-    // Sanity check: each item needs at minimum a name OR a category set
-    const missing = toSave.filter((p) => !p.name.trim());
-    if (missing.length > 0) {
-      setError(
-        `${missing.length} vêtement${missing.length > 1 ? 's ont' : ' a'} besoin d'un nom avant l'enregistrement.`
-      );
       return;
     }
 
@@ -402,33 +175,29 @@ export default function BulkUploadFlow() {
     setError(null);
 
     const body = new FormData();
-    const meta = toSave.map((p) => ({
-      name: p.name.trim(),
+    const meta = items.map((p) => ({
+      name: '',
       category: p.category,
-      colors: p.colors,
-      material: p.material.trim() || undefined,
-      season: p.season,
-      occasion: p.occasion,
-      brand: p.brand.trim() || undefined,
-      ai_tags: p.ai,
+      colors: [],
+      season: 'ALL',
+      occasion: 'CASUAL',
     }));
     body.append('items_meta', JSON.stringify(meta));
     body.append('remove_bg', '1');
-    toSave.forEach((p, i) => {
-      body.append(`photo_${i}`, p.file);
+    items.forEach((p, i) => {
+      body.append(`photo_${i}`, p.frontFile);
       if (p.backFile) body.append(`photo_back_${i}`, p.backFile);
     });
 
-    // Progress bar advances optimistically while the single bulk request runs.
-    const totalToSave = toSave.length;
+    const total = items.length;
     const progressTimer = setInterval(() => {
-      setSaveIndex((i) => (i < totalToSave - 1 ? i + 1 : i));
+      setSaveIndex((i) => (i < total - 1 ? i + 1 : i));
     }, 600);
 
     try {
       const res = await api.post<ClothingItem[]>('/wardrobe/bulk', body);
       clearInterval(progressTimer);
-      setSaveIndex(totalToSave);
+      setSaveIndex(total);
 
       if (res.success && res.data && res.data.length > 0) {
         const ids = res.data.map((it) => it.id).join(',');
@@ -438,66 +207,18 @@ export default function BulkUploadFlow() {
 
       const resAny = res as unknown as { error?: string; message?: string };
       setError(resAny.message || resAny.error || "Erreur lors de l'enregistrement.");
-      setPhase('review');
+      setPhase('triage');
     } catch {
       clearInterval(progressTimer);
       setError("Erreur de connexion lors de l'enregistrement.");
-      setPhase('review');
+      setPhase('triage');
     }
   };
 
-  // ─── Retry every failed item at once ─────────────────────────────────────
-  const retryAllErrors = async () => {
-    const erroredIds = photos.filter((p) => p.status === 'error').map((p) => p.id);
-    for (const id of erroredIds) {
-      await analyzeOne(id);
-      await new Promise((r) => setTimeout(r, ANALYSIS_DELAY_MS));
-    }
-  };
-
-  // ─── Skip AI entirely and go straight to manual editing ─────────────────
-  const skipAnalysis = () => {
-    setError(null);
-    setPhotos((prev) =>
-      prev.map((p) => ({ ...p, status: 'skipped', errorMessage: undefined }))
-    );
-    setPhase('review');
-  };
-
-  // ─── Attach / replace a back photo on a single item ─────────────────────
-  const attachBackPhoto = async (id: string, file: File) => {
-    if (!file.type.startsWith('image/')) return;
-    if (file.size > MAX_FILE_SIZE) {
-      setError(`«${file.name}» dépasse 10 Mo et a été ignoré.`);
-      return;
-    }
-    const preview = await readDataUrl(file);
-    setPhotos((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, backFile: file, backPreview: preview } : p
-      )
-    );
-  };
-
-  const removeBackPhoto = (id: string) => {
-    setPhotos((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, backFile: undefined, backPreview: undefined } : p
-      )
-    );
-  };
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // RENDER
-  // ─────────────────────────────────────────────────────────────────────────
-  // Items eligible to be saved = anything NOT mid-analysis. Errored items are
-  // included so the user can edit + save them manually.
-  const eligibleCount = photos.filter((p) => p.status !== 'analyzing').length;
-  const errorCount = photos.filter((p) => p.status === 'error').length;
-
+  // ─── RENDER ──────────────────────────────────────────────────────────────
   return (
     <div className="pb-32">
-      {/* ════════ HIDDEN FILE INPUT ════════ */}
+      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -507,27 +228,24 @@ export default function BulkUploadFlow() {
         onChange={onFileInputChange}
       />
 
-      {/* ════════ PHASE: SELECT / ANALYZING ════════ */}
-      {(phase === 'select' || phase === 'analyzing') && (
+      {/* ════════ PHASE: SELECT ════════ */}
+      {phase === 'select' && (
         <>
-          {/* ─── Drop zone ─── */}
+          {/* Drop zone */}
           <div
             className={`mx-1 cursor-pointer rounded-3xl border-2 border-dashed bg-[#EDE5DC]/20 p-8 transition-colors ${
-              isDragging
-                ? 'border-[#C6A47E] bg-[#EDE5DC]/40'
-                : 'border-[#C6A47E]/50'
+              isDragging ? 'border-[#C6A47E] bg-[#EDE5DC]/40' : 'border-[#C6A47E]/50'
             }`}
             style={{ minHeight: '200px' }}
-            onClick={() => phase === 'select' && fileInputRef.current?.click()}
+            onClick={() => fileInputRef.current?.click()}
             onDragOver={(e) => {
               e.preventDefault();
-              if (phase === 'select') setIsDragging(true);
+              setIsDragging(true);
             }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={onDrop}
           >
             <div className="flex flex-col items-center justify-center text-center">
-              {/* 2x2 shirt grid icon */}
               <div className="mb-3 grid h-12 w-12 grid-cols-2 gap-1">
                 {[0, 1, 2, 3].map((i) => (
                   <svg
@@ -550,108 +268,49 @@ export default function BulkUploadFlow() {
                 Glissez vos photos ici ou cliquez pour choisir
               </p>
               <p className="mt-1 text-xs text-[#CFCFCF]">
-                JPG, PNG · Max 10 Mo par photo
+                JPG, PNG · Max 10 Mo par photo · Fond retiré automatiquement
               </p>
             </div>
           </div>
 
-          {/* ─── Selected photos preview grid ─── */}
-          {photos.length > 0 && (
+          {/* Selected photos preview grid */}
+          {items.length > 0 && (
             <>
               <div className="mt-4 grid grid-cols-4 gap-2">
-                {photos.map((photo, i) => (
+                {items.map((it, i) => (
                   <div
-                    key={photo.id}
+                    key={it.id}
                     className="relative aspect-square overflow-hidden rounded-xl bg-[#F0EDE8]"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={photo.preview}
+                      src={it.frontPreview}
                       alt=""
                       className="h-full w-full object-cover"
                     />
-
-                    {/* Status overlay */}
-                    {photo.status === 'analyzing' && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm">
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="#FFFFFF"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          className="animate-spin"
-                        >
-                          <circle cx="12" cy="12" r="10" opacity="0.3" />
-                          <path d="M22 12a10 10 0 0 1-10 10" />
-                        </svg>
-                        <p className="mt-1 text-[10px] text-white">Analyse...</p>
-                      </div>
-                    )}
-                    {photo.status === 'done' && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-green-500/20">
-                        <svg
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="#16A34A"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      </div>
-                    )}
-                    {photo.status === 'error' && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-red-500/20">
-                        <svg
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="#FFFFFF"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="18" y1="6" x2="6" y2="18" />
-                          <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                      </div>
-                    )}
-
-                    {/* Remove button (only when not analyzing) */}
-                    {phase === 'select' && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removePhoto(photo.id);
-                        }}
-                        aria-label="Retirer cette photo"
-                        className="absolute right-1 top-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-black/50 text-white"
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeItem(it.id);
+                      }}
+                      aria-label="Retirer cette photo"
+                      className="absolute right-1 top-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-black/50 text-white"
+                    >
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       >
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="18" y1="6" x2="6" y2="18" />
-                          <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                      </button>
-                    )}
-
-                    {/* Index */}
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
                     <span
                       className="absolute bottom-1 left-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/50 font-bold text-white"
                       style={{ fontSize: '9px' }}
@@ -665,425 +324,187 @@ export default function BulkUploadFlow() {
               {/* Stats bar */}
               <div className="mt-1 flex items-center justify-between py-3">
                 <p className="text-xs text-[#8A8A8A]">
-                  {photos.length} photo{photos.length > 1 ? 's' : ''} sélectionnée
-                  {photos.length > 1 ? 's' : ''}
+                  {items.length} photo{items.length > 1 ? 's' : ''} sélectionnée
+                  {items.length > 1 ? 's' : ''}
                 </p>
-                {phase === 'select' && (
-                  <button
-                    type="button"
-                    onClick={clearAll}
-                    className="cursor-pointer text-xs text-[#D4785C]"
-                  >
-                    Tout supprimer
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={clearAll}
+                  className="cursor-pointer text-xs text-[#D4785C]"
+                >
+                  Tout supprimer
+                </button>
               </div>
 
-              {/* Analyze + skip buttons (select phase only) */}
-              {phase === 'select' && (
-                <div className="mt-2 flex flex-col gap-2">
-                  <button
-                    type="button"
-                    onClick={startAnalysis}
-                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#111111] py-4 text-sm font-semibold text-white"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                    </svg>
-                    Analyser {photos.length} vêtement{photos.length > 1 ? 's' : ''} avec
-                    l&rsquo;IA
-                  </button>
-                  <button
-                    type="button"
-                    onClick={skipAnalysis}
-                    className="cursor-pointer rounded-full border border-[#EFEFEF] bg-white py-3 text-xs font-medium text-[#8A8A8A] hover:text-[#111111]"
-                  >
-                    Continuer sans l&rsquo;IA (saisie manuelle)
-                  </button>
-                </div>
-              )}
+              {/* Continue button */}
+              <button
+                type="button"
+                onClick={() => setPhase('triage')}
+                className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#111111] py-4 text-sm font-semibold text-white"
+              >
+                Continuer · trier devant / dos
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </button>
             </>
           )}
 
-          {/* Error */}
           {error && (
             <div className="mt-4 rounded-xl border border-[#D4785C]/20 bg-[#FFF8F6] px-4 py-3 text-xs text-[#D4785C]">
               {error}
             </div>
           )}
-
-          {/* Analyzing progress bar (fixed bottom) */}
-          {phase === 'analyzing' && (
-            <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[#EFEFEF] bg-white px-5 py-3 md:left-64">
-              <div className="mx-auto max-w-3xl">
-                <p className="text-sm font-medium text-[#111111]">
-                  Analyse en cours… {Math.min(analyzeIndex + 1, photos.length)}/
-                  {photos.length}
-                </p>
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#F0EDE8]">
-                  <div
-                    className="h-full rounded-full bg-[#111111] transition-all duration-300"
-                    style={{
-                      width: `${
-                        ((Math.min(analyzeIndex + 1, photos.length)) / photos.length) *
-                        100
-                      }%`,
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
         </>
       )}
 
-      {/* ════════ PHASE: REVIEW ════════ */}
-      {phase === 'review' && (
+      {/* ════════ PHASE: TRIAGE ════════ */}
+      {phase === 'triage' && (
         <>
           <div className="mb-4">
-            <h2 className="font-serif text-lg text-[#111111]">
-              Vérifiez les {photos.length} vêtement{photos.length > 1 ? 's' : ''}
-            </h2>
-            <p className="mt-1 text-xs text-[#8A8A8A]">
-              Vous pouvez modifier les informations et ajouter une photo de dos
-              avant de tout enregistrer.
-            </p>
-          </div>
-
-          {/* Errors banner — visible only if at least one photo failed analysis */}
-          {errorCount > 0 && (() => {
-            // Show the most common / most actionable failure reason
-            const firstReason =
-              photos.find((p) => p.status === 'error' && p.errorMessage)?.errorMessage ||
-              "Impossible de joindre l'analyse IA.";
-            return (
-              <div className="mb-3 flex items-start gap-3 rounded-2xl border border-[#D4785C]/20 bg-[#FFF8F6] p-3">
+            <div className="mb-2 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setPhase('select')}
+                className="flex cursor-pointer items-center gap-1 text-xs text-[#8A8A8A]"
+              >
                 <svg
-                  width="18"
-                  height="18"
+                  width="14"
+                  height="14"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="#D4785C"
+                  stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="mt-0.5 flex-shrink-0"
                 >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                  <line x1="19" y1="12" x2="5" y2="12" />
+                  <polyline points="12 19 5 12 12 5" />
                 </svg>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-[#D4785C]">
-                    {errorCount} photo{errorCount > 1 ? 's' : ''} sans analyse IA
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-[#8A8A8A]">{firstReason}</p>
-                  <p className="mt-1 text-[11px] text-[#8A8A8A]">
-                    Vous pouvez tout de même les enregistrer en remplissant les
-                    informations à la main ci-dessous.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={retryAllErrors}
-                  className="flex-shrink-0 cursor-pointer rounded-full bg-[#D4785C] px-3 py-1.5 text-[11px] font-semibold text-white"
-                >
-                  Tout réessayer
-                </button>
-              </div>
-            );
-          })()}
+                Retour
+              </button>
+              <span className="text-xs text-[#8A8A8A]">
+                {items.length} vêtement{items.length > 1 ? 's' : ''}
+              </span>
+            </div>
+            <h2 className="font-serif text-lg text-[#111111]">
+              Associez devant et dos
+            </h2>
+            <p className="mt-1 text-xs text-[#8A8A8A]">
+              Touchez «&nbsp;Lier dos&nbsp;» sur un vêtement, puis touchez la photo
+              de dos correspondante. Vous pouvez aussi changer la catégorie de
+              chaque pièce.
+            </p>
+          </div>
 
-          {photos.map((photo) => {
-            const expanded = expandedId === photo.id;
-            const errored = photo.status === 'error';
-            return (
-              <div
-                key={photo.id}
-                className="mb-3 overflow-hidden rounded-2xl bg-white shadow-sm"
+          {pairingSource !== null && (
+            <div className="mb-3 flex items-center gap-2 rounded-2xl border border-[#C6A47E]/40 bg-[#FFF8EE] px-3 py-2">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#C6A47E"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                {/* Header row */}
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72" />
+              </svg>
+              <p className="flex-1 text-[11px] text-[#111111]">
+                Touchez une autre photo pour l&rsquo;associer comme{' '}
+                <strong>dos</strong>.
+              </p>
+              <button
+                type="button"
+                onClick={() => setPairingSource(null)}
+                className="cursor-pointer text-[11px] text-[#D4785C]"
+              >
+                Annuler
+              </button>
+            </div>
+          )}
+
+          <div
+            className="grid gap-3"
+            style={{
+              gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+            }}
+          >
+            {items.map((it, i) => {
+              const isPairingSource = pairingSource === it.id;
+              const isPairingTarget = pairingSource !== null && !isPairingSource;
+              return (
                 <div
-                  className="flex cursor-pointer items-center border-b border-[#F7F5F2] p-3"
-                  onClick={() => setExpandedId(expanded ? null : photo.id)}
+                  key={it.id}
+                  className={`overflow-hidden rounded-2xl bg-white shadow-sm transition-all ${
+                    isPairingSource
+                      ? 'ring-2 ring-[#C6A47E] ring-offset-2'
+                      : isPairingTarget
+                        ? 'ring-1 ring-[#C6A47E]/30'
+                        : ''
+                  }`}
                 >
-                  {/* Thumb */}
-                  <div className="h-12 w-12 overflow-hidden rounded-xl bg-[#F0EDE8]">
+                  {/* Photo: front (full) + back overlay */}
+                  <button
+                    type="button"
+                    onClick={() => handleCardTap(it.id)}
+                    className="relative block h-44 w-full cursor-pointer bg-[#F0EDE8]"
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={photo.preview}
-                      alt=""
-                      className="h-full w-full object-cover"
+                      src={it.frontPreview}
+                      alt="Devant"
+                      className="absolute inset-0 h-full w-full object-cover"
                       style={{ objectPosition: 'center 15%' }}
                     />
-                  </div>
-
-                  {/* Info */}
-                  <div className="ml-3 min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-[#111111]">
-                      {photo.name || 'Vêtement sans nom'}
-                    </p>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      <span
-                        className="rounded-full bg-[#F0EDE8] px-2 py-0.5 text-[#111111]"
-                        style={{ fontSize: '9px' }}
-                      >
-                        {CATEGORIES.find((c) => c.value === photo.category)?.label ??
-                          photo.category}
-                      </span>
-                      {photo.colors.slice(0, 2).map((c) => (
-                        <span
-                          key={c}
-                          className="rounded-full bg-[#F0EDE8] px-2 py-0.5 text-[#111111]"
-                          style={{ fontSize: '9px' }}
-                        >
-                          {c}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Right cluster */}
-                  <div className="ml-2 flex items-center gap-2">
-                    {errored ? (
-                      photo.status === 'analyzing' ? (
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="#D4785C"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          className="animate-spin"
-                        >
-                          <circle cx="12" cy="12" r="10" opacity="0.3" />
-                          <path d="M22 12a10 10 0 0 1-10 10" />
-                        </svg>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            retryOne(photo.id);
-                          }}
-                          className="flex cursor-pointer items-center gap-1 rounded-full bg-[#D4785C] px-2.5 py-1 text-[10px] font-semibold text-white"
-                        >
-                          <svg
-                            width="11"
-                            height="11"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <polyline points="23 4 23 10 17 10" />
-                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-                          </svg>
-                          Réessayer
-                        </button>
-                      )
-                    ) : photo.status === 'analyzing' ? (
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#8A8A8A"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        className="animate-spin"
-                      >
-                        <circle cx="12" cy="12" r="10" opacity="0.3" />
-                        <path d="M22 12a10 10 0 0 1-10 10" />
-                      </svg>
-                    ) : (
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#16A34A"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    )}
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#8A8A8A"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className={`transition-transform ${expanded ? 'rotate-180' : ''}`}
-                    >
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removePhoto(photo.id);
-                      }}
-                      aria-label="Retirer ce vêtement"
-                      className="flex h-6 w-6 cursor-pointer items-center justify-center text-[#CFCFCF] hover:text-[#D4785C]"
-                    >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Inline error message — visible even when collapsed so the
-                    user immediately sees WHY a photo failed analysis */}
-                {errored && photo.errorMessage && (
-                  <div className="border-b border-[#F7F5F2] bg-[#FFF8F6] px-3 py-2">
-                    <p className="text-[11px] text-[#D4785C]">
-                      <span className="font-semibold">Analyse IA :</span>{' '}
-                      {photo.errorMessage}
-                    </p>
-                    <p className="mt-0.5 text-[10px] text-[#8A8A8A]">
-                      Vous pouvez quand même enregistrer ce vêtement en remplissant
-                      les informations ci-dessous.
-                    </p>
-                  </div>
-                )}
-
-                {/* Expanded edit form */}
-                {expanded && (
-                  <div className="flex flex-col gap-3 p-4">
-                    {/* Name */}
-                    <input
-                      type="text"
-                      value={photo.name}
-                      onChange={(e) => updatePhoto(photo.id, 'name', e.target.value)}
-                      placeholder="Nom du vêtement"
-                      className="w-full rounded-xl bg-[#F7F5F2] px-3 py-2 text-sm text-[#111111] placeholder-[#8A8A8A] outline-none"
-                    />
-
-                    {/* Front + back photo previews */}
-                    <div>
-                      <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wide text-[#8A8A8A]">
-                        Photos
-                      </p>
-                      <div className="flex gap-2">
-                        {/* Front (read-only) */}
-                        <div className="flex flex-col items-center">
-                          <div className="h-20 w-20 overflow-hidden rounded-xl bg-[#F0EDE8]">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={photo.preview}
-                              alt="Devant"
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                          <span className="mt-1 text-[9px] text-[#8A8A8A]">Devant</span>
-                        </div>
-
-                        {/* Back (add / replace) */}
-                        <div className="flex flex-col items-center">
-                          {photo.backPreview ? (
-                            <div className="relative h-20 w-20 overflow-hidden rounded-xl bg-[#F0EDE8]">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src={photo.backPreview}
-                                alt="Dos"
-                                className="h-full w-full object-cover"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => removeBackPhoto(photo.id)}
-                                aria-label="Retirer la photo de dos"
-                                className="absolute right-1 top-1 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white"
-                              >
-                                <svg
-                                  width="9"
-                                  height="9"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="3"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <line x1="18" y1="6" x2="6" y2="18" />
-                                  <line x1="6" y1="6" x2="18" y2="18" />
-                                </svg>
-                              </button>
-                            </div>
-                          ) : (
-                            <label className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[#C6A47E]/60 bg-[#F7F5F2] text-[#8A8A8A] hover:text-[#111111]">
-                              <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.8"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <line x1="12" y1="5" x2="12" y2="19" />
-                                <line x1="5" y1="12" x2="19" y2="12" />
-                              </svg>
-                              <span className="text-[9px]">Ajouter</span>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => {
-                                  const f = e.target.files?.[0];
-                                  if (f) attachBackPhoto(photo.id, f);
-                                  e.target.value = '';
-                                }}
-                              />
-                            </label>
-                          )}
-                          <span className="mt-1 text-[9px] text-[#8A8A8A]">Dos</span>
-                        </div>
+                    {it.backPreview && (
+                      <div className="absolute bottom-2 right-2 h-12 w-12 overflow-hidden rounded-lg border-2 border-white shadow-lg">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={it.backPreview}
+                          alt="Dos"
+                          className="h-full w-full object-cover"
+                        />
                       </div>
-                    </div>
+                    )}
+                    <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[9px] font-semibold text-white">
+                      {it.backPreview ? 'Devant + Dos' : 'Devant'}
+                    </span>
+                    <span
+                      className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 font-bold text-white"
+                      style={{ fontSize: '9px' }}
+                    >
+                      {i + 1}
+                    </span>
+                  </button>
 
-                    {/* Category pills */}
-                    <div className="flex flex-wrap gap-1.5">
+                  {/* Action row */}
+                  <div className="border-t border-[#F7F5F2] p-2">
+                    {/* Category compact pills */}
+                    <div className="mb-2 flex flex-wrap gap-1">
                       {CATEGORIES.map((c) => {
-                        const active = photo.category === c.value;
+                        const active = it.category === c.value;
                         return (
                           <button
                             key={c.value}
                             type="button"
-                            onClick={() => updatePhoto(photo.id, 'category', c.value)}
-                            className={`cursor-pointer rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
+                            onClick={() => updateCategory(it.id, c.value)}
+                            className={`cursor-pointer rounded-full px-2 py-0.5 text-[9px] font-medium ${
                               active
                                 ? 'bg-[#111111] text-white'
-                                : 'bg-[#F7F5F2] text-[#8A8A8A] hover:text-[#111111]'
+                                : 'bg-[#F7F5F2] text-[#8A8A8A]'
                             }`}
                           >
                             {c.label}
@@ -1091,107 +512,65 @@ export default function BulkUploadFlow() {
                         );
                       })}
                     </div>
-
-                    {/* Colors */}
-                    <div className="flex flex-wrap gap-1.5">
-                      {COLOR_NAMES.map((name) => {
-                        const selected = photo.colors.includes(name);
-                        return (
-                          <button
-                            key={name}
-                            type="button"
-                            onClick={() => toggleColor(photo.id, name)}
-                            aria-label={name}
-                            title={name}
-                            className={`h-6 w-6 cursor-pointer rounded-full transition-transform ${
-                              selected
-                                ? 'scale-110 ring-2 ring-[#111111] ring-offset-1'
-                                : 'ring-1 ring-[#EFEFEF]'
-                            }`}
-                            style={{ background: COLOR_HEXES[name] }}
-                          />
-                        );
-                      })}
-                    </div>
-
-                    {/* Season + Occasion */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-[#8A8A8A]">
-                          Saison
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {SEASONS.map((s) => {
-                            const active = photo.season === s.value;
-                            return (
-                              <button
-                                key={s.value}
-                                type="button"
-                                onClick={() => updatePhoto(photo.id, 'season', s.value)}
-                                className={`cursor-pointer rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                                  active
-                                    ? 'bg-[#111111] text-white'
-                                    : 'bg-[#F7F5F2] text-[#8A8A8A]'
-                                }`}
-                              >
-                                {s.label}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                      <div>
-                        <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-[#8A8A8A]">
-                          Occasion
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {OCCASIONS.map((o) => {
-                            const active = photo.occasion === o.value;
-                            return (
-                              <button
-                                key={o.value}
-                                type="button"
-                                onClick={() =>
-                                  updatePhoto(photo.id, 'occasion', o.value)
-                                }
-                                className={`cursor-pointer rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                                  active
-                                    ? 'bg-[#111111] text-white'
-                                    : 'bg-[#F7F5F2] text-[#8A8A8A]'
-                                }`}
-                              >
-                                {o.label}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
+                    <div className="flex items-center justify-between gap-1">
+                      {it.backPreview ? (
+                        <button
+                          type="button"
+                          onClick={() => removeBackPhoto(it.id)}
+                          className="cursor-pointer text-[10px] text-[#D4785C]"
+                        >
+                          Retirer dos
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleCardTap(it.id)}
+                          className={`cursor-pointer text-[10px] font-semibold ${
+                            isPairingSource ? 'text-[#D4785C]' : 'text-[#C6A47E]'
+                          }`}
+                        >
+                          {isPairingSource ? 'Annuler' : 'Lier dos'}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeItem(it.id)}
+                        aria-label="Supprimer"
+                        className="cursor-pointer text-[#CFCFCF] hover:text-[#D4785C]"
+                      >
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
-                )}
-              </div>
-            );
-          })}
+                </div>
+              );
+            })}
+          </div>
 
           {/* Sticky save bar */}
           <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[#EFEFEF] bg-white px-5 py-4 md:left-64">
             <div className="mx-auto max-w-3xl">
-              {error && (
-                <p className="mb-2 text-xs text-[#D4785C]">{error}</p>
-              )}
+              {error && <p className="mb-2 text-xs text-[#D4785C]">{error}</p>}
               <p className="mb-3 text-xs text-[#8A8A8A]">
-                {eligibleCount} vêtement{eligibleCount > 1 ? 's' : ''} à enregistrer
-                {errorCount > 0 && (
-                  <span className="text-[#D4785C]">
-                    {' '}
-                    · {errorCount} sans IA
-                  </span>
-                )}
+                {items.length} vêtement{items.length > 1 ? 's' : ''} à ajouter au
+                dressing · fond retiré automatiquement
               </p>
               <button
                 type="button"
                 onClick={saveAll}
-                disabled={eligibleCount === 0}
+                disabled={items.length === 0}
                 className="w-full cursor-pointer rounded-full bg-[#111111] py-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Ajouter au dressing
@@ -1219,14 +598,14 @@ export default function BulkUploadFlow() {
               <path d="M22 12a10 10 0 0 1-10 10" />
             </svg>
             <p className="mt-4 font-serif text-base text-[#111111]">
-              Enregistrement… {Math.min(saveIndex + 1, eligibleCount)}/{eligibleCount}
+              Enregistrement… {Math.min(saveIndex + 1, items.length)}/{items.length}
             </p>
             <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[#F0EDE8]">
               <div
                 className="h-full rounded-full bg-[#111111] transition-all duration-300"
                 style={{
                   width: `${
-                    ((Math.min(saveIndex + 1, eligibleCount)) / eligibleCount) * 100
+                    ((Math.min(saveIndex + 1, items.length)) / items.length) * 100
                   }%`,
                 }}
               />
