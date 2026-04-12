@@ -52,39 +52,57 @@ export default function StylistsPage() {
 
   return (
     <div className="space-y-4 pb-10">
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-2 md:px-0">
+      {/* Header — mobile: hamburger + centered + bell */}
+      <div className="flex items-center justify-between px-5 py-4 md:px-0 md:pt-2">
+        <button className="flex h-9 w-9 cursor-pointer items-center justify-center md:hidden" aria-label="Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="1.5" strokeLinecap="round">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
         <h1 className="font-serif text-lg text-[#1A1A1A] md:text-xl md:font-semibold" style={{ fontWeight: 500 }}>Nos stylistes</h1>
         <a
           href="/messages"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white"
-          style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}
+          className="flex h-9 w-9 items-center justify-center"
+          aria-label="Notifications"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
         </a>
       </div>
 
-      {/* Search */}
-      <div className="flex items-center gap-2 rounded-full px-4 py-2.5" style={{ background: 'var(--color-tag-bg)' }}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-        </svg>
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Nom, ville ou style…"
-          className="flex-1 bg-transparent text-sm text-[#111111] placeholder-[#8A8A8A] focus:outline-none"
-        />
-        {search && (
-          <button type="button" onClick={() => setSearch('')} className="text-[#8A8A8A]">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        )}
+      {/* Search + filter */}
+      <div className="mx-5 flex items-center gap-3 md:mx-0">
+        <div className="flex flex-1 items-center gap-2 rounded-full bg-[#F2F0EC] px-4 py-2.5">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un styliste"
+            className="flex-1 bg-transparent text-sm text-[#1A1A1A] placeholder-[#9B9B9B] focus:outline-none"
+          />
+          {search && (
+            <button type="button" onClick={() => setSearch('')} className="text-[#9B9B9B]">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
+        </div>
+        <button type="button" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F2F0EC]" aria-label="Filtres">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" />
+            <line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" />
+            <line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" /><line x1="17" y1="16" x2="23" y2="16" />
+          </svg>
+        </button>
       </div>
 
       {/* Filter pills — horizontal scroll */}
@@ -95,10 +113,10 @@ export default function StylistsPage() {
               key={f}
               type="button"
               onClick={() => setActiveFilter(f)}
-              className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition-all ${
+              className={`shrink-0 cursor-pointer rounded-full px-4 py-1.5 text-sm transition-all ${
                 activeFilter === f
-                  ? 'bg-[#111111] text-white'
-                  : 'bg-[#F0EDE8] text-[#111111]'
+                  ? 'bg-[#1A1A1A] text-white'
+                  : 'border border-[#EFEFEF] bg-white text-[#1A1A1A]'
               }`}
             >
               {f}
