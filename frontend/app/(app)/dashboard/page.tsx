@@ -136,7 +136,7 @@ export default function DashboardPage() {
   const challengePct = Math.round((challenge.current / challenge.target) * 100);
 
   return (
-    <div className="bg-[#F2F0EB] md:bg-transparent min-h-screen pb-24 md:pb-0 overflow-x-hidden max-w-[100vw]">
+    <div className="w-full bg-[#F2F0EB] md:bg-transparent min-h-screen pb-24 md:pb-0 overflow-x-hidden max-w-[100vw]">
       {/* ============ TUTORIAL ============ */}
       {showTutorial && (
         <DashboardTutorial
@@ -188,53 +188,53 @@ export default function DashboardPage() {
       )}
 
       {/* ============ B. STAT CARDS ============ */}
-      <div className="mx-5 mb-5 md:mx-0 md:mb-12 grid grid-cols-3 gap-3 md:gap-4">
+      <div className="mx-4 mb-5 md:mx-0 md:mb-12 grid grid-cols-3 gap-2 md:gap-4">
         {/* Card 1 — Mon dressing */}
-        <div className="rounded-2xl bg-white p-3 md:border md:border-[#EFEFEF] md:p-5">
+        <div className="overflow-hidden rounded-2xl bg-white p-3 md:border md:border-[#EFEFEF] md:p-5">
           <div className="flex items-center gap-1 mb-2">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
-            <span className="truncate text-[11px] text-[#9B9B9B]">Mon dressing</span>
+            <span className="truncate text-[10px] text-[#9B9B9B]">Mon dressing</span>
           </div>
           <p className="font-serif text-3xl md:text-4xl text-[#111111] leading-none">{stats.wardrobe}</p>
           <p className="text-[10px] text-[#9B9B9B] mt-0.5 md:mt-2">vêtements</p>
-          <Link href="/wardrobe" className="text-[11px] md:text-xs font-medium text-[#111111] mt-2 block">
+          <Link href="/wardrobe" className="text-[10px] md:text-xs font-medium text-[#111111] mt-2 block">
             Voir tout →
           </Link>
         </div>
 
         {/* Card 2 — Mes looks */}
-        <div className="rounded-2xl bg-white p-3 md:border md:border-[#EFEFEF] md:p-5">
+        <div className="overflow-hidden rounded-2xl bg-white p-3 md:border md:border-[#EFEFEF] md:p-5">
           <div className="flex items-center gap-1 mb-2">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
-            <span className="truncate text-[11px] text-[#9B9B9B]">Mes looks</span>
+            <span className="truncate text-[10px] text-[#9B9B9B]">Mes looks</span>
           </div>
           <p className="font-serif text-3xl md:text-4xl text-[#111111] leading-none">{stats.looks}</p>
           <p className="text-[10px] text-[#9B9B9B] mt-0.5 md:mt-2">créés</p>
-          <Link href="/outfits" className="text-[11px] md:text-xs font-medium text-[#111111] mt-2 block">
+          <Link href="/outfits" className="text-[10px] md:text-xs font-medium text-[#111111] mt-2 block">
             Voir tout →
           </Link>
         </div>
 
         {/* Card 3 — Sessions */}
-        <div className="rounded-2xl bg-white p-3 md:border md:border-[#EFEFEF] md:p-5">
+        <div className="overflow-hidden rounded-2xl bg-white p-3 md:border md:border-[#EFEFEF] md:p-5">
           <div className="flex items-center gap-1 mb-2">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
               <rect x="3" y="4" width="18" height="18" rx="2" />
               <line x1="16" y1="2" x2="16" y2="6" />
               <line x1="8" y1="2" x2="8" y2="6" />
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
-            <span className="truncate text-[11px] text-[#9B9B9B]">Sessions</span>
+            <span className="truncate text-[10px] text-[#9B9B9B]">Sessions</span>
           </div>
           <p className="font-serif text-3xl md:text-4xl text-[#111111] leading-none">{stats.sessions}</p>
           <p className="text-[10px] text-[#9B9B9B] mt-0.5 md:mt-2">en cours</p>
-          <Link href="/calendar" className="text-[11px] md:text-xs font-medium text-[#111111] mt-2 block">
-            Voir mes sessions →
+          <Link href="/calendar" className="text-[10px] md:text-xs font-medium text-[#111111] mt-2 block">
+            Sessions →
           </Link>
         </div>
       </div>
