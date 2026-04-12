@@ -48,6 +48,8 @@ export interface ClothingItem {
   last_worn_at?: string;
   ai_tags?: Record<string, unknown>;
   try_on_url?: string | null;
+  archived?: boolean;
+  archived_at?: string | null;
   created_at: string;
 }
 

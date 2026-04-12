@@ -7,6 +7,7 @@ import {
   updateItem,
   deleteItem,
   markWorn,
+  archiveItem,
   getItemsCount,
   getWardrobeStats,
   tryOnItem,
@@ -38,5 +39,6 @@ router.post('/bulk', bulkPhotoUpload, bulkCreateItems);
 router.put('/:id', photoFields, updateItem);
 router.delete('/:id', deleteItem);
 router.post('/:id/wear', markWorn);
+router.put('/:id/archive', archiveItem);
 
 export default router;

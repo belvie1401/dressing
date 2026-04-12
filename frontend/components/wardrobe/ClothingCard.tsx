@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { ClothingItem } from '@/types';
 import { api } from '@/lib/api';
@@ -21,6 +21,8 @@ interface ClothingCardProps {
   onToast?: (msg: string) => void;
   /** When set, matches inside the card name are wrapped in <mark>. */
   searchQuery?: string;
+  /** Called after an item is deleted or archived so the parent can refresh. */
+  onRemoved?: () => void;
 }
 
 /**
@@ -32,9 +34,10 @@ interface ClothingCardProps {
  *    (40px threshold) without triggering navigation
  *  - Desktop hover reveals a quick-action bar (Voir / Favori / Porter)
  */
-export default function ClothingCard({ item, onToast, searchQuery }: ClothingCardProps) {
+export default function ClothingCard({ item, onToast, searchQuery, onRemoved }: ClothingCardProps) {
   const router = useRouter();
   const markWornInStore = useWardrobeStore((s) => s.markWorn);
+  const removeItemFromStore = useWardrobeStore((s) => s.removeItem);
 
   const frontUrl = item.bg_removed_url || item.photo_url;
   const backUrl = item.photo_back_removed || item.photo_back_url || '';
@@ -46,6 +49,11 @@ export default function ClothingCard({ item, onToast, searchQuery }: ClothingCar
   const startXRef = useRef<number | null>(null);
   const draggedRef = useRef(false);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 3-dots menu state
+  const [showMenu, setShowMenu] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const THRESHOLD = 40;
 
@@ -152,6 +160,40 @@ export default function ClothingCard({ item, onToast, searchQuery }: ClothingCar
     router.push(`/wardrobe/${item.id}#tryon`);
   };
 
+  // Close menu on outside click
+  useEffect(() => {
+    if (!showMenu) return;
+    const onClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
+  }, [showMenu]);
+
+  const handleArchive = async () => {
+    const res = await api.put<ClothingItem>(`/wardrobe/${item.id}/archive`);
+    if (res.success) {
+      removeItemFromStore(item.id);
+      onToast?.('Archiv\u00e9');
+      onRemoved?.();
+    }
+    setConfirmAction(null);
+    setShowMenu(false);
+  };
+
+  const handleDelete = async () => {
+    const res = await api.delete(`/wardrobe/${item.id}`);
+    if (res.success) {
+      removeItemFromStore(item.id);
+      onToast?.('Supprim\u00e9');
+      onRemoved?.();
+    }
+    setConfirmAction(null);
+    setShowMenu(false);
+  };
+
   const displayName =
     item.name || item.brand || categoryAbbrev[item.category] || 'Vêtement';
 
@@ -255,13 +297,139 @@ export default function ClothingCard({ item, onToast, searchQuery }: ClothingCar
         </span>
       )}
 
-      {/* Category badge (top-right) */}
+      {/* Category badge (top-right, shifts left when menu is visible) */}
       <span
         className="pointer-events-none absolute z-10 rounded-full bg-white/80 font-medium text-[#111111] backdrop-blur-sm"
-        style={{ top: '6px', right: '6px', fontSize: '9px', padding: '1px 6px' }}
+        style={{ top: '6px', right: showMenu ? '34px' : '6px', fontSize: '9px', padding: '1px 6px', transition: 'right 0.15s' }}
       >
         {categoryAbbrev[item.category] || item.category}
       </span>
+
+      {/* 3-dots menu button */}
+      <div ref={menuRef} className="absolute right-2 top-1.5 z-20">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowMenu((v) => !v);
+          }}
+          className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/40 backdrop-blur-sm"
+          aria-label="Actions"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+            <circle cx="12" cy="5" r="2" />
+            <circle cx="12" cy="12" r="2" />
+            <circle cx="12" cy="19" r="2" />
+          </svg>
+        </button>
+
+        {showMenu && (
+          <div
+            className="absolute right-0 top-8 z-30 w-[160px] rounded-2xl border border-[#EFEFEF] bg-white py-2 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setShowMenu(false); router.push(`/wardrobe/${item.id}`); }}
+              className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-2.5 text-sm text-[#111111] hover:bg-[#F7F5F2]"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              Voir le d&eacute;tail
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setShowMenu(false); handleFavorite(e); }}
+              className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-2.5 text-sm text-[#111111] hover:bg-[#F7F5F2]"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              Ajouter aux favoris
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setShowMenu(false); handleWear(e); }}
+              className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-2.5 text-sm text-[#111111] hover:bg-[#F7F5F2]"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
+              </svg>
+              Marquer comme port&eacute;
+            </button>
+            <div className="my-1 border-t border-[#EFEFEF]" />
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setShowMenu(false); setConfirmAction('archive'); }}
+              className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-2.5 text-sm text-[#8A8A8A] hover:bg-[#F7F5F2]"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="21 8 21 21 3 21 3 8" />
+                <rect x="1" y="3" width="22" height="5" />
+                <line x1="10" y1="12" x2="14" y2="12" />
+              </svg>
+              Archiver
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setShowMenu(false); setConfirmAction('delete'); }}
+              className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-2.5 text-sm text-[#D4785C] hover:bg-[#F7F5F2]"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+              Supprimer
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Archive/Delete confirm modal */}
+      {confirmAction && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-5"
+          onClick={(e) => { e.stopPropagation(); setConfirmAction(null); }}
+        >
+          <div
+            className="w-full max-w-[280px] rounded-2xl bg-white p-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="font-serif text-base text-[#111111]">
+              {confirmAction === 'archive' ? 'Archiver ce v\u00eatement ?' : 'Supprimer ce v\u00eatement ?'}
+            </p>
+            <p className="mt-1 text-xs text-[#8A8A8A]">
+              {confirmAction === 'archive'
+                ? 'Il sera masqu\u00e9 mais pas supprim\u00e9.'
+                : 'Cette action est irr\u00e9versible.'}
+            </p>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (confirmAction === 'archive') handleArchive();
+                  else handleDelete();
+                }}
+                className={`flex-1 cursor-pointer rounded-full py-2 text-xs font-semibold text-white ${
+                  confirmAction === 'delete' ? 'bg-[#D4785C]' : 'bg-[#111111]'
+                }`}
+              >
+                {confirmAction === 'archive' ? 'Archiver' : 'Supprimer'}
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setConfirmAction(null); }}
+                className="flex-1 cursor-pointer rounded-full border border-[#EFEFEF] py-2 text-xs font-medium text-[#111111]"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bottom info overlay (hidden on hover to reveal action bar) */}
       <div

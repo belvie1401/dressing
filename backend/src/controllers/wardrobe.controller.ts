@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import sharp from 'sharp';
 import prisma from '../lib/prisma';
 import { uploadImage, removeBackground } from '../services/cloudinary.service';
 import { virtualTryOn } from '../services/ai.service';
@@ -7,6 +8,39 @@ import { createNotification } from './notifications.controller';
 // ─── Plan limits ─────────────────────────────────────────────────────────────
 const FREE_PLAN_ITEM_LIMIT = 50;
 const FREE_PLAN_WARN_AT = 45;
+
+// ─── Perceptual hashing (pHash) ─────────────────────────────────────────────
+const PHASH_SIZE = 8; // 8×8 = 64-bit hash
+const PHASH_SIMILARITY_THRESHOLD = 10; // max bit diff for "similar"
+
+async function getPerceptualHash(imageBuffer: Buffer): Promise<string> {
+  try {
+    const resized = await sharp(imageBuffer)
+      .resize(PHASH_SIZE, PHASH_SIZE, { fit: 'fill' })
+      .grayscale()
+      .raw()
+      .toBuffer();
+
+    const pixels = Array.from(resized);
+    const avg = pixels.reduce((s, v) => s + v, 0) / pixels.length;
+    return pixels.map((v) => (v >= avg ? '1' : '0')).join('');
+  } catch {
+    return '';
+  }
+}
+
+function hammingDistance(h1: string, h2: string): number {
+  if (h1.length !== h2.length) return 999;
+  let d = 0;
+  for (let i = 0; i < h1.length; i++) {
+    if (h1[i] !== h2[i]) d++;
+  }
+  return d;
+}
+
+function isPerceptualHash(h: string): boolean {
+  return h.length === 64 && /^[01]+$/.test(h);
+}
 
 /**
  * Returns the current plan for a user. Absent subscription = FREE.
@@ -90,7 +124,7 @@ function getUploadedFile(
 
 export async function getItems(req: Request, res: Response): Promise<void> {
   try {
-    const { category, season, occasion, color, search, limit } = req.query;
+    const { category, season, occasion, color, search, limit, include_archived } = req.query;
 
     const take = limit ? Math.max(1, Math.min(100, Number(limit))) : undefined;
 
@@ -108,9 +142,13 @@ export async function getItems(req: Request, res: Response): Promise<void> {
         }
       : {};
 
+    // By default, exclude archived items unless explicitly requested
+    const archivedFilter = include_archived === 'true' ? {} : { archived: false };
+
     const items = await prisma.clothingItem.findMany({
       where: {
         user_id: req.user!.userId,
+        ...archivedFilter,
         ...(category && { category: category as any }),
         ...(season && { season: season as any }),
         ...(occasion && { occasion: occasion as any }),
@@ -201,33 +239,15 @@ export async function createItem(req: Request, res: Response): Promise<void> {
       }
     }
 
-    // ── Photo deduplication check ──
-    // Wrapped in its own try/catch so a missing column (before DB migration runs)
-    // never blocks item creation — worst case we skip the check.
-    if (photo_hash && duplicate_confirmed !== '1') {
-      try {
-        const existing = await prisma.clothingItem.findFirst({
-          where: { user_id: userId, photo_hash },
-        });
-        if (existing) {
-          res.status(409).json({
-            success: false,
-            error: 'DUPLICATE',
-            message: 'Ce vêtement existe déjà dans votre dressing',
-            existing_item: existing,
-          });
-          return;
-        }
-      } catch {
-        // Column not yet migrated — skip dedup check silently
-      }
-    }
-
-    // ── Upload front photo ──
+    // ── Upload front photo (moved before dedup so we have the buffer for pHash) ──
     let photo_url = '';
     let bg_removed_url: string | undefined;
+    let computedPHash = '';
     const frontFile = getUploadedFile(req, 'photo');
     if (frontFile) {
+      // Compute perceptual hash from the raw buffer
+      computedPHash = await getPerceptualHash(frontFile.buffer);
+
       const res1 = await processPhotoBuffer(frontFile, remove_bg !== '0');
       photo_url = res1.url;
       bg_removed_url = res1.bgUrl;
@@ -248,12 +268,59 @@ export async function createItem(req: Request, res: Response): Promise<void> {
     const has_360_view = !!photo_back_url;
     const parsedColors = typeof colors === 'string' ? JSON.parse(colors) : colors || [];
 
+    // ── Perceptual hash dedup check ──
+    // Uses pHash (computed from the uploaded buffer via sharp) to detect
+    // exact and visually similar duplicates. Wrapped in try/catch so a missing
+    // column never blocks item creation.
+    const effectiveHash = computedPHash || photo_hash || null;
+    if (effectiveHash && duplicate_confirmed !== '1') {
+      try {
+        const existingItems = await prisma.clothingItem.findMany({
+          where: { user_id: userId, photo_hash: { not: null } },
+          select: { id: true, photo_hash: true, name: true, photo_url: true, bg_removed_url: true, category: true },
+        });
+
+        for (const existing of existingItems) {
+          if (!existing.photo_hash) continue;
+
+          // Exact match
+          if (existing.photo_hash === effectiveHash) {
+            res.status(409).json({
+              success: false,
+              error: 'EXACT_DUPLICATE',
+              message: 'Cette photo existe d\u00e9j\u00e0 dans votre dressing.',
+              existing_item: existing,
+            });
+            return;
+          }
+
+          // Perceptual similarity (only compare pHash-format values)
+          if (isPerceptualHash(effectiveHash) && isPerceptualHash(existing.photo_hash)) {
+            const dist = hammingDistance(effectiveHash, existing.photo_hash);
+            if (dist < PHASH_SIMILARITY_THRESHOLD) {
+              const similarity = Math.round((1 - dist / 64) * 100);
+              res.status(409).json({
+                success: false,
+                error: 'SIMILAR_DUPLICATE',
+                similarity,
+                message: `Un article tr\u00e8s similaire (${similarity}% de ressemblance) existe d\u00e9j\u00e0.`,
+                existing_item: existing,
+              });
+              return;
+            }
+          }
+        }
+      } catch {
+        // Column not yet migrated — skip dedup check silently
+      }
+    }
+
     const item = await prisma.clothingItem.create({
       data: {
         user_id: userId,
         name: name || null,
         photo_url,
-        photo_hash: photo_hash || null,
+        photo_hash: effectiveHash,
         bg_removed_url,
         photo_back_url: photo_back_url || null,
         photo_back_removed: photo_back_removed || null,
@@ -781,5 +848,37 @@ export async function tryOnItem(req: Request, res: Response): Promise<void> {
       error: 'TRYON_FAILED',
       message: 'Essayage virtuel indisponible. Réessayez.',
     });
+  }
+}
+
+/**
+ * PUT /api/wardrobe/:id/archive
+ * Toggles the archived status of a clothing item.
+ */
+export async function archiveItem(req: Request, res: Response): Promise<void> {
+  try {
+    const { id } = req.params as { id: string };
+    const item = await prisma.clothingItem.findFirst({
+      where: { id, user_id: req.user!.userId },
+    });
+
+    if (!item) {
+      res.status(404).json({ success: false, error: 'Vêtement non trouvé' });
+      return;
+    }
+
+    const newArchived = !(item as unknown as { archived?: boolean }).archived;
+    const updated = await prisma.clothingItem.update({
+      where: { id },
+      data: {
+        archived: newArchived,
+        archived_at: newArchived ? new Date() : null,
+      },
+    });
+
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    console.error('Archive item error:', error);
+    res.status(500).json({ success: false, error: "Erreur lors de l'archivage" });
   }
 }

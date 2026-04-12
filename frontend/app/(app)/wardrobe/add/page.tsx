@@ -133,6 +133,8 @@ export default function WardrobeAddPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [duplicate, setDuplicate] = useState<ClothingItem | null>(null);
+  const [dupType, setDupType] = useState<'EXACT_DUPLICATE' | 'SIMILAR_DUPLICATE'>('EXACT_DUPLICATE');
+  const [dupSimilarity, setDupSimilarity] = useState(100);
 
   // Upload mode selector — defaults to individual
   const [mode, setMode] = useState<UploadMode>('individual');
@@ -277,6 +279,7 @@ export default function WardrobeAddPage() {
       error?: string;
       message?: string;
       existing_item?: ClothingItem;
+      similarity?: number;
       status?: number;
     };
 
@@ -290,8 +293,17 @@ export default function WardrobeAddPage() {
       setLimitReached(true);
       setLimitCount(limitMax);
       return;
+    } else if (
+      (resAny.error === 'EXACT_DUPLICATE' || resAny.error === 'SIMILAR_DUPLICATE') &&
+      resAny.existing_item
+    ) {
+      setDuplicate(resAny.existing_item);
+      setDupType(resAny.error as 'EXACT_DUPLICATE' | 'SIMILAR_DUPLICATE');
+      setDupSimilarity(resAny.similarity ?? 100);
     } else if (resAny.status === 409 && resAny.existing_item) {
       setDuplicate(resAny.existing_item);
+      setDupType('EXACT_DUPLICATE');
+      setDupSimilarity(100);
     } else {
       setError(resAny.message || resAny.error || "Une erreur est survenue lors de l'enregistrement.");
     }
@@ -795,60 +807,86 @@ export default function WardrobeAddPage() {
       {duplicate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-5">
           <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#FEF3C7]">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            {/* Warning icon */}
+            <div className="flex justify-center">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                 <line x1="12" y1="9" x2="12" y2="13" />
                 <line x1="12" y1="17" x2="12.01" y2="17" />
               </svg>
             </div>
-            <h2 className="font-serif text-xl text-[#111111]">
-              Vêtement déjà présent&nbsp;?
+            <h2 className="mt-3 text-center font-serif text-lg text-[#111111]">
+              Article similaire d&eacute;tect&eacute;
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-[#8A8A8A]">
-              Cette photo correspond à un vêtement déjà enregistré dans votre dressing.
+            <p className="mt-2 text-center text-sm leading-relaxed text-[#8A8A8A]">
+              {dupType === 'EXACT_DUPLICATE'
+                ? 'Cette photo existe d\u00e9j\u00e0 dans votre dressing.'
+                : `Un article tr\u00e8s similaire (${dupSimilarity}% de ressemblance) existe d\u00e9j\u00e0.`}
             </p>
-            <div className="mt-4 flex items-center gap-3 rounded-2xl bg-[#F7F5F2] p-3">
-              <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-[#F0EDE8]">
-                {(duplicate.bg_removed_url || duplicate.photo_url) && (
-                  <Image
-                    src={duplicate.bg_removed_url || duplicate.photo_url}
-                    alt={duplicate.name || 'Vêtement existant'}
-                    fill
-                    unoptimized
-                    className="object-cover"
-                    sizes="64px"
-                  />
-                )}
+
+            {/* Side-by-side comparison */}
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div>
+                <div className="relative h-32 overflow-hidden rounded-xl bg-[#F0EDE8]">
+                  {(duplicate.bg_removed_url || duplicate.photo_url) && (
+                    <Image
+                      src={duplicate.bg_removed_url || duplicate.photo_url}
+                      alt="Existant"
+                      fill
+                      unoptimized
+                      className="object-cover"
+                      style={{ objectPosition: 'center 15%' }}
+                      sizes="140px"
+                    />
+                  )}
+                </div>
+                <p className="mt-1 text-center text-xs text-[#8A8A8A]">Existant</p>
+                <p className="truncate text-center text-xs text-[#111111]">
+                  {duplicate.name || CATEGORIES.find((c) => c.value === duplicate.category)?.label || 'V\u00eatement'}
+                </p>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-[#111111]">
-                  {duplicate.name || CATEGORIES.find((c) => c.value === duplicate.category)?.label || 'Vêtement'}
-                </p>
-                <p className="text-xs text-[#8A8A8A]">
-                  {duplicate.colors?.slice(0, 3).join(' · ') || '—'}
-                </p>
+              <div>
+                <div className="relative h-32 overflow-hidden rounded-xl bg-[#F0EDE8]">
+                  {preview && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={preview}
+                      alt="Nouveau"
+                      className="h-full w-full object-cover"
+                      style={{ objectPosition: 'center 15%' }}
+                    />
+                  )}
+                </div>
+                <p className="mt-1 text-center text-xs text-[#8A8A8A]">Nouveau</p>
+                <p className="truncate text-center text-xs text-[#111111]">Photo upload&eacute;e</p>
               </div>
             </div>
+
             <div className="mt-5 flex flex-col gap-2">
               <button
                 type="button"
-                onClick={() => router.push('/wardrobe')}
-                className="cursor-pointer rounded-full bg-[#111111] py-3 text-xs font-semibold text-white"
+                onClick={() => {
+                  setDuplicate(null);
+                  router.push(`/wardrobe/${duplicate.id}`);
+                }}
+                className="cursor-pointer rounded-full border border-[#EFEFEF] bg-white py-3 text-xs font-medium text-[#111111]"
               >
-                Voir dans mon dressing
+                Voir l&apos;article existant
               </button>
               <button
                 type="button"
                 onClick={confirmAddDuplicate}
-                className="cursor-pointer rounded-full border border-[#EFEFEF] bg-white py-3 text-xs font-medium text-[#111111]"
+                className="cursor-pointer py-2 text-center text-sm text-[#8A8A8A] hover:text-[#111111]"
               >
-                Ajouter quand même
+                Ajouter quand m&ecirc;me
               </button>
               <button
                 type="button"
-                onClick={() => setDuplicate(null)}
-                className="cursor-pointer py-2 text-xs text-[#8A8A8A] hover:text-[#111111]"
+                onClick={() => {
+                  setDuplicate(null);
+                  handleResetFront();
+                }}
+                className="cursor-pointer rounded-full bg-[#111111] py-3 text-xs font-semibold text-white"
               >
                 Annuler
               </button>

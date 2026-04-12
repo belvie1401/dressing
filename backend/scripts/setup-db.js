@@ -272,6 +272,11 @@ ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "has_360_view" BOOLEAN NOT N
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "avatar_body_url" TEXT;
 ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "try_on_url" TEXT;
 
+-- Archive support
+ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "archived" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "archived_at" TIMESTAMP(3);
+CREATE INDEX IF NOT EXISTS "ClothingItem_user_id_archived_idx" ON "ClothingItem"("user_id", "archived");
+
 -- Password reset tokens
 CREATE TABLE IF NOT EXISTS "PasswordReset" (
   "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,

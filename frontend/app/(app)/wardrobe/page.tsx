@@ -294,6 +294,7 @@ export default function WardrobePage() {
                       item={item}
                       onToast={showToast}
                       searchQuery={trimmedSearch}
+                      onRemoved={loadItems}
                     />
                   ))}
                 </div>
@@ -337,7 +338,7 @@ export default function WardrobePage() {
                   style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}
                 >
                   {filteredItems.map((item) => (
-                    <ClothingCard key={item.id} item={item} onToast={showToast} />
+                    <ClothingCard key={item.id} item={item} onToast={showToast} onRemoved={loadItems} />
                   ))}
                 </div>
               )}
