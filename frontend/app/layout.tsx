@@ -5,19 +5,19 @@ import PWAInstallPrompt from "@/components/ui/PWAInstallPrompt";
 import ServiceWorkerRegistrar from "@/components/ui/ServiceWorkerRegistrar";
 
 export const metadata: Metadata = {
-  title: "Lien — Votre style, connecté",
+  title: "LIEN — Votre dressing connecté",
   description:
-    "Votre dressing connecté aux stylistes. Ajoutez vos vêtements, échangez avec des stylistes et recevez des looks qui vous ressemblent.",
+    "Votre dressing intelligent connecté aux stylistes",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Lien",
+    title: "LIEN",
   },
   other: {
     "mobile-web-app-capable": "yes",
-    "msapplication-TileColor": "#1A1A1A",
-    "msapplication-TileImage": "/icons/icon-144x144.png",
+    "msapplication-TileColor": "#111111",
+    "msapplication-TileImage": "/icons/icon-144x144.png?v=2",
   },
 };
 
@@ -27,7 +27,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#1A1A1A",
+  themeColor: "#111111",
 };
 
 export default function RootLayout({
@@ -38,15 +38,14 @@ export default function RootLayout({
   return (
     <html lang="fr" className="h-full">
       <head>
-        {/* Standard favicons */}
-        <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-96x96.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-72x72.png" />
+        {/* Favicon */}
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=2" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=2" />
 
         {/* Apple touch icons */}
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
-        <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png" />
-        <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512x512.png" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=2" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png?v=2" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png?v=2" />
 
         {/* iOS splash screens */}
         <link rel="apple-touch-startup-image" href="/splash/splash-640x1136.png"

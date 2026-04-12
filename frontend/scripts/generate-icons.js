@@ -1,59 +1,119 @@
 const sharp = require('sharp');
 const fs = require('fs');
-const path = require('path');
 
-const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
-const outDir = path.join(__dirname, '../public/icons');
-
-if (!fs.existsSync(outDir)) {
-  fs.mkdirSync(outDir, { recursive: true });
+// Create icons directory
+if (!fs.existsSync('public/icons')) {
+  fs.mkdirSync('public/icons', { recursive: true });
 }
 
-// Calligraphic logo path — stylized cursive "a" from brand mark
-// Drawn in a 0-100 coordinate space
-const LOGO_PATH =
-  'M 60,78 C 38,90 8,72 12,45 C 16,18 48,8 66,28 C 78,42 68,62 50,58 ' +
-  'C 34,54 38,36 52,34 C 62,32 60,20 54,12 C 48,4 62,4 68,16';
+// LIEN brand icon — black bg + serif "LIEN" text
+// with proper letter-spacing and centered design
+const createSVG = (size) => `
+<svg width="${size}" height="${size}"
+  viewBox="0 0 ${size} ${size}"
+  xmlns="http://www.w3.org/2000/svg">
 
-function makeSvg(size, maskable = false) {
-  const bg = '#1A1A1A';
-  const stroke = '#C6A47E';
-  const r = maskable ? 0 : Math.round(size * 0.22);
-  const pad = maskable ? Math.round(size * 0.24) : Math.round(size * 0.14);
+  <!-- Background: rich black -->
+  <rect width="${size}" height="${size}"
+    fill="#111111" rx="${size * 0.22}"/>
 
-  const inner = size - 2 * pad;
-  const scale = inner / 100;
-  // Keep stroke visually consistent: thicker for small icons
-  const sw = size <= 96 ? 4 : size <= 192 ? 3.2 : 2.8;
+  <!-- Gold accent line top -->
+  <rect x="${size * 0.3}" y="${size * 0.22}"
+    width="${size * 0.4}" height="${size * 0.025}"
+    fill="#C6A47E" rx="${size * 0.012}"/>
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
-  <rect width="${size}" height="${size}" rx="${r}" fill="${bg}"/>
-  <g transform="translate(${pad},${pad}) scale(${scale})">
-    <path d="${LOGO_PATH}"
-      fill="none" stroke="${stroke}" stroke-width="${sw / scale}"
-      stroke-linecap="round" stroke-linejoin="round"/>
-  </g>
+  <!-- LIEN text centered -->
+  <text
+    x="${size / 2}"
+    y="${size * 0.62}"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="${size * 0.28}"
+    font-weight="400"
+    fill="#F7F5F2"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    letter-spacing="${size * 0.04}">LIEN</text>
+
+  <!-- Gold accent line bottom -->
+  <rect x="${size * 0.3}" y="${size * 0.75}"
+    width="${size * 0.4}" height="${size * 0.025}"
+    fill="#C6A47E" rx="${size * 0.012}"/>
+
 </svg>`;
-}
 
-async function run() {
-  for (const sz of sizes) {
-    await sharp(Buffer.from(makeSvg(sz, false)))
+// Maskable icon (no rounded corners — OS adds them)
+const createMaskableSVG = (size) => `
+<svg width="${size}" height="${size}"
+  viewBox="0 0 ${size} ${size}"
+  xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Full bleed background -->
+  <rect width="${size}" height="${size}" fill="#111111"/>
+
+  <!-- Gold accent line top -->
+  <rect x="${size * 0.25}" y="${size * 0.28}"
+    width="${size * 0.5}" height="${size * 0.02}"
+    fill="#C6A47E"/>
+
+  <!-- LIEN text -->
+  <text
+    x="${size / 2}"
+    y="${size / 2}"
+    font-family="Georgia, serif"
+    font-size="${size * 0.26}"
+    font-weight="400"
+    fill="#F7F5F2"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    letter-spacing="${size * 0.04}">LIEN</text>
+
+  <!-- Gold accent line bottom -->
+  <rect x="${size * 0.25}" y="${size * 0.72}"
+    width="${size * 0.5}" height="${size * 0.02}"
+    fill="#C6A47E"/>
+
+</svg>`;
+
+async function generateIcons() {
+  const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+
+  console.log('Generating PWA icons...');
+
+  for (const size of sizes) {
+    await sharp(Buffer.from(createSVG(size)))
       .png()
-      .toFile(path.join(outDir, `icon-${sz}x${sz}.png`));
-    console.log(`✓ icon-${sz}x${sz}.png`);
-
-    if (sz === 192 || sz === 512) {
-      await sharp(Buffer.from(makeSvg(sz, true)))
-        .png()
-        .toFile(path.join(outDir, `icon-maskable-${sz}x${sz}.png`));
-      console.log(`✓ icon-maskable-${sz}x${sz}.png`);
-    }
+      .toFile(`public/icons/icon-${size}x${size}.png`);
+    console.log(`✓ icon-${size}x${size}.png`);
   }
-  console.log('\nAll icons generated!');
+
+  // Maskable icon (for Android adaptive icons)
+  await sharp(Buffer.from(createMaskableSVG(512)))
+    .png()
+    .toFile('public/icons/icon-maskable-512.png');
+  console.log('✓ icon-maskable-512.png');
+
+  // Apple touch icon (must be 180x180, no radius)
+  await sharp(Buffer.from(createSVG(180)))
+    .png()
+    .toFile('public/icons/apple-touch-icon.png');
+  console.log('✓ apple-touch-icon.png');
+
+  // Favicon (32x32)
+  await sharp(Buffer.from(createSVG(32)))
+    .png()
+    .toFile('public/favicon.png');
+  console.log('✓ favicon.png');
+
+  // Also create favicon.ico equivalent
+  await sharp(Buffer.from(createSVG(32)))
+    .png()
+    .toFile('public/favicon-32x32.png');
+
+  await sharp(Buffer.from(createSVG(16)))
+    .png()
+    .toFile('public/favicon-16x16.png');
+
+  console.log('All icons generated!');
 }
 
-run().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+generateIcons().catch(console.error);
