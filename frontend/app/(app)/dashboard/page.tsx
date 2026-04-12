@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { format, isSameDay } from 'date-fns';
+import { isSameDay } from 'date-fns';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
-import type { Outfit, CalendarEntry } from '@/types';
+import type { CalendarEntry } from '@/types';
 import DashboardTutorial from '@/components/ui/DashboardTutorial';
 import TutorialHelpButton from '@/components/ui/TutorialHelpButton';
 
@@ -31,8 +30,8 @@ export default function DashboardPage() {
   // Stats
   const [stats, setStats] = useState({ wardrobe: 0, looks: 0, sessions: 0 });
 
-  // Recommandations — recent outfits
-  const [recommendations, setRecommendations] = useState<Outfit[] | null>(null);
+  // Recommandations — stylist-curated outfits
+  const [recommendations, setRecommendations] = useState<any[]>([]);
 
   // Daily reminder banner
   const [todayHasEntry, setTodayHasEntry] = useState<boolean | null>(null);
@@ -71,16 +70,11 @@ export default function DashboardPage() {
   useEffect(() => {
     let mounted = true;
 
-    const loadRest = async () => {
+    const loadCalendar = async () => {
       const now = new Date();
-      const [recsRes, calRes] = await Promise.all([
-        api.get<Outfit[]>('/outfits?limit=4&sort=recent'),
-        api.get<CalendarEntry[]>(`/calendar?month=${now.getMonth() + 1}&year=${now.getFullYear()}`),
-      ]);
+      const calRes = await api.get<CalendarEntry[]>(`/calendar?month=${now.getMonth() + 1}&year=${now.getFullYear()}`);
 
       if (!mounted) return;
-
-      setRecommendations(recsRes.success && recsRes.data ? recsRes.data : []);
 
       if (calRes.success && calRes.data) {
         const hasToday = calRes.data.some((e) => isSameDay(new Date(e.date), now));
@@ -90,10 +84,21 @@ export default function DashboardPage() {
       }
     };
 
-    loadRest();
+    loadCalendar();
     return () => {
       mounted = false;
     };
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('lien_token');
+    const API = process.env.NEXT_PUBLIC_API_URL;
+    fetch(`${API}/api/outfits?from_stylist=true&limit=3`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((d) => setRecommendations(d.data || []))
+      .catch(() => {});
   }, []);
 
   const challenge: ChallengeState = {
@@ -233,93 +238,71 @@ export default function DashboardPage() {
       </div>
 
       {/* ============ C. RECOMMANDATIONS POUR VOUS ============ */}
-      <section className="mb-8 md:mb-12 px-5 md:px-0" data-tour="look-du-jour">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+      <section className="mb-5 md:mb-12 px-5 md:px-0" data-tour="look-du-jour">
+        <div className="mb-3 flex items-start justify-between">
           <div>
-            <h2 className="font-serif text-lg md:text-2xl text-[#111111]">
-              Recommandations pour vous
+            <h2 className="font-serif text-xl md:text-2xl text-[#111111]">
+              Recommandations
             </h2>
-            <p className="mt-1 text-sm text-[#8A8A8A]">
-              Des inspirations s&eacute;lectionn&eacute;es par votre styliste
+            <p className="mt-0.5 text-xs text-[#9B9B9B]">
+              Des looks sélectionnés par votre styliste
             </p>
           </div>
           <Link
             href="/outfits"
-            className="cursor-pointer rounded-full border border-[#EFEFEF] bg-white px-4 py-2 text-xs font-medium text-[#111111] transition-colors hover:bg-[#F0EDE8]"
+            className="flex-shrink-0 rounded-full border border-[#EFEFEF] bg-white px-3 py-1.5 text-[11px] font-medium text-[#111111]"
           >
             Voir tous les looks
           </Link>
         </div>
 
-        {recommendations === null ? (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-            {[0, 1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="aspect-[4/5] rounded-2xl bg-[#F0EDE8] animate-pulse"
-              />
-            ))}
-          </div>
-        ) : recommendations.length === 0 ? (
-          <div className="rounded-2xl bg-white p-8 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#F0EDE8]">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-            </div>
-            <p className="font-serif text-lg text-[#111111]">
-              Aucun look pour l&rsquo;instant
-            </p>
-            <p className="mt-2 text-xs text-[#8A8A8A]">
-              Cr&eacute;ez votre premier look depuis votre dressing.
-            </p>
+        {recommendations.length === 0 ? (
+          <div className="rounded-2xl bg-white p-5 text-center">
+            <p className="font-serif text-base text-[#111111]">Aucune recommandation</p>
+            <p className="mt-1 text-xs text-[#9B9B9B]">Votre styliste n&rsquo;a pas encore partagé de looks.</p>
             <Link
-              href="/outfits"
-              className="mt-4 inline-flex items-center rounded-full bg-[#111111] px-5 py-2.5 text-xs font-medium text-white"
+              href="/stylists"
+              className="mt-3 inline-flex items-center rounded-full bg-[#111111] px-4 py-2 text-xs font-medium text-white"
             >
-              Cr&eacute;er un look
+              Trouver un styliste
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-            {recommendations.map((look) => {
+          <div className="grid grid-cols-3 gap-2 md:gap-4">
+            {recommendations.map((look: any) => {
               const firstItem = look.items?.[0]?.item;
               const cover = firstItem?.bg_removed_url || firstItem?.photo_url || null;
-              const pieces = look.items?.length ?? 0;
               return (
-                <Link
-                  key={look.id}
-                  href={`/outfits/${look.id}`}
-                  className="group relative block cursor-pointer overflow-hidden rounded-2xl bg-white"
-                >
-                  <div className="relative aspect-[4/5] w-full bg-[#F0EDE8]">
+                <div key={look.id} className="overflow-hidden rounded-2xl bg-white">
+                  <div className="relative h-[150px]">
                     {cover ? (
-                      <Image
+                      <img
                         src={cover}
                         alt={look.name}
-                        fill
-                        className="object-cover"
-                        sizes="(min-width: 1280px) 220px, (min-width: 768px) 30vw, 45vw"
+                        className="h-full w-full object-cover"
                       />
-                    ) : null}
-                    <button
-                      type="button"
-                      aria-label="Ajouter aux favoris"
-                      className="absolute right-3 top-3 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-colors hover:bg-white"
-                      onClick={(e) => e.preventDefault()}
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                      </svg>
-                    </button>
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent px-4 pb-4 pt-10">
-                      <p className="text-sm font-semibold text-white">{look.name}</p>
-                      <p className="mt-0.5 text-xs text-white/80">
-                        {pieces} pi&egrave;ce{pieces > 1 ? 's' : ''}
-                      </p>
+                    ) : (
+                      <div className="h-full w-full bg-[#F0EDE8]" />
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 pb-2 pt-6">
+                      <p className="text-[10px] italic leading-tight text-white">{look.name}</p>
                     </div>
                   </div>
-                </Link>
+                  <div className="flex flex-col gap-1.5 p-2">
+                    <button
+                      type="button"
+                      className="w-full rounded-full bg-[#C6A47E]/20 py-2 text-[11px] text-[#9B7B5C]"
+                    >
+                      Portez ce Look
+                    </button>
+                    <Link
+                      href={`/outfits/${look.id}`}
+                      className="block w-full rounded-full border border-[#EFEFEF] py-2 text-center text-[11px] text-[#111111]"
+                    >
+                      Afficher les détails
+                    </Link>
+                  </div>
+                </div>
               );
             })}
           </div>
