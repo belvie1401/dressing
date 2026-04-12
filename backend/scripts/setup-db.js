@@ -268,6 +268,10 @@ ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "photo_back_url" TEXT;
 ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "photo_back_removed" TEXT;
 ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "has_360_view" BOOLEAN NOT NULL DEFAULT false;
 
+-- Virtual try-on
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "avatar_body_url" TEXT;
+ALTER TABLE "ClothingItem" ADD COLUMN IF NOT EXISTS "try_on_url" TEXT;
+
 -- Password reset tokens
 CREATE TABLE IF NOT EXISTS "PasswordReset" (
   "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,

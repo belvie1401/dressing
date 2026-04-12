@@ -31,3 +31,6 @@ services:
       # Anthropic (AI clothing scan) — set in dashboard
       - key: ANTHROPIC_API_KEY
         sync: false
+      # Replicate (virtual try-on) — set in dashboard
+      - key: REPLICATE_API_TOKEN
+        sync: false
