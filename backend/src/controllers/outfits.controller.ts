@@ -85,17 +85,58 @@ export async function createOutfit(req: Request, res: Response): Promise<void> {
   try {
     const { name, occasion, season, item_ids, ai_generated } = req.body;
 
+    // ── Validate required fields ──
+    const trimmedName = typeof name === 'string' ? name.trim() : '';
+    if (!trimmedName) {
+      res.status(400).json({
+        success: false,
+        error: 'MISSING_NAME',
+        message: 'Le nom de la tenue est requis.',
+      });
+      return;
+    }
+
+    if (!Array.isArray(item_ids) || item_ids.length === 0) {
+      res.status(400).json({
+        success: false,
+        error: 'MISSING_ITEMS',
+        message: 'Sélectionnez au moins un vêtement.',
+      });
+      return;
+    }
+
+    // ── Validate that every item belongs to the authenticated user ──
+    // This catches: foreign IDs, deleted items, typos. Without this check
+    // the Prisma nested-create below would throw a generic FK violation
+    // and the user would only see "Erreur serveur".
+    const userItems = await prisma.clothingItem.findMany({
+      where: {
+        id: { in: item_ids as string[] },
+        user_id: req.user!.userId,
+      },
+      select: { id: true },
+    });
+
+    if (userItems.length !== item_ids.length) {
+      res.status(400).json({
+        success: false,
+        error: 'INVALID_ITEMS',
+        message:
+          "Certains vêtements sélectionnés sont introuvables dans votre dressing.",
+      });
+      return;
+    }
+
+    // ── Create the outfit ──
     const outfit = await prisma.outfit.create({
       data: {
         user_id: req.user!.userId,
-        name,
-        occasion,
-        season,
+        name: trimmedName,
+        occasion: occasion || undefined,
+        season: season || undefined,
         ai_generated: ai_generated || false,
         items: {
-          create: (item_ids || []).map((item_id: string) => ({
-            item_id,
-          })),
+          create: (item_ids as string[]).map((item_id) => ({ item_id })),
         },
       },
       include: {
@@ -107,7 +148,13 @@ export async function createOutfit(req: Request, res: Response): Promise<void> {
 
     res.status(201).json({ success: true, data: outfit });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'Erreur lors de la création de la tenue' });
+    console.error('Create outfit error:', error);
+    const err = error as { message?: string };
+    res.status(500).json({
+      success: false,
+      error: 'CREATE_FAILED',
+      message: err.message || 'Erreur lors de la création de la tenue',
+    });
   }
 }
 
