@@ -4,7 +4,7 @@
   "description": "Votre dressing intelligent connecté aux stylistes",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#111111",
+  "background_color": "#F7F5F2",
   "theme_color": "#111111",
   "orientation": "portrait",
   "scope": "/",

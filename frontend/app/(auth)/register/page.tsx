@@ -15,11 +15,8 @@ export default function RegisterPage() {
           paddingTop: 'calc(env(safe-area-inset-top, 44px) + 24px)',
         }}
       >
-        <a
-          href="/"
-          className="font-serif text-2xl text-[#111111] no-underline mb-8"
-        >
-          LIEN
+        <a href="/" className="mb-8 block">
+          <img src="/logo.png" alt="LIEN" className="h-12 w-auto" />
         </a>
 
         <h1 className="font-serif text-2xl text-[#111111]">Créer un compte</h1>
@@ -135,7 +132,7 @@ export default function RegisterPage() {
           >
             ← Retour
           </button>
-          <p className="font-serif text-3xl text-[#111111]">LIEN</p>
+          <img src="/logo.png" alt="LIEN" className="h-12 w-auto mx-auto" />
           <div className="w-8 h-0.5 bg-[#C6A47E] mx-auto mt-2" />
           <div className="mt-3 inline-flex items-center gap-2 bg-[#F0EDE8] rounded-full px-3 py-1">
             <div className="w-1.5 h-1.5 bg-[#C6A47E] rounded-full" />

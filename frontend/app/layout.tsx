@@ -42,6 +42,10 @@ export default function RootLayout({
       publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!}
       localization={frFR}
       appearance={{
+        layout: {
+          logoImageUrl: '/logo.png',
+          logoLinkUrl: '/',
+        },
         variables: {
           colorPrimary: '#111111',
           colorBackground: '#F7F5F2',

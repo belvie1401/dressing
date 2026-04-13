@@ -12,11 +12,8 @@ export default function LoginPage() {
     >
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <a
-            href="/"
-            className="font-serif text-3xl text-[#111111] no-underline"
-          >
-            LIEN
+          <a href="/">
+            <img src="/logo.png" alt="LIEN" className="h-14 w-auto mx-auto" />
           </a>
           <div className="w-8 h-0.5 bg-[#C6A47E] mx-auto mt-2" />
         </div>
