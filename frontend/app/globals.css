@@ -151,6 +151,18 @@ body {
 }
 
 /* ─── Toast animation ─────────────────────────────────────────────────── */
+/* ─── Clerk component overrides ──────────────────────────────────────── */
+.cl-internal-b3fm6y {
+  display: none !important;
+}
+.cl-footer {
+  display: none !important;
+}
+[data-localization-key="signIn.start.subtitle"] {
+  display: none !important;
+}
+
+/* ─── Toast animation ─────────────────────────────────────────────────── */
 @keyframes toast-in {
   0% {
     opacity: 0;

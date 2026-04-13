@@ -44,7 +44,10 @@ export default function RootLayout({
       appearance={{
         layout: {
           logoImageUrl: '/logo.png',
-          logoLinkUrl: '/',
+          logoPlacement: 'inside' as const,
+          showOptionalFields: false,
+          socialButtonsPlacement: 'top' as const,
+          socialButtonsVariant: 'blockButton' as const,
         },
         variables: {
           colorPrimary: '#111111',
@@ -52,12 +55,14 @@ export default function RootLayout({
           colorInputBackground: '#FFFFFF',
           colorInputText: '#111111',
           colorTextOnPrimaryBackground: '#FFFFFF',
+          colorText: '#111111',
+          colorTextSecondary: '#8A8A8A',
+          colorNeutral: '#111111',
+          colorDanger: '#D4785C',
           borderRadius: '16px',
           fontFamily: 'Inter, sans-serif',
           fontSize: '14px',
-          colorDanger: '#D4785C',
-          colorSuccess: '#16A34A',
-          colorWarning: '#C6A47E',
+          spacingUnit: '4px',
         },
         elements: {
           rootBox: {
@@ -68,17 +73,24 @@ export default function RootLayout({
             boxShadow: 'none',
             border: '1px solid #EFEFEF',
             borderRadius: '24px',
-            padding: '24px',
+            padding: '28px 24px',
+            width: '100%',
+            maxWidth: '400px',
           },
           headerTitle: {
             fontFamily: 'Playfair Display, serif',
             fontSize: '22px',
             color: '#111111',
             fontWeight: '500',
+            textAlign: 'center' as const,
           },
           headerSubtitle: {
             color: '#8A8A8A',
             fontSize: '13px',
+            textAlign: 'center' as const,
+          },
+          logoBox: {
+            display: 'none',
           },
           socialButtonsBlockButton: {
             borderRadius: '9999px',
@@ -86,28 +98,23 @@ export default function RootLayout({
             backgroundColor: '#FFFFFF',
             color: '#111111',
             fontWeight: '500',
-          },
-          formButtonPrimary: {
-            backgroundColor: '#111111',
-            borderRadius: '9999px',
             fontSize: '14px',
-            fontWeight: '500',
-            paddingTop: '14px',
-            paddingBottom: '14px',
+            padding: '14px 24px',
             '&:hover': {
-              backgroundColor: '#333333',
-              opacity: 1,
+              backgroundColor: '#F7F5F2',
+              border: '1px solid #111111',
             },
           },
-          formFieldInput: {
-            borderRadius: '16px',
-            border: '1px solid #EFEFEF',
-            backgroundColor: '#FFFFFF',
-            fontSize: '14px',
-            '&:focus': {
-              border: '1px solid #111111',
-              boxShadow: 'none',
-            },
+          socialButtonsBlockButtonText: {
+            color: '#111111',
+            fontWeight: '500',
+          },
+          dividerLine: {
+            backgroundColor: '#EFEFEF',
+          },
+          dividerText: {
+            color: '#CFCFCF',
+            fontSize: '12px',
           },
           formFieldLabel: {
             fontSize: '11px',
@@ -115,20 +122,100 @@ export default function RootLayout({
             textTransform: 'uppercase' as const,
             letterSpacing: '0.05em',
             fontWeight: '500',
+            marginBottom: '6px',
+          },
+          formFieldInput: {
+            borderRadius: '14px',
+            border: '1px solid #EFEFEF',
+            backgroundColor: '#FFFFFF',
+            color: '#111111',
+            fontSize: '14px',
+            padding: '14px 16px',
+            '&:focus': {
+              border: '1px solid #111111',
+              boxShadow: 'none',
+              outline: 'none',
+            },
+            '&::placeholder': {
+              color: '#CFCFCF',
+            },
+          },
+          formFieldInputShowPasswordButton: {
+            color: '#8A8A8A',
+          },
+          formButtonPrimary: {
+            backgroundColor: '#111111',
+            borderRadius: '9999px',
+            fontSize: '14px',
+            fontWeight: '500',
+            padding: '14px 24px',
+            textTransform: 'none' as const,
+            letterSpacing: '0',
+            boxShadow: 'none',
+            '&:hover': {
+              backgroundColor: '#333333',
+              boxShadow: 'none',
+            },
+            '&:active': {
+              backgroundColor: '#000000',
+            },
+          },
+          formButtonReset: {
+            color: '#8A8A8A',
+            fontSize: '13px',
+          },
+          footerActionText: {
+            color: '#8A8A8A',
+            fontSize: '13px',
           },
           footerActionLink: {
             color: '#111111',
             fontWeight: '500',
+            textDecoration: 'underline',
+            '&:hover': {
+              color: '#333333',
+            },
           },
-          identityPreviewText: {
-            color: '#111111',
+          formFieldErrorText: {
+            color: '#D4785C',
+            fontSize: '12px',
           },
           alertText: {
             fontSize: '13px',
+            color: '#D4785C',
           },
-          dividerText: {
-            color: '#CFCFCF',
+          alert: {
+            backgroundColor: '#FFF8F6',
+            borderColor: '#D4785C33',
+            borderRadius: '12px',
+          },
+          formFieldAction: {
+            color: '#8A8A8A',
             fontSize: '12px',
+            textDecoration: 'underline',
+          },
+          identityPreviewText: {
+            color: '#111111',
+            fontSize: '13px',
+          },
+          identityPreviewEditButton: {
+            color: '#C6A47E',
+          },
+          otpCodeFieldInput: {
+            borderRadius: '12px',
+            border: '2px solid #EFEFEF',
+            color: '#111111',
+            fontSize: '20px',
+            fontFamily: 'Playfair Display, serif',
+            '&:focus': {
+              borderColor: '#111111',
+            },
+          },
+          footer: {
+            display: 'none',
+          },
+          main: {
+            gap: '16px',
           },
         },
       }}
