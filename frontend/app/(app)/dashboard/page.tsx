@@ -149,24 +149,24 @@ export default function DashboardPage() {
       <TutorialHelpButton onRestart={restartTutorial} />
 
       {/* ============ A. GREETING ============ */}
-      <div className="px-5 mt-2 mb-4 md:px-0 md:mt-0 md:mb-6">
-        <h1 className="font-serif text-4xl md:text-4xl font-semibold leading-tight text-[#111111]">
+      <div className="px-4 mt-1 mb-3 md:px-0 md:mt-0 md:mb-6">
+        <h1 className="font-serif text-3xl md:text-4xl font-semibold leading-tight text-[#111111]">
           Bonjour{firstName ? ` ${firstName}` : ''}{' '}
           <span className="inline-block" aria-hidden>
             &#128075;
           </span>
         </h1>
-        <p className="mt-2 text-sm text-[#9B9B9B] md:text-[#8A8A8A] leading-relaxed">
+        <p className="mt-1 text-xs text-[#9B9B9B] md:text-sm md:text-[#8A8A8A] leading-relaxed">
           Votre dressing, vos stylistes, votre style. Tout est connect&eacute;.
         </p>
       </div>
 
       {/* ============ DAILY REMINDER BANNER ============ */}
       {todayHasEntry === false && (
-        <div className="mx-5 mb-5 md:mx-0 md:mb-6 rounded-2xl bg-[#EDE5DC] p-4 md:p-3">
-          <div className="flex items-center gap-4 md:gap-3">
-            <div className="flex h-12 w-12 md:h-10 md:w-10 flex-shrink-0 items-center justify-center rounded-2xl md:rounded-full bg-white/60">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <div className="mx-4 mb-4 md:mx-0 md:mb-6 rounded-xl md:rounded-2xl bg-[#EDE5DC] p-3 md:p-3">
+          <div className="flex items-center gap-3 md:gap-3">
+            <div className="flex h-10 w-10 md:h-10 md:w-10 flex-shrink-0 items-center justify-center rounded-xl md:rounded-full bg-white/60">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" />
                 <line x1="16" y1="2" x2="16" y2="6" />
                 <line x1="8" y1="2" x2="8" y2="6" />
@@ -174,12 +174,12 @@ export default function DashboardPage() {
               </svg>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-base md:text-sm font-semibold text-[#111111] leading-snug">Qu&apos;est-ce que vous portez aujourd&apos;hui&nbsp;?</p>
+              <p className="text-sm md:text-sm font-semibold text-[#111111] leading-snug">Qu&apos;est-ce que vous portez aujourd&apos;hui&nbsp;?</p>
               <p className="text-xs text-[#9B9B9B] md:text-[#8A8A8A] mt-1">Enregistrez votre look du jour</p>
             </div>
             <Link
               href="/calendar"
-              className="flex-shrink-0 rounded-full bg-[#111111] px-4 md:px-3 py-2.5 md:py-1.5 text-sm md:text-xs font-medium text-white"
+              className="flex-shrink-0 rounded-full bg-[#111111] px-3 md:px-3 py-2 md:py-1.5 text-xs md:text-xs font-medium text-white"
             >
               Ajouter
             </Link>
@@ -188,9 +188,9 @@ export default function DashboardPage() {
       )}
 
       {/* ============ B. STAT CARDS ============ */}
-      <div className="mx-4 mb-5 md:mx-0 md:mb-12 grid grid-cols-3 gap-2 md:gap-4">
+      <div className="mx-4 mb-4 md:mx-0 md:mb-12 grid grid-cols-3 gap-2 md:gap-4">
         {/* Card 1 — Mon dressing */}
-        <div className="overflow-hidden rounded-2xl bg-white p-3 md:border md:border-[#EFEFEF] md:p-5">
+        <div className="overflow-hidden rounded-xl md:rounded-2xl bg-white p-3 md:border md:border-[#EFEFEF] md:p-5">
           <div className="flex items-center gap-1 mb-2">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 md:w-[14px] md:h-[14px]">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -198,30 +198,30 @@ export default function DashboardPage() {
             </svg>
             <span className="truncate text-[10px] md:text-[11px] text-[#9B9B9B]">Mon dressing</span>
           </div>
-          <p className="font-serif text-3xl md:text-4xl text-[#111111] leading-none">{stats.wardrobe}</p>
+          <p className="font-serif text-2xl md:text-4xl text-[#111111] leading-none">{stats.wardrobe}</p>
           <p className="text-[10px] text-[#9B9B9B] mt-0.5 md:mt-2">vêtements</p>
-          <Link href="/wardrobe" className="text-[10px] md:text-xs font-medium text-[#111111] mt-2 block">
+          <Link href="/wardrobe" className="text-[10px] md:text-xs font-medium text-[#111111] mt-1.5 md:mt-2 block">
             Voir tout →
           </Link>
         </div>
 
         {/* Card 2 — Mes looks */}
-        <div className="overflow-hidden rounded-2xl bg-white p-3 md:border md:border-[#EFEFEF] md:p-5">
+        <div className="overflow-hidden rounded-xl md:rounded-2xl bg-white p-3 md:border md:border-[#EFEFEF] md:p-5">
           <div className="flex items-center gap-1 mb-2">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 md:w-[14px] md:h-[14px]">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
             <span className="truncate text-[10px] md:text-[11px] text-[#9B9B9B]">Mes looks</span>
           </div>
-          <p className="font-serif text-3xl md:text-4xl text-[#111111] leading-none">{stats.looks}</p>
+          <p className="font-serif text-2xl md:text-4xl text-[#111111] leading-none">{stats.looks}</p>
           <p className="text-[10px] text-[#9B9B9B] mt-0.5 md:mt-2">créés</p>
-          <Link href="/outfits" className="text-[10px] md:text-xs font-medium text-[#111111] mt-2 block">
+          <Link href="/outfits" className="text-[10px] md:text-xs font-medium text-[#111111] mt-1.5 md:mt-2 block">
             Voir tout →
           </Link>
         </div>
 
         {/* Card 3 — Sessions */}
-        <div className="overflow-hidden rounded-2xl bg-white p-3 md:border md:border-[#EFEFEF] md:p-5">
+        <div className="overflow-hidden rounded-xl md:rounded-2xl bg-white p-3 md:border md:border-[#EFEFEF] md:p-5">
           <div className="flex items-center gap-1 mb-2">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 md:w-[14px] md:h-[14px]">
               <rect x="3" y="4" width="18" height="18" rx="2" />
@@ -231,9 +231,9 @@ export default function DashboardPage() {
             </svg>
             <span className="truncate text-[10px] md:text-[11px] text-[#9B9B9B]">Sessions</span>
           </div>
-          <p className="font-serif text-3xl md:text-4xl text-[#111111] leading-none">{stats.sessions}</p>
+          <p className="font-serif text-2xl md:text-4xl text-[#111111] leading-none">{stats.sessions}</p>
           <p className="text-[10px] text-[#9B9B9B] mt-0.5 md:mt-2">en cours</p>
-          <Link href="/calendar" className="text-[10px] md:text-xs font-medium text-[#111111] mt-2 block">
+          <Link href="/calendar" className="text-[10px] md:text-xs font-medium text-[#111111] mt-1.5 md:mt-2 block">
             <span className="md:hidden">Sessions →</span>
             <span className="hidden md:inline">Voir mes sessions →</span>
           </Link>
@@ -241,10 +241,10 @@ export default function DashboardPage() {
       </div>
 
       {/* ============ C. RECOMMANDATIONS POUR VOUS ============ */}
-      <section className="mb-5 md:mb-12 px-5 md:px-0" data-tour="look-du-jour">
+      <section className="mb-4 md:mb-12 px-4 md:px-0" data-tour="look-du-jour">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="font-serif text-xl md:text-2xl text-[#111111]">
+            <h2 className="font-serif text-lg md:text-2xl text-[#111111]">
               Recommandations
             </h2>
             <p className="mt-0.5 text-xs text-[#9B9B9B]">
@@ -260,7 +260,7 @@ export default function DashboardPage() {
         </div>
 
         {recommendations.length === 0 ? (
-          <div className="rounded-2xl bg-white p-5 text-center">
+          <div className="rounded-xl md:rounded-2xl bg-white p-4 md:p-5 text-center">
             <p className="font-serif text-base text-[#111111]">Aucune recommandation</p>
             <p className="mt-1 text-xs text-[#9B9B9B]">Votre styliste n&rsquo;a pas encore partagé de looks.</p>
             <Link
@@ -276,8 +276,8 @@ export default function DashboardPage() {
               const firstItem = look.items?.[0]?.item;
               const cover = firstItem?.bg_removed_url || firstItem?.photo_url || null;
               return (
-                <div key={look.id} className="overflow-hidden rounded-2xl bg-white">
-                  <div className="relative h-[150px]">
+                <div key={look.id} className="overflow-hidden rounded-xl md:rounded-2xl bg-white">
+                  <div className="relative h-[130px] md:h-[150px]">
                     {cover ? (
                       <img
                         src={cover}
@@ -294,13 +294,13 @@ export default function DashboardPage() {
                   <div className="flex flex-col gap-1.5 p-2">
                     <button
                       type="button"
-                      className="w-full rounded-full bg-[#C6A47E]/20 py-2 text-[11px] text-[#9B7B5C]"
+                      className="w-full rounded-full bg-[#C6A47E]/20 py-1.5 text-[10px] md:py-2 md:text-[11px] text-[#9B7B5C]"
                     >
                       Portez ce Look
                     </button>
                     <Link
                       href={`/outfits/${look.id}`}
-                      className="block w-full rounded-full border border-[#EFEFEF] py-2 text-center text-[11px] text-[#111111]"
+                      className="block w-full rounded-full border border-[#EFEFEF] py-1.5 text-center text-[10px] md:py-2 md:text-[11px] text-[#111111]"
                     >
                       Afficher les détails
                     </Link>
@@ -313,8 +313,8 @@ export default function DashboardPage() {
       </section>
 
       {/* ============ D. WARDROBE PREVIEW ============ */}
-      <div className="px-5 mb-5">
-        <div className="rounded-2xl bg-white p-4">
+      <div className="mx-4 mb-4 md:mx-0 md:mb-5">
+        <div className="rounded-xl md:rounded-2xl bg-white p-3 md:p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-serif text-base text-[#111111]">Mon Dressing</h2>
             <span className="text-sm text-[#9B9B9B]">{stats.wardrobe} pièces</span>
@@ -325,7 +325,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={item.id}
-                  className="h-[95px] w-[80px] flex-shrink-0 overflow-hidden rounded-xl bg-[#F7F5F2]"
+                  className="h-[82px] w-[68px] md:h-[95px] md:w-[80px] flex-shrink-0 overflow-hidden rounded-lg md:rounded-xl bg-[#F7F5F2]"
                 >
                   {photo && (
                     <img
@@ -340,7 +340,7 @@ export default function DashboardPage() {
             })}
             <Link
               href="/wardrobe/add"
-              className="flex h-[95px] w-[80px] flex-shrink-0 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#CFCFCF] bg-[#F2F0EB]"
+              className="flex h-[82px] w-[68px] md:h-[95px] md:w-[80px] flex-shrink-0 cursor-pointer flex-col items-center justify-center rounded-lg md:rounded-xl border-2 border-dashed border-[#CFCFCF] bg-[#F2F0EB]"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round">
                 <line x1="12" y1="5" x2="12" y2="19" />
@@ -353,16 +353,16 @@ export default function DashboardPage() {
       </div>
 
       {/* ============ E. PROCHAINE SESSION (mobile only — right panel has desktop version) ============ */}
-      <div className="px-5 mb-6 lg:hidden">
-        <div className="rounded-2xl bg-[#111111] p-4">
+      <div className="mx-4 mb-4 lg:hidden">
+        <div className="rounded-xl bg-[#111111] p-3 md:p-4">
           {!nextSession ? (
             <>
-              <p className="text-[9px] uppercase tracking-widest text-[#C6A47E]">PROCHAINE SESSION</p>
-              <p className="mt-1 font-serif text-xl text-white">Aucune session prévue</p>
+              <p className="text-[8px] uppercase tracking-widest text-[#C6A47E]">PROCHAINE SESSION</p>
+              <p className="mt-1 font-serif text-lg text-white">Aucune session prévue</p>
               <p className="mt-1 text-xs text-[#9B9B9B]">Réservez un rendez-vous avec un styliste.</p>
               <Link
                 href="/stylists"
-                className="mt-3 inline-block rounded-full bg-white px-4 py-2.5 text-xs font-semibold text-[#111111]"
+                className="mt-3 inline-block rounded-full bg-white px-4 py-2 text-xs font-semibold text-[#111111]"
               >
                 Trouvez un styliste
               </Link>
@@ -370,8 +370,8 @@ export default function DashboardPage() {
           ) : (
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <p className="text-[9px] uppercase tracking-widest text-[#C6A47E]">PROCHAINE SESSION</p>
-                <p className="mt-1 font-serif text-xl text-white">
+                <p className="text-[8px] uppercase tracking-widest text-[#C6A47E]">PROCHAINE SESSION</p>
+                <p className="mt-1 font-serif text-lg text-white">
                   {new Date(nextSession.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </p>
                 <p className="mt-1 text-sm text-white">
@@ -401,21 +401,21 @@ export default function DashboardPage() {
       {/* ============ F. TWO BOTTOM CARDS ============ */}
       <section
         data-tour="cette-semaine"
-        className="grid grid-cols-1 gap-3 md:gap-4 md:grid-cols-2 px-5 md:px-0"
+        className="grid grid-cols-1 gap-3 md:gap-4 md:grid-cols-2 px-4 md:px-0 mb-4 md:mb-0"
       >
         {/* ----- Besoin d'inspiration ----- */}
-        <div className="relative overflow-hidden rounded-2xl bg-[#EDE5DC] p-4 md:p-6">
+        <div className="relative overflow-hidden rounded-xl md:rounded-2xl bg-[#EDE5DC] p-3 md:p-6">
           <div className="relative z-10">
-            <h3 className="font-serif text-lg text-[#111111]">
+            <h3 className="font-serif text-sm md:text-lg text-[#111111]">
               Besoin d&rsquo;inspiration&nbsp;?
             </h3>
-            <p className="mt-2 max-w-[80%] text-xs leading-relaxed text-[#8A8A8A]">
+            <p className="mt-1 md:mt-2 max-w-[80%] text-[11px] md:text-xs leading-relaxed text-[#8A8A8A]">
               Parlez &agrave; un styliste et recevez des looks adapt&eacute;s &agrave;
               votre style et &agrave; vos envies.
             </p>
             <Link
               href="/stylists"
-              className="mt-4 inline-flex items-center rounded-full bg-[#111111] px-5 py-2.5 text-xs font-medium text-white"
+              className="mt-3 md:mt-4 inline-flex items-center rounded-full bg-[#111111] px-4 md:px-5 py-2 md:py-2.5 text-xs font-medium text-white"
             >
               Trouver un styliste
             </Link>
@@ -423,18 +423,18 @@ export default function DashboardPage() {
         </div>
 
         {/* ----- Défi du mois ----- */}
-        <div className="rounded-2xl bg-[#F0EDE8] p-4 md:p-6">
+        <div className="rounded-xl md:rounded-2xl bg-[#F0EDE8] p-3 md:p-6">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h3 className="font-serif text-lg text-[#111111]">
+              <h3 className="font-serif text-sm md:text-lg text-[#111111]">
                 D&eacute;fi du mois
               </h3>
-              <p className="mt-2 text-xs leading-relaxed text-[#8A8A8A]">
+              <p className="mt-1 md:mt-2 text-[11px] md:text-xs leading-relaxed text-[#8A8A8A]">
                 Cr&eacute;ez {challenge.target} looks avec vos pi&egrave;ces les moins
                 port&eacute;es.
               </p>
-              <div className="mt-6">
-                <p className="mb-2 text-xs text-[#8A8A8A]">
+              <div className="mt-4 md:mt-6">
+                <p className="mb-2 text-[11px] md:text-xs text-[#8A8A8A]">
                   {`${challenge.current} / ${challenge.target} looks créés`}
                 </p>
                 <div className="h-1.5 w-full rounded-full bg-[#F0EDE8]">
