@@ -151,6 +151,29 @@ body {
 }
 
 /* ─── Toast animation ─────────────────────────────────────────────────── */
+/* ─── Remove browser focus outlines on non-interactive containers ─────── */
+div:focus,
+section:focus,
+main:focus,
+article:focus,
+aside:focus,
+nav:focus,
+header:focus,
+footer:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Keep focus-visible ring on interactive elements for accessibility */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 2px solid #111111;
+  outline-offset: 2px;
+}
+
 /* ─── Clerk component overrides ──────────────────────────────────────── */
 .cl-internal-b3fm6y {
   display: none !important;

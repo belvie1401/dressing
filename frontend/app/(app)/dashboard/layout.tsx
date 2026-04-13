@@ -204,36 +204,47 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     let mounted = true;
 
     const load = async () => {
-      const [convRes, actRes, statsRes, upcomingRes] = await Promise.all([
-        api.get<Array<{ unreadCount: number }>>('/messages'),
-        api.get<ActivityItem[]>('/activity?limit=5'),
-        api.get<WardrobeStats>('/wardrobe/stats'),
-        api.get<CalendarEntry[]>('/calendar?upcoming=true&limit=1'),
-      ]);
+      try {
+        const [convRes, actRes, statsRes, upcomingRes] = await Promise.allSettled([
+          api.get<Array<{ unreadCount: number }>>('/messages'),
+          api.get<ActivityItem[]>('/activity?limit=5'),
+          api.get<WardrobeStats>('/wardrobe/stats'),
+          api.get<CalendarEntry[]>('/calendar?upcoming=true&limit=1'),
+        ]);
 
-      if (!mounted) return;
+        if (!mounted) return;
 
-      if (convRes.success && convRes.data) {
-        const unread = convRes.data.reduce(
-          (acc, c) => acc + (c.unreadCount ?? 0),
-          0
+        if (convRes.status === 'fulfilled' && convRes.value.success && convRes.value.data) {
+          const unread = convRes.value.data.reduce(
+            (acc, c) => acc + (c.unreadCount ?? 0),
+            0
+          );
+          setUnreadMessages(unread);
+        } else {
+          setUnreadMessages(0);
+        }
+
+        setActivities(
+          actRes.status === 'fulfilled' && actRes.value.success && actRes.value.data
+            ? actRes.value.data
+            : []
         );
-        setUnreadMessages(unread);
-      } else {
-        setUnreadMessages(0);
+        setStats(
+          statsRes.status === 'fulfilled' && statsRes.value.success && statsRes.value.data
+            ? statsRes.value.data
+            : { worn: 0, new_outfits: 0, cost_per_wear: 0 }
+        );
+        setNextSession(
+          upcomingRes.status === 'fulfilled' && upcomingRes.value.success && upcomingRes.value.data && upcomingRes.value.data.length > 0
+            ? upcomingRes.value.data[0]
+            : null
+        );
+      } catch {
+        if (!mounted) return;
+        setActivities([]);
+        setStats({ worn: 0, new_outfits: 0, cost_per_wear: 0 });
+        setNextSession(null);
       }
-
-      setActivities(actRes.success && actRes.data ? actRes.data : []);
-      setStats(
-        statsRes.success && statsRes.data
-          ? statsRes.data
-          : { worn: 0, new_outfits: 0, cost_per_wear: 0 }
-      );
-      setNextSession(
-        upcomingRes.success && upcomingRes.data && upcomingRes.data.length > 0
-          ? upcomingRes.data[0]
-          : null
-      );
     };
 
     load();
