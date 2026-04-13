@@ -4,6 +4,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-[#F7F5F2] flex flex-col items-center justify-center px-5">
       <SignUp
+        routing="hash"
         forceRedirectUrl="/onboarding"
         fallbackRedirectUrl="/onboarding"
       />
