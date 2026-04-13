@@ -2,7 +2,7 @@ import { clerkMiddleware } from '@clerk/nextjs/server';
 
 export default clerkMiddleware({
   publishableKey: 'pk_test_YmVjb21pbmctc2Vhc25haWwtMzQuY2xlcmsuYWNjb3VudHMuZGV2JA',
-  secretKey: process.env.CLERK_SECRET_KEY,
+  secretKey: 'sk_test_pEAJoL4pZHn4MKosszwva6edqwc5RqohXgnIRZfCBN',
 });
 
 export const config = {
