@@ -59,7 +59,7 @@ export default function OutfitsPage() {
   return (
     <div className="min-h-screen bg-[#F7F5F2] pb-24">
       {/* ══ Header ══ */}
-      <div className="flex items-center justify-between px-5 pt-6">
+      <div className="flex items-center justify-between px-4 pt-6">
         <h1 className="font-serif text-2xl font-semibold text-[#111111]">Mes looks</h1>
         <Link
           href="/outfits/create"
@@ -70,7 +70,7 @@ export default function OutfitsPage() {
       </div>
 
       {/* ══ Tab pills ══ */}
-      <div className="mx-5 mt-4 grid h-12 grid-cols-2 rounded-2xl bg-[#F0EDE8] p-1">
+      <div className="mx-4 mt-4 grid h-12 grid-cols-2 rounded-2xl bg-[#F0EDE8] p-1">
         {([
           { key: 'mine' as const, label: 'Mes looks' },
           { key: 'stylist' as const, label: 'Looks styliste' },

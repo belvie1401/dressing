@@ -53,7 +53,7 @@ export default function StylistsPage() {
   return (
     <div className="space-y-4 pb-24 md:pb-10">
       {/* Header — mobile: hamburger + centered + bell */}
-      <div className="flex items-center justify-between px-5 py-4 md:px-0 md:pt-2">
+      <div className="flex items-center justify-between px-4 py-4 md:px-0 md:pt-2">
         <button className="flex h-9 w-9 cursor-pointer items-center justify-center md:hidden" aria-label="Menu">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="1.5" strokeLinecap="round">
             <line x1="3" y1="6" x2="21" y2="6" />
@@ -75,7 +75,7 @@ export default function StylistsPage() {
       </div>
 
       {/* Search + filter */}
-      <div className="mx-5 flex items-center gap-3 md:mx-0">
+      <div className="mx-4 flex items-center gap-3 md:mx-0">
         <div className="flex flex-1 items-center gap-2 rounded-full bg-[#F2F0EC] px-4 py-2.5">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -107,7 +107,7 @@ export default function StylistsPage() {
 
       {/* Filter pills — horizontal scroll */}
       <div className="overflow-x-auto scrollbar-hide">
-        <div className="flex gap-2 px-5 pb-1">
+        <div className="flex gap-2 px-4 pb-1">
           {styleFilters.map((f) => (
             <button
               key={f}
@@ -147,7 +147,7 @@ export default function StylistsPage() {
               <a
                 key={stylist.id}
                 href={`/stylists/${stylist.id}`}
-                className="flex items-center gap-3 border-b border-[#F2F0EC] bg-white px-5 py-4"
+                className="flex items-center gap-3 border-b border-[#F2F0EC] bg-white px-4 py-4"
               >
                 <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl">
                   {stylist.avatar_url ? (

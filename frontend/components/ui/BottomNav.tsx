@@ -111,9 +111,12 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0
-      z-30 bg-white border-t border-[#F2F0EB] h-[72px]
+      z-30 bg-white border-t border-[#F2F0EB]
       flex items-center justify-around px-2 md:hidden"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      style={{
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 8px)',
+        paddingTop: '10px',
+      }}>
 
       {tabs.map(tab => {
         const isActive = pathname === tab.href ||

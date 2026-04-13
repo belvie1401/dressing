@@ -360,7 +360,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           ================================================= */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* TOP BAR */}
-        <header className="flex h-[88px] w-full flex-shrink-0 items-center gap-3 overflow-hidden bg-[#F7F5F2] px-4 lg:gap-4 lg:px-10">
+        <header
+          className="flex w-full flex-shrink-0 items-center gap-3 overflow-hidden bg-[#F7F5F2] px-4 pb-3 lg:h-[88px] lg:pb-0 lg:gap-4 lg:px-10"
+          style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
+        >
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
@@ -409,7 +412,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         {/* CENTER + RIGHT PANEL row */}
         <div className="flex min-h-0 flex-1">
           {/* ZONE 2 — CENTER CONTENT */}
-          <main className="flex min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden pb-24 lg:px-10 lg:pb-10">
+          <main className="flex min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden lg:px-10 lg:pb-10">
             {children}
           </main>
 

@@ -138,7 +138,7 @@ export default function DashboardPage() {
   const challengePct = Math.round((challenge.current / challenge.target) * 100);
 
   return (
-    <div className="w-full bg-[#F2F0EB] md:bg-transparent min-h-screen pb-24 md:pb-0 overflow-x-hidden max-w-[100vw]">
+    <div className="w-full bg-[#F2F0EB] md:bg-transparent min-h-screen mobile-bottom-padding md:pb-0 overflow-x-hidden max-w-[100vw]">
       {/* ============ TUTORIAL ============ */}
       {showTutorial && (
         <DashboardTutorial

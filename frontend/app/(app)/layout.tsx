@@ -101,7 +101,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <Sidebar />
 
         {/* Main content */}
-        <main className="flex-1 min-w-0 w-full overflow-x-hidden pb-24 lg:pb-8">
+        <main className="flex-1 min-w-0 w-full overflow-x-hidden mobile-bottom-padding lg:pb-8">
           {children}
         </main>
 

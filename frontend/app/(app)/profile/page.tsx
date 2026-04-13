@@ -176,7 +176,7 @@ export default function ProfilePage() {
             {dressings.map((d, i) => (
               <div
                 key={d.id}
-                className={`flex items-center gap-3 px-5 py-4 ${
+                className={`flex items-center gap-3 px-4 py-4 ${
                   i < dressings.length - 1 ? 'border-b border-[#F7F5F2]' : ''
                 }`}
               >

@@ -246,7 +246,7 @@ export default function WardrobePage() {
       {/* ============ FIXED HEADER ============ */}
       <div className="flex-shrink-0 border-b border-[#EFEFEF] bg-white">
         {/* Top row: menu + title + notif */}
-        <div className="flex items-center justify-between px-5 py-4">
+        <div className="flex items-center justify-between px-4 py-4">
           <button className="flex h-9 w-9 cursor-pointer items-center justify-center" aria-label="Menu">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="1.5" strokeLinecap="round">
               <line x1="3" y1="6" x2="21" y2="6" />
@@ -264,7 +264,7 @@ export default function WardrobePage() {
         </div>
 
         {/* Tabs row — pill style */}
-        <div className="flex items-center justify-center gap-1 px-5 pb-3">
+        <div className="flex items-center justify-center gap-1 px-4 pb-3">
           {TABS.map((t) => {
             const active = tab === t.key;
             return (
@@ -731,7 +731,7 @@ export default function WardrobePage() {
           />
           <div className="flex flex-1 flex-col overflow-hidden rounded-t-3xl bg-white">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-[#F0EDE8] px-5 pb-3 pt-5">
+            <div className="flex items-center justify-between border-b border-[#F0EDE8] px-4 pb-3 pt-5">
               <h2 className="font-serif text-lg font-semibold text-[#111111]">Filtres</h2>
               <button
                 type="button"
@@ -747,7 +747,7 @@ export default function WardrobePage() {
             </div>
 
             {/* Scrollable sections */}
-            <div className="flex-1 space-y-6 overflow-y-auto px-5 py-4">
+            <div className="flex-1 space-y-6 overflow-y-auto px-4 py-4">
               {/* Catégorie */}
               <div>
                 <h3 className="mb-3 text-sm font-semibold text-[#111111]">Catégorie</h3>
@@ -897,7 +897,7 @@ export default function WardrobePage() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center gap-3 border-t border-[#F0EDE8] px-5 py-4">
+            <div className="flex items-center gap-3 border-t border-[#F0EDE8] px-4 py-4">
               <button
                 type="button"
                 onClick={resetPendingFilters}

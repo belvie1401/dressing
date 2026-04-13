@@ -91,6 +91,14 @@ body {
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
+  .mobile-safe-top {
+    padding-top: calc(env(safe-area-inset-top) + 12px);
+  }
+}
+
+/* Bottom padding that accounts for bottom nav + safe area */
+.mobile-bottom-padding {
+  padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 80px);
 }
 
 /* ─── 360° view animations ─────────────────────────────────────────────── */
