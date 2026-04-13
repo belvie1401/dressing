@@ -74,6 +74,7 @@ enum TransactionStatus {
 
 model User {
   id            String   @id @default(cuid())
+  clerk_id      String?  @unique
   email         String   @unique
   name          String
   avatar_url    String?

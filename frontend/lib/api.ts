@@ -2,16 +2,27 @@ import type { ApiResponse } from '@/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
-function getToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('lien_token');
+// ── Clerk token bridge ──────────────────────────────────────────────────────
+// ClerkTokenSync sets this getter so all API calls use Clerk session tokens.
+let _clerkTokenGetter: (() => Promise<string | null>) | null = null;
+
+export function setClerkTokenGetter(fn: () => Promise<string | null>) {
+  _clerkTokenGetter = fn;
 }
 
+export async function getClerkToken(): Promise<string | null> {
+  if (_clerkTokenGetter) {
+    return _clerkTokenGetter();
+  }
+  return null;
+}
+
+// ── Core request helper ─────────────────────────────────────────────────────
 async function request<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
-  const token = getToken();
+  const token = await getClerkToken();
 
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),
@@ -31,10 +42,8 @@ async function request<T>(
       headers,
     });
 
-    // Handle 401 — token expired or invalid
+    // Handle 401 — session expired or invalid
     if (res.status === 401) {
-      localStorage.removeItem('lien_token');
-      // Only redirect if we're in the browser and not already on login
       if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
         window.location.href = '/login';
       }
@@ -44,8 +53,6 @@ async function request<T>(
     const data = await res.json();
 
     if (!res.ok) {
-      // Forward the full response body so callers can read extra fields
-      // (e.g. `existing_item` on a 409 duplicate, `message`, etc.)
       return {
         ...data,
         success: false,

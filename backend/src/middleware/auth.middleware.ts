@@ -1,5 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { createClerkClient, verifyToken } from '@clerk/backend';
+import prisma from '../lib/prisma';
+
+const clerk = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY!,
+});
+
+const CLERK_SECRET = process.env.CLERK_SECRET_KEY!;
 
 interface JwtPayload {
   userId: string;
@@ -15,7 +22,7 @@ declare global {
   }
 }
 
-export function authenticate(req: Request, res: Response, next: NextFunction): void {
+export async function authenticate(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -24,17 +31,67 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
     }
 
     const token = authHeader.split(' ')[1];
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      res.status(500).json({ success: false, error: 'Configuration serveur invalide' });
+
+    // Verify the Clerk session token
+    const payload = await verifyToken(token, { secretKey: CLERK_SECRET });
+    const clerkUserId = payload.sub;
+
+    if (!clerkUserId) {
+      res.status(401).json({ success: false, error: 'Token invalide' });
       return;
     }
 
-    const decoded = jwt.verify(token, secret) as JwtPayload;
-    req.user = decoded;
+    // Find or create the DB user
+    let dbUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { clerk_id: clerkUserId },
+        ],
+      },
+    });
+
+    if (!dbUser) {
+      // Fetch user info from Clerk to create a local DB record
+      const clerkUser = await clerk.users.getUser(clerkUserId);
+      const email = clerkUser.emailAddresses[0]?.emailAddress || '';
+
+      // Check if a user with this email already exists (migration case)
+      dbUser = await prisma.user.findUnique({ where: { email } });
+
+      if (dbUser) {
+        // Link existing user to Clerk
+        dbUser = await prisma.user.update({
+          where: { id: dbUser.id },
+          data: { clerk_id: clerkUserId },
+        });
+      } else {
+        // Create a new user
+        const roleStr = (clerkUser.unsafeMetadata?.role as string) || 'CLIENT';
+        const role = roleStr === 'STYLIST' ? 'STYLIST' as const : 'CLIENT' as const;
+        dbUser = await prisma.user.create({
+          data: {
+            clerk_id: clerkUserId,
+            email,
+            name: clerkUser.fullName || clerkUser.firstName || 'Utilisateur',
+            avatar_url: clerkUser.imageUrl || null,
+            role,
+            active_role: roleStr,
+          },
+        });
+      }
+    }
+
+    // Set req.user with the same shape all controllers expect
+    req.user = {
+      userId: dbUser.id,
+      email: dbUser.email,
+      role: dbUser.role,
+    };
+
     next();
-  } catch (error) {
-    res.status(401).json({ success: false, error: 'Token invalide ou expiré' });
+  } catch (error: any) {
+    console.error('Auth error:', error.message);
+    res.status(401).json({ success: false, error: 'Authentification échouée' });
   }
 }
 

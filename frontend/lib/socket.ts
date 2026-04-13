@@ -1,4 +1,5 @@
 import { io, Socket } from 'socket.io-client';
+import { getClerkToken } from './api';
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
 
@@ -6,10 +7,7 @@ let socket: Socket | null = null;
 
 export function getSocket(): Socket {
   if (!socket) {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('lien_token') : null;
-
     socket = io(SOCKET_URL, {
-      auth: { token },
       autoConnect: false,
     });
   }
@@ -17,10 +15,10 @@ export function getSocket(): Socket {
   return socket;
 }
 
-export function connectSocket(): void {
+export async function connectSocket(): Promise<void> {
   const s = getSocket();
   if (!s.connected) {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('lien_token') : null;
+    const token = await getClerkToken();
     s.auth = { token };
     s.connect();
   }

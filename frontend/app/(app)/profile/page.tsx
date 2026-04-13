@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useClerk } from '@clerk/nextjs';
 import { useAuthStore, useWardrobeStore } from '@/lib/store';
 import StyleDNAProfile from '@/components/ai/StyleDNAProfile';
 import type { Dressing, Subscription } from '@/types';
@@ -17,7 +18,8 @@ const planLabels: Record<string, string> = {
 };
 
 export default function ProfilePage() {
-  const { user, logout, loadUser } = useAuthStore();
+  const { user, loadUser } = useAuthStore();
+  const { signOut } = useClerk();
   const { items, loadItems } = useWardrobeStore();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [avatarBodyUrl, setAvatarBodyUrl] = useState<string | null>(null);
@@ -58,8 +60,8 @@ export default function ProfilePage() {
   }, [user?.avatar_body_url]);
 
   const handleLogout = () => {
-    logout();
-    router.push('/');
+    useAuthStore.getState().logout();
+    signOut({ redirectUrl: '/' });
   };
 
   // ─── Avatar upload ────────────────────────────────────────────────────────

@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@clerk/nextjs';
 import { useAuthStore } from '@/lib/store';
 import { api } from '@/lib/api';
 
@@ -157,6 +158,7 @@ function PricingInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const user = useAuthStore((s) => s.user);
+  const { isSignedIn } = useAuth();
 
   const roleParam = searchParams.get('role');
   const [audience, setAudience] = useState<'client' | 'stylist'>(
@@ -166,18 +168,15 @@ function PricingInner() {
   // Determine smart back href
   const [backHref, setBackHref] = useState('/');
   useEffect(() => {
-    const token = localStorage.getItem('lien_token');
-    if (token) {
+    if (isSignedIn) {
       setBackHref(user?.role === 'STYLIST' ? '/stylist-dashboard' : '/dashboard');
     } else {
       setBackHref('/');
     }
-  }, [user]);
+  }, [user, isSignedIn]);
 
   const handleCTAClick = async (planId: string) => {
-    const token = localStorage.getItem('lien_token');
-
-    if (!token) {
+    if (!isSignedIn) {
       router.push(`/register?plan=${planId}`);
       return;
     }

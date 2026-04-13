@@ -49,6 +49,7 @@ DO $$ BEGIN CREATE TYPE "TransactionStatus" AS ENUM ('PENDING', 'COMPLETED', 'RE
 -- ── USER ─────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "User" (
   "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
+  "clerk_id" TEXT,
   "email" TEXT NOT NULL,
   "name" TEXT NOT NULL,
   "avatar_url" TEXT,
@@ -65,6 +66,8 @@ CREATE TABLE IF NOT EXISTS "User" (
   CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 CREATE UNIQUE INDEX IF NOT EXISTS "User_email_key" ON "User"("email");
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "clerk_id" TEXT;
+DO $$ BEGIN CREATE UNIQUE INDEX "User_clerk_id_key" ON "User"("clerk_id") WHERE "clerk_id" IS NOT NULL; EXCEPTION WHEN duplicate_table THEN null; END $$;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "active_role" TEXT NOT NULL DEFAULT 'CLIENT';
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "is_dual_role" BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "referral_code" TEXT;

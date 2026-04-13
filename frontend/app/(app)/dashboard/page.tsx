@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { isSameDay } from 'date-fns';
-import { api } from '@/lib/api';
+import { api, getClerkToken } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import type { CalendarEntry } from '@/types';
 import DashboardTutorial from '@/components/ui/DashboardTutorial';
@@ -58,20 +58,23 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('lien_token');
-    if (!token) return;
-    const h: HeadersInit = { 'Authorization': `Bearer ${token}` };
-    const API = process.env.NEXT_PUBLIC_API_URL;
+    const loadStats = async () => {
+      const token = await getClerkToken();
+      if (!token) return;
+      const h: HeadersInit = { 'Authorization': `Bearer ${token}` };
+      const API = process.env.NEXT_PUBLIC_API_URL;
 
-    fetch(`${API}/api/wardrobe/count`, { headers: h })
-      .then((r) => r.json())
-      .then((d) => setStats((p) => ({ ...p, wardrobe: d.data?.count ?? 0 })))
-      .catch(() => {});
+      fetch(`${API}/api/wardrobe/count`, { headers: h })
+        .then((r) => r.json())
+        .then((d) => setStats((p) => ({ ...p, wardrobe: d.data?.count ?? 0 })))
+        .catch(() => {});
 
-    fetch(`${API}/api/outfits/count`, { headers: h })
-      .then((r) => r.json())
-      .then((d) => setStats((p) => ({ ...p, looks: d.data?.count ?? 0 })))
-      .catch(() => {});
+      fetch(`${API}/api/outfits/count`, { headers: h })
+        .then((r) => r.json())
+        .then((d) => setStats((p) => ({ ...p, looks: d.data?.count ?? 0 })))
+        .catch(() => {});
+    };
+    loadStats();
   }, []);
 
   useEffect(() => {
@@ -98,37 +101,46 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('lien_token');
-    const API = process.env.NEXT_PUBLIC_API_URL;
-    fetch(`${API}/api/outfits?from_stylist=true&limit=3`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    })
-      .then((r) => r.json())
-      .then((d) => setRecommendations(d.data || []))
-      .catch(() => {});
+    const loadRecs = async () => {
+      const token = await getClerkToken();
+      const API = process.env.NEXT_PUBLIC_API_URL;
+      fetch(`${API}/api/outfits?from_stylist=true&limit=3`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+        .then((r) => r.json())
+        .then((d) => setRecommendations(d.data || []))
+        .catch(() => {});
+    };
+    loadRecs();
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('lien_token');
-    if (!token) return;
-    const API = process.env.NEXT_PUBLIC_API_URL;
-    fetch(`${API}/api/wardrobe?limit=4`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    })
-      .then((r) => r.json())
-      .then((d) => setWardrobeItems(d.data || []))
-      .catch(() => {});
+    const loadWardrobe = async () => {
+      const token = await getClerkToken();
+      if (!token) return;
+      const API = process.env.NEXT_PUBLIC_API_URL;
+      fetch(`${API}/api/wardrobe?limit=4`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+        .then((r) => r.json())
+        .then((d) => setWardrobeItems(d.data || []))
+        .catch(() => {});
+    };
+    loadWardrobe();
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('lien_token');
-    const API = process.env.NEXT_PUBLIC_API_URL;
-    fetch(`${API}/api/calendar?upcoming=true&limit=1`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    })
-      .then((r) => r.json())
-      .then((d) => setNextSession(d.data?.[0] || null))
-      .catch(() => {});
+    const loadSession = async () => {
+      const token = await getClerkToken();
+      const API = process.env.NEXT_PUBLIC_API_URL;
+      fetch(`${API}/api/calendar?upcoming=true&limit=1`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+        .then((r) => r.json())
+        .then((d) => setNextSession(d.data?.[0] || null))
+        .catch(() => {});
+    };
+    loadSession();
   }, []);
 
   const challenge: ChallengeState = {

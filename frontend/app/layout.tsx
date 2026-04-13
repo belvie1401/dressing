@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
+import { frFR } from "@clerk/localizations";
 import { ToastProvider } from "@/components/ui/Toast";
 import PWAInstallPrompt from "@/components/ui/PWAInstallPrompt";
 import ServiceWorkerRegistrar from "@/components/ui/ServiceWorkerRegistrar";
@@ -36,6 +38,96 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    <ClerkProvider
+      localization={frFR}
+      appearance={{
+        variables: {
+          colorPrimary: '#111111',
+          colorBackground: '#F7F5F2',
+          colorInputBackground: '#FFFFFF',
+          colorInputText: '#111111',
+          colorTextOnPrimaryBackground: '#FFFFFF',
+          borderRadius: '16px',
+          fontFamily: 'Inter, sans-serif',
+          fontSize: '14px',
+          colorDanger: '#D4785C',
+          colorSuccess: '#16A34A',
+          colorWarning: '#C6A47E',
+        },
+        elements: {
+          rootBox: {
+            width: '100%',
+          },
+          card: {
+            backgroundColor: '#FFFFFF',
+            boxShadow: 'none',
+            border: '1px solid #EFEFEF',
+            borderRadius: '24px',
+            padding: '24px',
+          },
+          headerTitle: {
+            fontFamily: 'Playfair Display, serif',
+            fontSize: '22px',
+            color: '#111111',
+            fontWeight: '500',
+          },
+          headerSubtitle: {
+            color: '#8A8A8A',
+            fontSize: '13px',
+          },
+          socialButtonsBlockButton: {
+            borderRadius: '9999px',
+            border: '1px solid #EFEFEF',
+            backgroundColor: '#FFFFFF',
+            color: '#111111',
+            fontWeight: '500',
+          },
+          formButtonPrimary: {
+            backgroundColor: '#111111',
+            borderRadius: '9999px',
+            fontSize: '14px',
+            fontWeight: '500',
+            paddingTop: '14px',
+            paddingBottom: '14px',
+            '&:hover': {
+              backgroundColor: '#333333',
+              opacity: 1,
+            },
+          },
+          formFieldInput: {
+            borderRadius: '16px',
+            border: '1px solid #EFEFEF',
+            backgroundColor: '#FFFFFF',
+            fontSize: '14px',
+            '&:focus': {
+              border: '1px solid #111111',
+              boxShadow: 'none',
+            },
+          },
+          formFieldLabel: {
+            fontSize: '11px',
+            color: '#8A8A8A',
+            textTransform: 'uppercase' as const,
+            letterSpacing: '0.05em',
+            fontWeight: '500',
+          },
+          footerActionLink: {
+            color: '#111111',
+            fontWeight: '500',
+          },
+          identityPreviewText: {
+            color: '#111111',
+          },
+          alertText: {
+            fontSize: '13px',
+          },
+          dividerText: {
+            color: '#CFCFCF',
+            fontSize: '12px',
+          },
+        },
+      }}
+    >
     <html lang="fr" className="h-full">
       <head>
         {/* Favicon */}
@@ -75,5 +167,6 @@ export default function RootLayout({
         <PWAInstallPrompt />
       </body>
     </html>
+    </ClerkProvider>
   );
 }
