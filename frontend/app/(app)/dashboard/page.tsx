@@ -59,17 +59,18 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const token = localStorage.getItem('lien_token');
+    if (!token) return;
     const h: HeadersInit = { 'Authorization': `Bearer ${token}` };
     const API = process.env.NEXT_PUBLIC_API_URL;
 
     fetch(`${API}/api/wardrobe/count`, { headers: h })
       .then((r) => r.json())
-      .then((d) => setStats((p) => ({ ...p, wardrobe: d.count || 0 })))
+      .then((d) => setStats((p) => ({ ...p, wardrobe: d.data?.count ?? 0 })))
       .catch(() => {});
 
     fetch(`${API}/api/outfits/count`, { headers: h })
       .then((r) => r.json())
-      .then((d) => setStats((p) => ({ ...p, looks: d.count || 0 })))
+      .then((d) => setStats((p) => ({ ...p, looks: d.data?.count ?? 0 })))
       .catch(() => {});
   }, []);
 
@@ -109,8 +110,9 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const token = localStorage.getItem('lien_token');
+    if (!token) return;
     const API = process.env.NEXT_PUBLIC_API_URL;
-    fetch(`${API}/api/wardrobe?limit=4&sort=recent`, {
+    fetch(`${API}/api/wardrobe?limit=4`, {
       headers: { 'Authorization': `Bearer ${token}` },
     })
       .then((r) => r.json())
