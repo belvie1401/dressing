@@ -79,7 +79,7 @@ export default function CalendarPage() {
   return (
     <div className="min-h-screen bg-[#F7F5F2] pb-24">
       {/* ══ Header ══ */}
-      <div className="flex items-center justify-between px-4 pt-6">
+      <div className="flex items-center justify-between px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 44px) + 12px)' }}>
         <h1 className="font-serif text-2xl text-[#111111]">Calendrier</h1>
         <button
           type="button"

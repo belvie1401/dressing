@@ -13,8 +13,8 @@ export default function MessagesPage() {
   }, []);
 
   return (
-    <div className="space-y-4">
-      <h1 className="font-serif text-xl font-semibold text-[#111111] pt-2">Messages</h1>
+    <div className="space-y-4 px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 44px) + 12px)' }}>
+      <h1 className="font-serif text-xl font-semibold text-[#111111]">Messages</h1>
 
       {/* Search */}
       <div className="flex items-center gap-3 rounded-full px-4 py-2.5" style={{ background: 'var(--color-tag-bg)' }}>

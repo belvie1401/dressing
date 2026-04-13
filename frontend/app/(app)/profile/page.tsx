@@ -125,9 +125,9 @@ export default function ProfilePage() {
   const favoriteColor = Object.entries(colorCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 44px) + 12px)' }}>
       {/* User info */}
-      <div className="flex items-center gap-4 pt-2">
+      <div className="flex items-center gap-4">
         <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#EDE5DC] text-xl font-bold text-[#C6A47E]">
           {user?.avatar_url ? (
             <img src={user.avatar_url} alt={user.name} className="h-full w-full rounded-full object-cover" />

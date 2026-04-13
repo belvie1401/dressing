@@ -127,7 +127,7 @@ export default function BookingPage() {
   return (
     <div className="pb-36">
       {/* Header */}
-      <div className="flex items-center px-5 py-4 mb-2">
+      <div className="flex items-center px-4 py-4 mb-2" style={{ paddingTop: 'calc(env(safe-area-inset-top, 44px) + 12px)' }}>
         <Link
           href={`/stylists/${id}`}
           className="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm"
@@ -141,7 +141,7 @@ export default function BookingPage() {
       </div>
 
       {/* Stylist summary card */}
-      <div className="mx-5 mb-6 flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm">
+      <div className="mx-4 mb-6 flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm">
         <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-[#EDE5DC]">
           {stylist?.avatar_url ? (
             <Image
@@ -179,7 +179,7 @@ export default function BookingPage() {
       </div>
 
       {/* ── SECTION 1: Durée ── */}
-      <div className="mx-5 mb-6">
+      <div className="mx-4 mb-6">
         <h2 className="font-serif text-[16px] font-semibold text-[#111111] mb-3">Choisissez une dur&eacute;e</h2>
         <div className="grid grid-cols-3 gap-2 md:gap-3">
           {durations.map((d, i) => (
@@ -198,7 +198,7 @@ export default function BookingPage() {
       </div>
 
       {/* ── SECTION 2: Date (Calendar) ── */}
-      <div className="mx-5 mb-6">
+      <div className="mx-4 mb-6">
         <h2 className="font-serif text-[16px] font-semibold text-[#111111] mb-3">Choisissez une date</h2>
         <div className="rounded-2xl bg-white p-4 shadow-sm">
           {/* Month nav */}
@@ -257,7 +257,7 @@ export default function BookingPage() {
 
       {/* ── SECTION 3: Créneaux ── */}
       {selectedDate && (
-        <div className="mx-5 mb-6">
+        <div className="mx-4 mb-6">
           <h2 className="font-serif text-[16px] font-semibold text-[#111111] mb-3">Cr&eacute;neaux disponibles</h2>
           <div className="flex flex-wrap gap-2">
             {slots.map((slot) => (
@@ -278,7 +278,7 @@ export default function BookingPage() {
       )}
 
       {/* ── CTA Fixed bottom ── */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#F2F0EC] bg-white px-5 py-4">
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#F2F0EC] bg-white px-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 12px)', paddingTop: '16px' }}>
         <button
           onClick={handleContinue}
           disabled={submitting}

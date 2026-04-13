@@ -93,7 +93,7 @@ export default function StylistDetailPage() {
       </div>
 
       {/* Info card — overlaps hero on mobile */}
-      <div className="-mt-6 relative rounded-t-3xl bg-white px-5 pt-5 md:mt-5 md:rounded-3xl md:p-5" style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.06)' }}>
+      <div className="-mt-6 relative rounded-t-3xl bg-white px-4 pt-5 md:mt-5 md:rounded-3xl md:p-5" style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.06)' }}>
         {/* Name + verified + location */}
         <div className="flex items-center gap-2">
           <h2 className="font-serif text-lg text-[#1A1A1A] md:text-xl md:font-bold">{stylist.name}</h2>
@@ -146,15 +146,15 @@ export default function StylistDetailPage() {
       {/* Bio section */}
       {bio && (
         <div className="mt-6">
-          <h3 className="px-5 font-serif text-lg text-[#111111]">À propos</h3>
-          <p className="mt-2 px-5 text-sm leading-relaxed text-[#8A8A8A]">{bio}</p>
+          <h3 className="px-4 font-serif text-lg text-[#111111]">À propos</h3>
+          <p className="mt-2 px-4 text-sm leading-relaxed text-[#8A8A8A]">{bio}</p>
         </div>
       )}
 
       {/* Portfolio section */}
       <div className="mt-6">
-        <h3 className="px-5 font-serif text-lg text-[#111111]">Portfolio</h3>
-        <div className="mt-3 px-5">
+        <h3 className="px-4 font-serif text-lg text-[#111111]">Portfolio</h3>
+        <div className="mt-3 px-4">
           {lookbooks === null ? (
             <div className="grid grid-cols-2 gap-3">
               {[0, 1, 2, 3].map((i) => (
@@ -200,7 +200,7 @@ export default function StylistDetailPage() {
       </div>
 
       {/* Sticky bottom contact buttons */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-[#F2F0EC] bg-white px-5 py-4">
+      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-[#F2F0EC] bg-white px-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 12px)', paddingTop: '16px' }}>
         <a
           href={`/stylists/${id}/booking`}
           className="flex w-full items-center justify-center rounded-full bg-[#C6A47E] py-4 font-serif text-base font-medium text-white md:hidden"

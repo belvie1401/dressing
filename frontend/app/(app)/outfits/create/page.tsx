@@ -135,7 +135,7 @@ export default function OutfitCreatePage() {
   return (
     <div className="min-h-screen bg-[#F7F5F2] pb-32">
       {/* ════════ HEADER ════════ */}
-      <div className="flex items-center justify-between border-b border-[#EFEFEF] bg-white px-5 py-4">
+      <div className="flex items-center justify-between border-b border-[#EFEFEF] bg-white px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 44px) + 12px)', paddingBottom: '16px' }}>
         <Link
           href="/outfits"
           aria-label="Retour"
@@ -167,13 +167,13 @@ export default function OutfitCreatePage() {
 
       {/* ════════ ERROR BANNER ════════ */}
       {error && (
-        <div className="mx-5 mt-3 rounded-xl border border-[#D4785C]/20 bg-[#FFF8F6] px-4 py-3">
+        <div className="mx-4 mt-3 rounded-xl border border-[#D4785C]/20 bg-[#FFF8F6] px-4 py-3">
           <p className="text-xs text-[#D4785C]">{error}</p>
         </div>
       )}
 
       {/* ════════ SELECTED OUTFIT PREVIEW ════════ */}
-      <div className="relative mx-5 mt-4 min-h-[140px] overflow-hidden rounded-3xl bg-[#111111] p-4">
+      <div className="relative mx-4 mt-4 min-h-[140px] overflow-hidden rounded-3xl bg-[#111111] p-4">
         {selectedDetails.length === 0 ? (
           <div className="flex h-[108px] items-center justify-center">
             <p className="text-center font-serif text-sm text-[#CFCFCF]">
@@ -239,7 +239,7 @@ export default function OutfitCreatePage() {
           onClick={() =>
             router.push(`/outfits/preview?items=${selectedItems.join(',')}`)
           }
-          className="mx-5 mt-3 flex w-[calc(100%-2.5rem)] cursor-pointer items-center gap-3 rounded-2xl bg-[#EDE5DC] p-4 text-left transition-colors hover:bg-[#E5DCD0]"
+          className="mx-4 mt-3 flex w-[calc(100%-2rem)] cursor-pointer items-center gap-3 rounded-2xl bg-[#EDE5DC] p-4 text-left transition-colors hover:bg-[#E5DCD0]"
         >
           <svg
             width="20"
@@ -442,7 +442,7 @@ export default function OutfitCreatePage() {
       )}
 
       {/* ════════ FIXED BOTTOM SAVE BAR ════════ */}
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-[#EFEFEF] bg-[#F7F5F2] px-5 py-4 lg:left-64">
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-[#EFEFEF] bg-[#F7F5F2] px-4 lg:left-64" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 8px)', paddingTop: '16px' }}>
         {selectedItems.length === 0 ? (
           <p className="text-center text-xs text-[#8A8A8A]">
             Sélectionnez des vêtements pour créer un look

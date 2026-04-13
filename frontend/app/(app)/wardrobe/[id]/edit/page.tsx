@@ -149,7 +149,7 @@ export default function WardrobeEditPage() {
   return (
     <div className="min-h-screen bg-[#F7F5F2] pb-32">
       {/* ══ Header ══ */}
-      <div className="flex items-center justify-between border-b border-[#EFEFEF] bg-white px-5 py-4">
+      <div className="flex items-center justify-between border-b border-[#EFEFEF] bg-white px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 44px) + 12px)', paddingBottom: '16px' }}>
         <Link
           href={`/wardrobe/${id}`}
           aria-label="Retour"
@@ -171,7 +171,7 @@ export default function WardrobeEditPage() {
       </div>
 
       {/* ══ Item photo (read-only) ══ */}
-      <div className="mx-5 mt-4 overflow-hidden rounded-2xl bg-white">
+      <div className="mx-4 mt-4 overflow-hidden rounded-2xl bg-white">
         <div className="relative h-[200px]" style={{ background: '#F0EDE8' }}>
           <Image
             src={item.bg_removed_url || item.photo_url}
@@ -185,13 +185,13 @@ export default function WardrobeEditPage() {
 
       {/* ══ Error banner ══ */}
       {error && (
-        <div className="mx-5 mt-3 rounded-xl border border-[#D4785C]/20 bg-[#FFF8F6] px-4 py-3">
+        <div className="mx-4 mt-3 rounded-xl border border-[#D4785C]/20 bg-[#FFF8F6] px-4 py-3">
           <p className="text-xs text-[#D4785C]">{error}</p>
         </div>
       )}
 
       {/* ══ Form fields ══ */}
-      <div className="mx-5 mt-4 space-y-6">
+      <div className="mx-4 mt-4 space-y-6">
         {/* Name */}
         <Field label="Nom du vêtement">
           <input
@@ -392,7 +392,7 @@ export default function WardrobeEditPage() {
       </div>
 
       {/* ══ Fixed bottom save bar ══ */}
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-[#EFEFEF] bg-white/95 px-5 py-4 backdrop-blur-sm lg:left-64">
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-[#EFEFEF] bg-white/95 px-4 backdrop-blur-sm lg:left-64" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 8px)', paddingTop: '16px' }}>
         <button
           type="button"
           onClick={handleSave}

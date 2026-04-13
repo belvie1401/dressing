@@ -53,7 +53,7 @@ export default function StylistsPage() {
   return (
     <div className="space-y-4 pb-24 md:pb-10">
       {/* Header — mobile: hamburger + centered + bell */}
-      <div className="flex items-center justify-between px-4 py-4 md:px-0 md:pt-2">
+      <div className="flex items-center justify-between px-4 py-4 md:px-0 md:pt-2" style={{ paddingTop: 'calc(env(safe-area-inset-top, 44px) + 12px)' }}>
         <button className="flex h-9 w-9 cursor-pointer items-center justify-center md:hidden" aria-label="Menu">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="1.5" strokeLinecap="round">
             <line x1="3" y1="6" x2="21" y2="6" />

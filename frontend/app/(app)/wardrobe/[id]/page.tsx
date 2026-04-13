@@ -372,10 +372,10 @@ function StylistFeedback({
 
   return (
     <div className="mt-6">
-      <h3 className="px-5 font-serif text-base text-[#111111]">Avis de votre styliste</h3>
+      <h3 className="px-4 font-serif text-base text-[#111111]">Avis de votre styliste</h3>
 
       {comments.length === 0 && hasStylist === false ? (
-        <div className="mx-5 mt-3 rounded-2xl bg-[#F0EDE8] p-4">
+        <div className="mx-4 mt-3 rounded-2xl bg-[#F0EDE8] p-4">
           <p className="text-xs leading-relaxed text-[#8A8A8A]">
             Connectez-vous &agrave; un styliste pour recevoir des conseils personnalis&eacute;s sur vos pi&egrave;ces.
           </p>
@@ -384,9 +384,9 @@ function StylistFeedback({
           </a>
         </div>
       ) : comments.length === 0 ? (
-        <p className="mt-2 px-5 text-xs text-[#8A8A8A]">Aucun commentaire pour l&apos;instant.</p>
+        <p className="mt-2 px-4 text-xs text-[#8A8A8A]">Aucun commentaire pour l&apos;instant.</p>
       ) : (
-        <div className="mt-3 flex flex-col gap-3 px-5">
+        <div className="mt-3 flex flex-col gap-3 px-4">
           {comments.map((c) => (
             <div key={c.id} className="rounded-2xl bg-white p-4 shadow-sm">
               <div className="flex items-start gap-3">

@@ -246,7 +246,7 @@ export default function WardrobePage() {
       {/* ============ FIXED HEADER ============ */}
       <div className="flex-shrink-0 border-b border-[#EFEFEF] bg-white">
         {/* Top row: menu + title + notif */}
-        <div className="flex items-center justify-between px-4 py-4">
+        <div className="flex items-center justify-between px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 44px) + 12px)', paddingBottom: '16px' }}>
           <button className="flex h-9 w-9 cursor-pointer items-center justify-center" aria-label="Menu">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="1.5" strokeLinecap="round">
               <line x1="3" y1="6" x2="21" y2="6" />

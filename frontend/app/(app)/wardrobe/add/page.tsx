@@ -320,7 +320,7 @@ export default function WardrobeAddPage() {
   // ── Upgrade screen when limit reached ──
   if (limitReached) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-[#F7F5F2] px-5">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#F2F0EB] px-4">
         {/* Lock icon */}
         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#CFCFCF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -790,7 +790,7 @@ export default function WardrobeAddPage() {
       )}
 
       {/* ============ FIXED BOTTOM SAVE BUTTON ============ */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[#EFEFEF] bg-white/95 p-4 backdrop-blur-sm md:left-64">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[#EFEFEF] bg-white/95 px-4 backdrop-blur-sm md:left-64" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 8px)', paddingTop: '16px' }}>
         <div className="mx-auto max-w-3xl">
           <button
             type="button"
