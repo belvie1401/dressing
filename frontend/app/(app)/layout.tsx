@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { useAuthStore } from '@/lib/store';
@@ -13,47 +13,32 @@ import { GlobalSearchProvider } from '@/components/ui/GlobalSearch';
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth();
   const user = useAuthStore((s) => s.user);
-  const _hasHydrated = useAuthStore((s) => s._hasHydrated);
   const router = useRouter();
   const pathname = usePathname();
-  const [ready, setReady] = useState(false);
 
-  // Wait for Clerk + Zustand hydration, then check auth
+  // Role-based dashboard redirect (only once user data is loaded)
   useEffect(() => {
-    if (!isLoaded || !_hasHydrated) return;
-
-    if (!isSignedIn) {
-      router.push('/login');
-      return;
-    }
-
-    // User data will be loaded by ClerkTokenSync
-    setReady(true);
-  }, [isLoaded, _hasHydrated, isSignedIn, router]);
-
-  // Role-based dashboard redirect
-  useEffect(() => {
-    if (!ready || !user) return;
+    if (!isLoaded || !isSignedIn || !user) return;
     if (user.role === 'STYLIST' && pathname === '/dashboard') {
       router.replace('/stylist-dashboard');
     }
     if (user.role === 'CLIENT' && pathname === '/stylist-dashboard') {
       router.replace('/dashboard');
     }
-  }, [ready, user, pathname, router]);
+  }, [isLoaded, isSignedIn, user, pathname, router]);
 
   // Connect socket once authenticated
   useEffect(() => {
-    if (ready && isSignedIn && user) {
+    if (isSignedIn && user) {
       connectSocket();
       return () => {
         disconnectSocket();
       };
     }
-  }, [ready, isSignedIn, user]);
+  }, [isSignedIn, user]);
 
-  // Show loading spinner while pending
-  if (!isLoaded || !_hasHydrated || !ready) {
+  // Show loading spinner while Clerk is initializing
+  if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center" style={{ background: 'var(--color-app-bg)' }}>
         <div className="flex flex-col items-center gap-3">
@@ -64,6 +49,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Middleware guarantees only authenticated users reach here,
+  // but guard against the edge case where isSignedIn is false
   if (!isSignedIn) return null;
 
   // /dashboard and /stylist-dashboard have their own dedicated layouts
