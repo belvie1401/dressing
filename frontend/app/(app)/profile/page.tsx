@@ -60,7 +60,6 @@ export default function ProfilePage() {
   }, [user?.avatar_body_url]);
 
   const handleLogout = () => {
-    useAuthStore.getState().logout();
     signOut({ redirectUrl: '/' });
   };
 

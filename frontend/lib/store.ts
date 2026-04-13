@@ -34,7 +34,6 @@ interface AuthState {
   tutorials: Tutorials;
   _hasHydrated: boolean;
   _setHasHydrated: (v: boolean) => void;
-  logout: () => void;
   loadUser: () => Promise<void>;
   switchRole: (role: 'CLIENT' | 'STYLIST') => Promise<void>;
   activateStylistMode: () => Promise<void>;
@@ -82,10 +81,6 @@ export const useAuthStore = create<AuthState>()(
       tutorials: { ...DEFAULT_TUTORIALS },
       _hasHydrated: false,
       _setHasHydrated: (v) => set({ _hasHydrated: v }),
-
-      logout: () => {
-        set({ user: null, activeRole: 'CLIENT', isDualRole: false });
-      },
 
       loadUser: async () => {
         set({ isLoading: true });

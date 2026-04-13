@@ -41,8 +41,6 @@ export default function RootLayout({
     <ClerkProvider
       publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!}
       localization={frFR}
-      signInUrl="/login"
-      signUpUrl="/register"
       appearance={{
         layout: {
           logoImageUrl: '/logo.png',

@@ -42,11 +42,7 @@ async function request<T>(
       headers,
     });
 
-    // Handle 401 — session expired or invalid
     if (res.status === 401) {
-      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
-        window.location.href = '/login';
-      }
       return { success: false, error: 'Session expirée' };
     }
 
