@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { isSameDay } from 'date-fns';
 import { api, getClerkToken } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
-import type { CalendarEntry } from '@/types';
+import type { CalendarEntry, StylistClient } from '@/types';
 import DashboardTutorial from '@/components/ui/DashboardTutorial';
 import TutorialHelpButton from '@/components/ui/TutorialHelpButton';
 
@@ -44,6 +44,9 @@ export default function DashboardPage() {
 
   // Next session
   const [nextSession, setNextSession] = useState<any>(null);
+
+  // Connected stylists
+  const [connectedStylists, setConnectedStylists] = useState<StylistClient[]>([]);
 
   useEffect(() => {
     if (!_hasHydrated) return;
@@ -127,6 +130,21 @@ export default function DashboardPage() {
         .catch(() => {});
     };
     loadWardrobe();
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadConnections = async () => {
+      const res = await api.get<StylistClient[]>('/stylists/connections');
+      if (!mounted) return;
+      if (res.success && Array.isArray(res.data)) {
+        setConnectedStylists(res.data.filter((c) => c.status === 'ACTIVE'));
+      }
+    };
+    loadConnections();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -253,6 +271,54 @@ export default function DashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* ============ B2. MA STYLISTE ============ */}
+      {connectedStylists.length > 0 && (
+        <section className="mb-4 md:mb-12 px-4 md:px-0">
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="font-serif text-lg md:text-2xl text-[#111111]">
+                {connectedStylists.length > 1 ? 'Mes stylistes' : 'Ma styliste'}
+              </h2>
+              <p className="mt-0.5 text-xs text-[#9B9B9B]">
+                Votre accompagnement personnalisé
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 md:gap-3">
+            {connectedStylists.map((conn) => {
+              const s = conn.stylist;
+              if (!s) return null;
+              return (
+                <div
+                  key={conn.id}
+                  className="flex items-center gap-3 rounded-xl md:rounded-2xl bg-white p-3 md:p-4"
+                >
+                  <div className="relative h-12 w-12 md:h-14 md:w-14 flex-shrink-0 overflow-hidden rounded-full bg-[#EDE5DC]">
+                    {s.avatar_url ? (
+                      <img src={s.avatar_url} alt={s.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center font-semibold text-[#C6A47E]">
+                        {s.name?.charAt(0) ?? ''}
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm md:text-base font-semibold text-[#111111]">{s.name}</p>
+                    <p className="truncate text-xs text-[#9B9B9B]">Styliste · Connectée</p>
+                  </div>
+                  <Link
+                    href={`/messages/${s.id}`}
+                    className="flex-shrink-0 rounded-full bg-[#111111] px-3 md:px-4 py-2 text-xs font-medium text-white"
+                  >
+                    Message
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* ============ C. RECOMMANDATIONS POUR VOUS ============ */}
       <section className="mb-4 md:mb-12 px-4 md:px-0" data-tour="look-du-jour">

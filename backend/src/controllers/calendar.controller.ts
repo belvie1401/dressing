@@ -209,6 +209,48 @@ export async function bookSession(req: Request, res: Response): Promise<void> {
       },
     });
 
+    // Ensure an ACTIVE StylistClient connection exists. A paid booking
+    // establishes the relationship — promote PENDING to ACTIVE, or create
+    // it if missing.
+    const connection = await prisma.stylistClient.findFirst({
+      where: { stylist_id, client_id: userId },
+    });
+    if (!connection) {
+      await prisma.stylistClient.create({
+        data: {
+          stylist_id,
+          client_id: userId,
+          status: 'ACTIVE',
+          started_at: new Date(),
+        },
+      });
+    } else if (connection.status !== 'ACTIVE') {
+      await prisma.stylistClient.update({
+        where: { id: connection.id },
+        data: { status: 'ACTIVE', started_at: connection.started_at ?? new Date() },
+      });
+    }
+
+    // Post a welcome message if there's no message history yet.
+    const existingMessage = await prisma.message.findFirst({
+      where: {
+        OR: [
+          { from_id: stylist_id, to_id: userId },
+          { from_id: userId, to_id: stylist_id },
+        ],
+      },
+    });
+    if (!existingMessage) {
+      await prisma.message.create({
+        data: {
+          from_id: stylist_id,
+          to_id: userId,
+          content: "Bonjour ! Votre session est confirmée. À très vite pour échanger sur votre style.",
+          type: 'TEXT',
+        },
+      });
+    }
+
     res.status(201).json({
       success: true,
       data: { ...clientEntry, price: price ?? null },
