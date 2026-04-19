@@ -22,7 +22,7 @@ export default function RegisterPage() {
             <img
               src="/logo.png"
               alt="LIEN"
-              style={{ height: '48px', width: 'auto', margin: '0 auto' }}
+              style={{ height: '32px', width: 'auto', margin: '0 auto', display: 'block' }}
             />
           </a>
           <div
@@ -148,7 +148,7 @@ export default function RegisterPage() {
         <img
           src="/logo.png"
           alt="LIEN"
-          style={{ height: '48px', width: 'auto', margin: '0 auto' }}
+          style={{ height: '32px', width: 'auto', margin: '0 auto', display: 'block' }}
         />
         <div
           style={{

@@ -157,7 +157,7 @@ export default function StylistDashboardLayout({ children }: { children: ReactNo
       {/* ======== LEFT SIDEBAR ======== */}
       <aside className="hidden lg:flex flex-col w-[220px] shrink-0 h-screen border-r border-[#EFEFEF] bg-white py-6 px-4">
         <Link href="/" className="px-3 mb-8">
-          <img src="/logo.png" alt="LIEN" className="h-8 w-auto" />
+          <img src="/logo.png" alt="LIEN" style={{ height: '28px', width: 'auto', display: 'block' }} />
         </Link>
 
         <nav className="flex flex-col gap-1 flex-1">
@@ -308,7 +308,7 @@ export default function StylistDashboardLayout({ children }: { children: ReactNo
             <aside className="fixed left-0 top-0 z-50 flex h-full w-[240px] flex-col border-r border-[#EFEFEF] bg-white px-4 py-6">
               <div className="mb-6 flex items-center justify-between px-2">
                 <Link href="/" onClick={() => setMobileOpen(false)}>
-                  <img src="/logo.png" alt="LIEN" className="h-8 w-auto" />
+                  <img src="/logo.png" alt="LIEN" style={{ height: '28px', width: 'auto', display: 'block' }} />
                 </Link>
                 <button
                   type="button"

@@ -12,7 +12,7 @@ export default function LoginPage() {
           <img
             src="/logo.png"
             alt="LIEN"
-            style={{ height: '56px', width: 'auto', margin: '0 auto' }}
+            style={{ height: '36px', width: 'auto', margin: '0 auto', display: 'block' }}
           />
         </a>
         <div

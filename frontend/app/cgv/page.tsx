@@ -13,7 +13,7 @@ export default function CgvPage() {
       {/* Header with logo */}
       <header className="px-5 py-6 border-b border-[#EFEFEF] bg-[#F7F5F2]">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <Link href="/"><img src="/logo.png" alt="LIEN" className="h-8 w-auto" /></Link>
+          <Link href="/"><img src="/logo.png" alt="LIEN" style={{ height: '32px', width: 'auto', display: 'block' }} /></Link>
           <Link href="/" className="flex items-center gap-2 text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6" />

@@ -205,7 +205,7 @@ function PricingInner() {
       {/* ══ Header ══ */}
       <div className="px-5 py-6 flex items-center justify-between max-w-6xl w-full mx-auto">
         <Link href={backHref}>
-          <img src="/logo.png" alt="LIEN" className="h-8 w-auto" />
+          <img src="/logo.png" alt="LIEN" style={{ height: '32px', width: 'auto', display: 'block' }} />
         </Link>
         <Link
           href={backHref}

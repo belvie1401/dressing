@@ -269,7 +269,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <aside className="hidden lg:flex h-screen w-[200px] flex-shrink-0 flex-col border-r border-[#EFEFEF] bg-white px-4 py-8">
         {/* Logo */}
         <Link href="/" className="mb-10 px-3">
-          <img src="/logo.png" alt="LIEN" className="h-8 w-auto" />
+          <img src="/logo.png" alt="LIEN" style={{ height: '28px', width: 'auto', display: 'block' }} />
         </Link>
 
         {/* Nav items */}
@@ -681,7 +681,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <aside className="fixed left-0 top-0 z-50 flex h-full w-[240px] flex-col border-r border-[#EFEFEF] bg-white px-4 py-6">
             <div className="mb-6 flex items-center justify-between px-2">
               <Link href="/" onClick={() => setMobileOpen(false)}>
-                <img src="/logo.png" alt="LIEN" className="h-8 w-auto" />
+                <img src="/logo.png" alt="LIEN" style={{ height: '28px', width: 'auto', display: 'block' }} />
               </Link>
               <button
                 type="button"

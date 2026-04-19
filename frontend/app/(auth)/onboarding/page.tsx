@@ -38,7 +38,7 @@ export default function OnboardingPage() {
     <div className="flex min-h-screen flex-col bg-white px-5">
       {/* Header */}
       <div className="flex items-center justify-between py-4">
-        <Link href="/"><img src="/logo.png" alt="LIEN" className="h-10 w-auto" /></Link>
+        <Link href="/"><img src="/logo.png" alt="LIEN" style={{ height: '32px', width: 'auto', display: 'block' }} /></Link>
         <a href="/dashboard" className="text-sm text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors cursor-pointer">
           Passer
         </a>
