@@ -43,6 +43,17 @@ type AgendaStats = {
   pending_count: number;
 };
 
+type PendingRequest = {
+  id: string;
+  client: {
+    id: string;
+    name: string | null;
+    avatar_url: string | null;
+    email: string | null;
+  } | null;
+  created_at: string;
+};
+
 function StatIcon({ name }: { name: 'users' | 'wardrobe' | 'calendar' }) {
   const common = {
     width: 18,
@@ -161,25 +172,36 @@ export default function StylistDashboardPage() {
   const [clients, setClients] = useState<StylistClientRow[] | null>(null);
   const [weekEntries, setWeekEntries] = useState<CalendarEntry[] | null>(null);
   const [agendaStats, setAgendaStats] = useState<AgendaStats | null>(null);
+  const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
     let mounted = true;
 
     const load = async () => {
-      const [statsRes, objRes, clientsRes, weekRes, agendaRes] = await Promise.all([
+      const [statsRes, objRes, clientsRes, weekRes, agendaRes, pendingRes] = await Promise.allSettled([
         api.get<StylistStats>('/stylists/stats'),
         api.get<Objectives>('/stylists/objectives'),
         api.get<StylistClientRow[]>('/stylists/clients?limit=6'),
         api.get<CalendarEntry[]>('/calendar?week=current'),
         api.get<AgendaStats>('/calendar/agenda-stats'),
+        api.get<{ count: number; requests: PendingRequest[] }>('/stylists/requests/pending'),
       ]);
 
       if (!mounted) return;
 
+      if (
+        pendingRes.status === 'fulfilled' &&
+        pendingRes.value.success &&
+        pendingRes.value.data
+      ) {
+        setPendingRequests(pendingRes.value.data.requests ?? []);
+      }
+
       setStats(
-        statsRes.success && statsRes.data
-          ? statsRes.data
+        statsRes.status === 'fulfilled' && statsRes.value.success && statsRes.value.data
+          ? statsRes.value.data
           : {
               active_clients: 0,
               active_clients_delta: 0,
@@ -189,8 +211,8 @@ export default function StylistDashboardPage() {
             }
       );
       setObjectives(
-        objRes.success && objRes.data
-          ? objRes.data
+        objRes.status === 'fulfilled' && objRes.value.success && objRes.value.data
+          ? objRes.value.data
           : {
               month: new Date().toLocaleDateString('fr-FR', {
                 month: 'long',
@@ -201,11 +223,19 @@ export default function StylistDashboardPage() {
               revenue: { current: 0, target: 0 },
             }
       );
-      setClients(clientsRes.success && clientsRes.data ? clientsRes.data : []);
-      setWeekEntries(weekRes.success && weekRes.data ? weekRes.data : []);
+      setClients(
+        clientsRes.status === 'fulfilled' && clientsRes.value.success && clientsRes.value.data
+          ? clientsRes.value.data
+          : []
+      );
+      setWeekEntries(
+        weekRes.status === 'fulfilled' && weekRes.value.success && weekRes.value.data
+          ? weekRes.value.data
+          : []
+      );
       setAgendaStats(
-        agendaRes.success && agendaRes.data
-          ? agendaRes.data
+        agendaRes.status === 'fulfilled' && agendaRes.value.success && agendaRes.value.data
+          ? agendaRes.value.data
           : {
               occupation_rate: 0,
               average_duration_min: 0,
@@ -226,6 +256,26 @@ export default function StylistDashboardPage() {
     await activateStylistMode();
     setActivatingClient(false);
     router.push('/dashboard');
+  };
+
+  const handleAcceptRequest = async (id: string) => {
+    setProcessingId(id);
+    const res = await api.post(`/stylists/accept/${id}`, {});
+    setProcessingId(null);
+    if (res.success) {
+      setPendingRequests((prev) => prev.filter((r) => r.id !== id));
+      const clientsRes = await api.get<StylistClientRow[]>('/stylists/clients?limit=6');
+      if (clientsRes.success && clientsRes.data) setClients(clientsRes.data);
+    }
+  };
+
+  const handleRejectRequest = async (id: string) => {
+    setProcessingId(id);
+    const res = await api.post(`/stylists/reject/${id}`, {});
+    setProcessingId(null);
+    if (res.success) {
+      setPendingRequests((prev) => prev.filter((r) => r.id !== id));
+    }
   };
 
   const weekDays = buildCurrentWeek();
@@ -379,6 +429,90 @@ export default function StylistDashboardPage() {
           )}
         </div>
       </section>
+
+      {/* ============ DEMANDES EN ATTENTE ============ */}
+      {pendingRequests.length > 0 && (
+        <section className="mb-10">
+          <div className="mb-5 flex items-end justify-between">
+            <div>
+              <h2 className="font-serif text-2xl text-[#111111]">
+                Demandes en attente
+              </h2>
+              <p className="mt-1 text-sm text-[#8A8A8A]">
+                {pendingRequests.length} cliente
+                {pendingRequests.length > 1 ? 's' : ''} souhaite
+                {pendingRequests.length > 1 ? 'nt' : ''} travailler avec vous
+              </p>
+            </div>
+            <span className="rounded-full bg-[#C6A47E] px-3 py-1 text-xs font-semibold text-white">
+              {pendingRequests.length}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {pendingRequests.map((req) => {
+              const name = req.client?.name || req.client?.email || 'Cliente';
+              const firstLetter = name.charAt(0).toUpperCase();
+              const isProcessing = processingId === req.id;
+              return (
+                <div
+                  key={req.id}
+                  className="rounded-3xl bg-white p-5 shadow-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-[#EDE5DC] ring-2 ring-[#C6A47E]">
+                      {req.client?.avatar_url ? (
+                        <Image
+                          src={req.client.avatar_url}
+                          alt={name}
+                          fill
+                          className="object-cover"
+                          sizes="48px"
+                        />
+                      ) : (
+                        <span className="flex h-full w-full items-center justify-center font-serif text-sm text-[#C6A47E]">
+                          {firstLetter}
+                        </span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-[#111111]">
+                        {name}
+                      </p>
+                      <p className="text-[11px] text-[#8A8A8A]">
+                        Demande re&ccedil;ue le{' '}
+                        {new Date(req.created_at).toLocaleDateString('fr-FR', {
+                          day: 'numeric',
+                          month: 'short',
+                        })}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleAcceptRequest(req.id)}
+                      disabled={isProcessing}
+                      className="flex-1 rounded-full bg-[#111111] py-2 text-xs font-semibold text-white transition-colors hover:bg-[#2a2a2a] disabled:opacity-50"
+                    >
+                      {isProcessing ? '...' : 'Accepter'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRejectRequest(req.id)}
+                      disabled={isProcessing}
+                      className="flex-1 rounded-full border border-[#EFEFEF] py-2 text-xs font-medium text-[#8A8A8A] transition-colors hover:bg-[#F7F5F2] disabled:opacity-50"
+                    >
+                      Refuser
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* ============ DRESSINGS CLIENTES + RIGHT SIDEBAR ============ */}
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">

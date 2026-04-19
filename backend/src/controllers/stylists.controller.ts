@@ -206,6 +206,27 @@ export async function acceptInvite(req: Request, res: Response): Promise<void> {
       },
     });
 
+    const existingMessage = await prisma.message.findFirst({
+      where: {
+        OR: [
+          { from_id: connection.stylist_id, to_id: connection.client_id },
+          { from_id: connection.client_id, to_id: connection.stylist_id },
+        ],
+      },
+    });
+
+    if (!existingMessage) {
+      await prisma.message.create({
+        data: {
+          from_id: connection.stylist_id,
+          to_id: connection.client_id,
+          content:
+            "Bonjour ! Votre demande a été acceptée. Je vais prendre le temps d'explorer votre dressing pour vous composer des looks personnalisés.",
+          type: 'TEXT',
+        },
+      });
+    }
+
     res.json({ success: true, data: updated });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Erreur serveur' });
