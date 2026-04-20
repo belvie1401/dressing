@@ -154,11 +154,11 @@ export default function LandingPage() {
               <p className="mt-5 max-w-sm text-base text-[#8A8A8A] leading-relaxed">
                 Ajoutez vos v&ecirc;tements, &eacute;changez avec un styliste professionnel et recevez des looks compos&eacute;s avec ce que vous poss&eacute;dez d&eacute;j&agrave;.
               </p>
-              <div className="mt-8 flex gap-3 flex-wrap">
-                <a href="/register" className="rounded-full bg-[#111111] px-8 py-3.5 text-base text-white font-medium">
+              <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap gap-3">
+                <a href="/register" className="rounded-full bg-[#111111] px-8 py-3.5 text-base text-white font-medium text-center w-full sm:w-auto">
                   Commencer gratuitement
                 </a>
-                <a href="#how" className="rounded-full border border-[#111111] px-8 py-3.5 text-base text-[#111111]">
+                <a href="#how" className="rounded-full border border-[#111111] px-8 py-3.5 text-base text-[#111111] text-center w-full sm:w-auto">
                   Comment &ccedil;a marche
                 </a>
               </div>
@@ -431,11 +431,11 @@ export default function LandingPage() {
             <p className="text-[#CFCFCF] mt-5 text-base max-w-xl mx-auto leading-relaxed">
               Rejoignez une communaut&eacute; de passionn&eacute;es de mode et de stylistes professionnels.
             </p>
-            <div className="mt-10 flex flex-wrap gap-4 justify-center">
-              <a href="/register?role=CLIENT" className="bg-white text-[#111111] rounded-full px-8 py-4 text-base font-medium hover:bg-[#F0EDE8] transition-colors">
+            <div className="mt-10 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 sm:justify-center">
+              <a href="/register?role=CLIENT" className="bg-white text-[#111111] rounded-full px-8 py-4 text-base font-medium hover:bg-[#F0EDE8] transition-colors text-center w-full sm:w-auto">
                 Je suis cliente
               </a>
-              <a href="/register?role=STYLIST" className="bg-[#C6A47E] text-[#111111] rounded-full px-8 py-4 text-base font-medium hover:bg-[#b8926a] transition-colors">
+              <a href="/register?role=STYLIST" className="bg-[#C6A47E] text-[#111111] rounded-full px-8 py-4 text-base font-medium hover:bg-[#b8926a] transition-colors text-center w-full sm:w-auto">
                 Je suis styliste
               </a>
             </div>
