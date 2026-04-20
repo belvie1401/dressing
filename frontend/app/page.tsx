@@ -360,14 +360,14 @@ export default function LandingPage() {
             <h2 className="font-serif text-2xl md:text-4xl text-white mt-3 mb-8 md:mb-14">
               Mode durable. <em className="italic">Style personnel.</em>
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="grid grid-cols-3 gap-2 px-3 md:gap-10 md:px-0">
               {values.map((v) => (
                 <div key={v.title} className="flex flex-col items-center text-center">
-                  <div className="w-14 h-14 rounded-full bg-[#C6A47E]/15 flex items-center justify-center mb-5">
+                  <div className="w-8 h-8 md:w-14 md:h-14 rounded-full bg-[#C6A47E]/15 flex items-center justify-center mb-2 md:mb-5">
                     {v.icon}
                   </div>
-                  <h3 className="font-serif text-xl text-white mb-3">{v.title}</h3>
-                  <p className="text-sm text-[#CFCFCF] leading-relaxed max-w-xs">{v.description}</p>
+                  <h3 className="font-serif text-[11px] md:text-xl text-white mb-1 md:mb-3">{v.title}</h3>
+                  <p className="hidden md:block text-sm text-[#CFCFCF] leading-relaxed max-w-xs">{v.description}</p>
                 </div>
               ))}
             </div>
