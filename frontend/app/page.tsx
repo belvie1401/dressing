@@ -204,11 +204,11 @@ export default function LandingPage() {
 
         {/* ===== METRICS BAR ===== */}
         <section className="bg-[#111111] py-8 px-5 md:py-10 md:px-8">
-          <div className="mx-auto max-w-5xl grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div className="mx-auto max-w-5xl grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
             {metrics.map((m) => (
               <div key={m.label}>
-                <p className="font-serif text-3xl sm:text-4xl text-white">{m.value}</p>
-                <p className="text-xs text-[#8A8A8A] uppercase tracking-wider mt-2">{m.label}</p>
+                <p className="font-serif text-xl sm:text-3xl md:text-4xl text-white">{m.value}</p>
+                <p className="text-[10px] md:text-xs text-[#8A8A8A] uppercase tracking-wider mt-2">{m.label}</p>
               </div>
             ))}
           </div>
@@ -257,9 +257,9 @@ export default function LandingPage() {
                 Comment &ccedil;a marche&nbsp;?
               </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide px-5 pb-4 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:px-0 md:pb-0">
               {steps.map((step, i) => (
-                <div key={step.title} className="bg-white rounded-3xl p-8 border border-[#EFEFEF]">
+                <div key={step.title} className="bg-white rounded-3xl p-8 border border-[#EFEFEF] flex-shrink-0 w-[260px] md:w-auto">
                   <div className="w-12 h-12 rounded-full bg-[#F0EDE8] flex items-center justify-center mb-6">
                     {step.icon}
                   </div>
@@ -380,9 +380,9 @@ export default function LandingPage() {
                 Ils ont adopt&eacute; LIEN
               </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide px-5 pb-4 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
               {testimonials.map((t) => (
-                <div key={t.name} className="bg-white rounded-3xl p-8 border border-[#EFEFEF] flex flex-col">
+                <div key={t.name} className="bg-white rounded-3xl p-8 border border-[#EFEFEF] flex flex-col flex-shrink-0 w-[280px] md:w-auto">
                   <div className="text-[#C6A47E] text-base mb-5">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
                   <p className="text-sm text-[#111111] leading-relaxed flex-1 italic">
                     &laquo;&nbsp;{t.quote}&nbsp;&raquo;
