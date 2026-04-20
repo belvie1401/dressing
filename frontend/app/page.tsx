@@ -145,7 +145,7 @@ export default function LandingPage() {
         <section className="min-h-screen flex items-center bg-[#F7F5F2]">
           <div className="mx-auto flex max-w-6xl w-full flex-col lg:flex-row">
             {/* Left */}
-            <div className="flex flex-1 flex-col justify-center px-8 lg:px-16 py-16">
+            <div className="flex flex-1 flex-col justify-center px-5 md:px-8 lg:px-16 py-10 md:py-16">
               <span className="text-xs uppercase tracking-[0.2em] text-[#C6A47E] mb-5">La mode autrement</span>
               <h1 className="font-serif text-[46px] sm:text-[52px] leading-[1.05] text-[#111111]">
                 Votre dressing,<br />
@@ -203,7 +203,7 @@ export default function LandingPage() {
         </section>
 
         {/* ===== METRICS BAR ===== */}
-        <section className="bg-[#111111] py-10 px-8">
+        <section className="bg-[#111111] py-8 px-5 md:py-10 md:px-8">
           <div className="mx-auto max-w-5xl grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {metrics.map((m) => (
               <div key={m.label}>
@@ -215,10 +215,10 @@ export default function LandingPage() {
         </section>
 
         {/* ===== LE CONSTAT ===== */}
-        <section className="bg-white py-20 px-8">
-          <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <section className="bg-white py-12 px-5 md:py-20 md:px-8">
+          <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="relative">
-              <div className="relative aspect-[5/6] rounded-3xl overflow-hidden">
+              <div className="relative h-[280px] md:aspect-[5/6] md:h-auto rounded-2xl md:rounded-3xl overflow-hidden">
                 <Image
                   src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=500&h=600&fit=crop"
                   alt="Dressing organis&eacute;"
@@ -249,11 +249,11 @@ export default function LandingPage() {
         </section>
 
         {/* ===== COMMENT ÇA MARCHE ===== */}
-        <section id="how" className="bg-[#F7F5F2] py-20 px-8">
+        <section id="how" className="bg-[#F7F5F2] py-12 px-5 md:py-20 md:px-8">
           <div className="mx-auto max-w-6xl">
-            <div className="text-center mb-14">
+            <div className="text-center mb-8 md:mb-14">
               <span className="text-xs uppercase tracking-[0.2em] text-[#8A8A8A]">Le parcours</span>
-              <h2 className="font-serif text-4xl text-[#111111] mt-3">
+              <h2 className="font-serif text-2xl md:text-4xl text-[#111111] mt-3">
                 Comment &ccedil;a marche&nbsp;?
               </h2>
             </div>
@@ -273,11 +273,11 @@ export default function LandingPage() {
         </section>
 
         {/* ===== DEUX ESPACES ===== */}
-        <section className="bg-white py-20 px-8">
+        <section className="bg-white py-12 px-5 md:py-20 md:px-8">
           <div className="mx-auto max-w-6xl">
-            <div className="text-center mb-12">
+            <div className="text-center mb-8 md:mb-12">
               <span className="text-xs uppercase tracking-[0.2em] text-[#8A8A8A]">Deux espaces, une plateforme</span>
-              <h2 className="font-serif text-4xl text-[#111111] mt-3">
+              <h2 className="font-serif text-2xl md:text-4xl text-[#111111] mt-3">
                 Con&ccedil;u pour deux univers distincts
               </h2>
             </div>
@@ -351,10 +351,10 @@ export default function LandingPage() {
         </section>
 
         {/* ===== VALEURS ===== */}
-        <section className="bg-[#111111] py-20 px-8">
+        <section className="bg-[#111111] py-12 px-5 md:py-20 md:px-8">
           <div className="mx-auto max-w-5xl text-center">
             <span className="text-xs uppercase tracking-[0.2em] text-[#C6A47E]">Notre vision</span>
-            <h2 className="font-serif text-4xl text-white mt-3 mb-14">
+            <h2 className="font-serif text-2xl md:text-4xl text-white mt-3 mb-8 md:mb-14">
               Mode durable. <em className="italic">Style personnel.</em>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -372,11 +372,11 @@ export default function LandingPage() {
         </section>
 
         {/* ===== TÉMOIGNAGES ===== */}
-        <section className="bg-[#F7F5F2] py-16 px-8">
+        <section className="bg-[#F7F5F2] py-10 px-5 md:py-16 md:px-8">
           <div className="mx-auto max-w-6xl">
-            <div className="text-center mb-12">
+            <div className="text-center mb-8 md:mb-12">
               <span className="text-xs uppercase tracking-[0.2em] text-[#8A8A8A]">T&eacute;moignages</span>
-              <h2 className="font-serif text-4xl text-[#111111] mt-3">
+              <h2 className="font-serif text-2xl md:text-4xl text-[#111111] mt-3">
                 Ils ont adopt&eacute; LIEN
               </h2>
             </div>
@@ -403,17 +403,17 @@ export default function LandingPage() {
         </section>
 
         {/* ===== INSPIRATION ===== */}
-        <section className="py-16 bg-white">
-          <div className="flex items-center justify-between px-8 mb-8 max-w-6xl mx-auto">
+        <section className="py-10 md:py-16 bg-white">
+          <div className="flex items-center justify-between px-5 md:px-8 mb-6 md:mb-8 max-w-6xl mx-auto">
             <div>
               <span className="text-xs uppercase tracking-[0.2em] text-[#8A8A8A]">Inspiration</span>
-              <h2 className="font-serif text-3xl text-[#111111] mt-1">De l&apos;inspiration, chaque jour</h2>
+              <h2 className="font-serif text-xl md:text-3xl text-[#111111] mt-1">De l&apos;inspiration, chaque jour</h2>
             </div>
             <a href="/register" className="text-sm text-[#8A8A8A] underline whitespace-nowrap hidden sm:block">
               Voir plus de looks
             </a>
           </div>
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide px-8">
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide px-5 md:px-8">
             {inspirationImages.map((img, i) => (
               <div key={i} className="relative w-[200px] h-[280px] flex-shrink-0 rounded-2xl overflow-hidden">
                 <Image src={img} alt={`Inspiration ${i + 1}`} fill className="object-cover" sizes="200px" />
@@ -423,9 +423,9 @@ export default function LandingPage() {
         </section>
 
         {/* ===== FINAL CTA ===== */}
-        <section className="bg-[#111111] py-24 px-8 text-center">
+        <section className="bg-[#111111] py-14 px-5 md:py-24 md:px-8 text-center">
           <div className="mx-auto max-w-3xl">
-            <h2 className="font-serif text-[40px] sm:text-[44px] leading-[1.1] text-white">
+            <h2 className="font-serif text-[28px] sm:text-[44px] leading-[1.1] text-white">
               Pr&ecirc;t&middot;e &agrave; r&eacute;inventer votre style&nbsp;?
             </h2>
             <p className="text-[#CFCFCF] mt-5 text-base max-w-xl mx-auto leading-relaxed">
@@ -445,7 +445,7 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#111111] border-t border-[#222] py-8 px-8">
+      <footer className="bg-[#111111] border-t border-[#222] py-8 px-5 md:px-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:flex-row md:justify-between">
           <Link href="/"><img src="/logo-white.png" alt="LIEN" className="h-8 w-auto" /></Link>
           <p className="text-sm text-[#8A8A8A]">
