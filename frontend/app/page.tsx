@@ -257,15 +257,18 @@ export default function LandingPage() {
                 Comment &ccedil;a marche&nbsp;?
               </h2>
             </div>
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide px-5 pb-4 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:px-0 md:pb-0">
+            <div className="grid grid-cols-3 gap-2 px-3 md:gap-8 md:px-0">
               {steps.map((step, i) => (
-                <div key={step.title} className="bg-white rounded-3xl p-8 border border-[#EFEFEF] flex-shrink-0 w-[260px] md:w-auto">
-                  <div className="w-12 h-12 rounded-full bg-[#F0EDE8] flex items-center justify-center mb-6">
+                <div key={step.title} className="bg-white rounded-xl md:rounded-3xl border border-[#EFEFEF] flex flex-col items-center text-center p-3 md:p-8">
+                  <div className="w-8 h-8 rounded-full bg-[#111111] flex items-center justify-center mb-2 md:hidden">
+                    <span className="text-white text-xs font-serif">0{i + 1}</span>
+                  </div>
+                  <div className="hidden md:flex w-12 h-12 rounded-full bg-[#F0EDE8] items-center justify-center mb-6">
                     {step.icon}
                   </div>
-                  <p className="font-serif text-4xl text-[#C6A47E] mb-3">0{i + 1}</p>
-                  <h3 className="font-serif text-lg text-[#111111] mb-2">{step.title}</h3>
-                  <p className="text-sm text-[#8A8A8A] leading-relaxed">{step.description}</p>
+                  <p className="hidden md:block font-serif text-4xl text-[#C6A47E] mb-3">0{i + 1}</p>
+                  <h3 className="text-[11px] md:text-lg font-serif text-[#111111] leading-tight">{step.title}</h3>
+                  <p className="hidden md:block text-sm text-[#8A8A8A] leading-relaxed mt-2">{step.description}</p>
                 </div>
               ))}
             </div>
@@ -281,23 +284,23 @@ export default function LandingPage() {
                 Con&ccedil;u pour deux univers distincts
               </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-3 px-3 md:gap-6 md:px-0">
               {/* Cliente */}
-              <div className="bg-[#F7F5F2] rounded-3xl p-8 border border-[#EFEFEF] flex flex-col">
-                <div className="w-14 h-14 rounded-full bg-[#EDE5DC] flex items-center justify-center mb-6">
+              <div className="bg-[#F7F5F2] rounded-2xl md:rounded-3xl p-3 md:p-8 border border-[#EFEFEF] flex flex-col">
+                <div className="hidden md:flex w-14 h-14 rounded-full bg-[#EDE5DC] items-center justify-center mb-6">
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2C12 2 8 2 8 6H4l1 14h14l1-14h-4c0-4-4-4-4-4z" />
                     <line x1="8" y1="6" x2="8" y2="8" /><line x1="16" y1="6" x2="16" y2="8" />
                   </svg>
                 </div>
-                <span className="inline-block text-xs bg-white text-[#111111] rounded-full px-3 py-1 mb-4 w-fit border border-[#EFEFEF]">
+                <span className="hidden md:inline-block text-xs bg-white text-[#111111] rounded-full px-3 py-1 mb-4 w-fit border border-[#EFEFEF]">
                   Pour vous habiller mieux
                 </span>
-                <h3 className="font-serif text-2xl text-[#111111] mb-3">L&rsquo;espace Cliente</h3>
-                <p className="text-sm text-[#8A8A8A] leading-relaxed mb-6">
+                <h3 className="font-serif text-sm md:text-2xl text-[#111111] mb-1 md:mb-3">L&rsquo;espace Cliente</h3>
+                <p className="hidden md:block text-sm text-[#8A8A8A] leading-relaxed mb-6">
                   Votre dressing digital, organis&eacute; et intelligent. Connectez-vous &agrave; un styliste professionnel et recevez des looks avec ce que vous poss&eacute;dez d&eacute;j&agrave;.
                 </p>
-                <ul className="flex flex-col gap-2.5 mb-8 flex-1">
+                <ul className="hidden md:flex flex-col gap-2.5 mb-8 flex-1">
                   {clientPerks.map((perk) => (
                     <li key={perk} className="flex items-center gap-3">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
@@ -309,27 +312,27 @@ export default function LandingPage() {
                 </ul>
                 <a
                   href="/register?role=CLIENT"
-                  className="block text-center rounded-full bg-[#111111] text-white px-6 py-3 text-sm font-medium hover:bg-[#000] transition-colors"
+                  className="block text-center rounded-full bg-[#111111] text-white px-2 py-1.5 md:px-6 md:py-3 text-[10px] md:text-sm font-medium hover:bg-[#000] transition-colors mt-auto"
                 >
                   Cr&eacute;er mon dressing
                 </a>
               </div>
 
               {/* Styliste */}
-              <div className="bg-[#111111] rounded-3xl p-8 flex flex-col">
-                <div className="w-14 h-14 rounded-full bg-[#C6A47E]/20 flex items-center justify-center mb-6">
+              <div className="bg-[#111111] rounded-2xl md:rounded-3xl p-3 md:p-8 flex flex-col">
+                <div className="hidden md:flex w-14 h-14 rounded-full bg-[#C6A47E]/20 items-center justify-center mb-6">
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                   </svg>
                 </div>
-                <span className="inline-block text-xs bg-[#C6A47E] text-[#111111] rounded-full px-3 py-1 mb-4 w-fit font-medium">
+                <span className="hidden md:inline-block text-xs bg-[#C6A47E] text-[#111111] rounded-full px-3 py-1 mb-4 w-fit font-medium">
                   Pour les professionnels
                 </span>
-                <h3 className="font-serif text-2xl text-white mb-3">L&rsquo;espace Styliste</h3>
-                <p className="text-sm text-[#CFCFCF] leading-relaxed mb-6">
+                <h3 className="font-serif text-sm md:text-2xl text-white mb-1 md:mb-3">L&rsquo;espace Styliste</h3>
+                <p className="hidden md:block text-sm text-[#CFCFCF] leading-relaxed mb-6">
                   Votre outil de travail professionnel. Acc&eacute;dez &agrave; la garde-robe de vos clientes, cr&eacute;ez des lookbooks sur mesure et d&eacute;veloppez votre activit&eacute;.
                 </p>
-                <ul className="flex flex-col gap-2.5 mb-8 flex-1">
+                <ul className="hidden md:flex flex-col gap-2.5 mb-8 flex-1">
                   {stylistPerks.map((perk) => (
                     <li key={perk} className="flex items-center gap-3">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C6A47E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
@@ -341,7 +344,7 @@ export default function LandingPage() {
                 </ul>
                 <a
                   href="/pour-les-stylistes"
-                  className="block text-center rounded-full bg-[#C6A47E] text-[#111111] px-6 py-3 text-sm font-medium hover:bg-[#b8926a] transition-colors"
+                  className="block text-center rounded-full bg-[#C6A47E] text-[#111111] px-2 py-1.5 md:px-6 md:py-3 text-[10px] md:text-sm font-medium hover:bg-[#b8926a] transition-colors mt-auto"
                 >
                   D&eacute;couvrir l&rsquo;espace styliste
                 </a>
@@ -380,20 +383,20 @@ export default function LandingPage() {
                 Ils ont adopt&eacute; LIEN
               </h2>
             </div>
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide px-5 pb-4 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
+            <div className="grid grid-cols-3 gap-2 px-3 md:gap-6 md:px-0">
               {testimonials.map((t) => (
-                <div key={t.name} className="bg-white rounded-3xl p-8 border border-[#EFEFEF] flex flex-col flex-shrink-0 w-[280px] md:w-auto">
-                  <div className="text-[#C6A47E] text-base mb-5">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                  <p className="text-sm text-[#111111] leading-relaxed flex-1 italic">
+                <div key={t.name} className="bg-white rounded-xl md:rounded-3xl border border-[#EFEFEF] flex flex-col p-2 md:p-8">
+                  <div className="text-[#C6A47E] text-[10px] md:text-base mb-1 md:mb-5">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                  <p className="hidden md:block text-sm text-[#111111] leading-relaxed flex-1 italic">
                     &laquo;&nbsp;{t.quote}&nbsp;&raquo;
                   </p>
-                  <div className="flex items-center gap-3 mt-6 pt-6 border-t border-[#EFEFEF]">
-                    <div className="relative h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
+                  <div className="flex items-center gap-1 md:gap-3 mt-auto md:mt-6 md:pt-6 md:border-t md:border-[#EFEFEF]">
+                    <div className="relative h-6 w-6 md:h-10 md:w-10 rounded-full overflow-hidden flex-shrink-0">
                       <Image src={t.avatar} alt={t.name} fill className="object-cover" sizes="40px" />
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-[#111111]">{t.name}</p>
-                      <p className="text-xs text-[#8A8A8A]">{t.role}</p>
+                    <div className="min-w-0">
+                      <p className="text-[9px] md:text-sm font-semibold text-[#111111] truncate">{t.name}</p>
+                      <p className="hidden md:block text-xs text-[#8A8A8A]">{t.role}</p>
                     </div>
                   </div>
                 </div>
