@@ -2,7 +2,7 @@
 
 import { AuthenticateWithRedirectCallback } from '@clerk/nextjs';
 
-export default function AuthCallbackPage() {
+export default function SSOCallbackPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#F7F5F2]">
       <div className="flex flex-col items-center gap-4">

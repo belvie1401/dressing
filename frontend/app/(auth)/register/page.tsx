@@ -168,6 +168,8 @@ export default function RegisterPage() {
           routing="hash"
           forceRedirectUrl="/onboarding"
           fallbackRedirectUrl="/onboarding"
+          signInForceRedirectUrl="/dashboard"
+          signInFallbackRedirectUrl="/dashboard"
           unsafeMetadata={{ role }}
         />
       </div>

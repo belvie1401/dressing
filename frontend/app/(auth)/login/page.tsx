@@ -28,6 +28,8 @@ export default function LoginPage() {
           routing="hash"
           forceRedirectUrl="/dashboard"
           fallbackRedirectUrl="/dashboard"
+          signUpForceRedirectUrl="/onboarding"
+          signUpFallbackRedirectUrl="/onboarding"
         />
       </div>
 

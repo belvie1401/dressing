@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useUser } from '@clerk/nextjs';
 import { useAuthStore } from '@/lib/store';
 import { api } from '@/lib/api';
 
@@ -12,7 +13,17 @@ const objectives = ['Quotidien', 'Travail', 'Soirée', 'Événements'];
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { user: clerkUser, isLoaded } = useUser();
   const user = useAuthStore((s) => s.user);
+
+  useEffect(() => {
+    if (!isLoaded || !clerkUser) return;
+    const completed = clerkUser.unsafeMetadata?.onboarding_completed;
+    const role = clerkUser.unsafeMetadata?.role;
+    if (completed) {
+      router.replace(role === 'STYLIST' ? '/stylist-dashboard' : '/dashboard');
+    }
+  }, [isLoaded, clerkUser, router]);
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [selectedBudget, setSelectedBudget] = useState('');
   const [selectedObjective, setSelectedObjective] = useState('');
@@ -31,7 +42,13 @@ export default function OnboardingPage() {
         objective: selectedObjective,
       },
     });
-    router.push('/dashboard');
+    if (clerkUser) {
+      await clerkUser.update({
+        unsafeMetadata: { ...clerkUser.unsafeMetadata, onboarding_completed: true },
+      });
+    }
+    const role = clerkUser?.unsafeMetadata?.role;
+    router.push(role === 'STYLIST' ? '/stylist-dashboard' : '/dashboard');
   };
 
   return (
