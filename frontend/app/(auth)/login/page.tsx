@@ -8,12 +8,9 @@ export default function LoginPage() {
     >
       {/* LIEN Logo above card */}
       <div className="text-center mb-6">
-        <a href="/">
-          <img
-            src="/logo.png"
-            alt="LIEN"
-            style={{ height: '36px', width: 'auto', margin: '0 auto', display: 'block' }}
-          />
+        <a href="/" className="flex items-center justify-center gap-2">
+          <img src="/logo.png" alt="LIEN" className="h-9 w-auto" />
+          <span className="font-serif text-xl text-[#111111] tracking-wide">Lien</span>
         </a>
         <div
           style={{

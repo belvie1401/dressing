@@ -18,12 +18,9 @@ export default function RegisterPage() {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <a href="/">
-            <img
-              src="/logo.png"
-              alt="LIEN"
-              style={{ height: '32px', width: 'auto', margin: '0 auto', display: 'block' }}
-            />
+          <a href="/" className="flex items-center justify-center gap-2">
+            <img src="/logo.png" alt="LIEN" className="h-8 w-auto" />
+            <span className="font-serif text-lg text-[#111111] tracking-wide">Lien</span>
           </a>
           <div
             style={{
@@ -145,11 +142,10 @@ export default function RegisterPage() {
           </svg>
           Retour
         </button>
-        <img
-          src="/logo.png"
-          alt="LIEN"
-          style={{ height: '32px', width: 'auto', margin: '0 auto', display: 'block' }}
-        />
+        <div className="flex items-center justify-center gap-2">
+          <img src="/logo.png" alt="LIEN" className="h-8 w-auto" />
+          <span className="font-serif text-lg text-[#111111] tracking-wide">Lien</span>
+        </div>
         <div
           style={{
             width: '32px',

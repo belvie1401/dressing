@@ -205,7 +205,7 @@ function PricingInner() {
       {/* ══ Header ══ */}
       <div className="px-5 py-6 flex items-center justify-between max-w-6xl w-full mx-auto">
         <Link href={backHref}>
-          <img src="/logo.png" alt="LIEN" style={{ height: '32px', width: 'auto', display: 'block' }} />
+          <span className="flex items-center gap-2"><img src="/logo.png" alt="LIEN" className="h-8 w-auto" /><span className="font-serif text-lg text-[#111111] tracking-wide">Lien</span></span>
         </Link>
         <Link
           href={backHref}
@@ -276,7 +276,7 @@ function PricingInner() {
       <footer className="bg-[#111111] border-t border-[#222] py-8 px-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:flex-row md:justify-between">
           <Link href={backHref}>
-            <img src="/logo-white.png" alt="LIEN" className="h-8 w-auto" />
+            <span className="flex items-center gap-2"><img src="/logo-white.png" alt="LIEN" className="h-8 w-auto" /><span className="font-serif text-lg text-white tracking-wide">Lien</span></span>
           </Link>
           <p className="text-sm text-[#8A8A8A]">
             &copy; {new Date().getFullYear()} Lien. Tous droits réservés.

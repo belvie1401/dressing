@@ -82,7 +82,7 @@ export default function PourLesStylesPage() {
       {/* Navbar */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#EFEFEF]">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-          <Link href="/"><img src="/logo.png" alt="LIEN" style={{ height: '32px', width: 'auto', display: 'block' }} /></Link>
+          <Link href="/" className="flex items-center gap-2"><img src="/logo.png" alt="LIEN" className="h-8 w-auto" /><span className="font-serif text-lg text-[#111111] tracking-wide">Lien</span></Link>
           <div className="hidden items-center gap-8 md:flex">
             <a href="/#how" className="text-sm text-[#8A8A8A] hover:text-[#111111] transition-colors">Fonctionnalit&eacute;s</a>
             <a href="/pour-les-stylistes" className="text-sm text-[#111111] font-medium">Pour les stylistes</a>
@@ -352,7 +352,7 @@ export default function PourLesStylesPage() {
       {/* Footer */}
       <footer className="bg-[#111111] border-t border-[#222] py-8 px-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:flex-row md:justify-between">
-          <Link href="/"><img src="/logo-white.png" alt="LIEN" className="h-8 w-auto" /></Link>
+          <Link href="/" className="flex items-center gap-2"><img src="/logo-white.png" alt="LIEN" className="h-8 w-auto" /><span className="font-serif text-lg text-white tracking-wide">Lien</span></Link>
           <p className="text-sm text-[#8A8A8A]">
             &copy; {new Date().getFullYear()} Lien. Tous droits r&eacute;serv&eacute;s.
           </p>
