@@ -18,9 +18,9 @@ export default function RegisterPage() {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <a href="/" className="flex items-center justify-center gap-2">
-            <img src="/logo.png" alt="LIEN" className="h-8 w-auto" />
-            <span className="font-serif text-lg text-[#111111] tracking-wide">Lien</span>
+          <a href="/" className="flex items-center justify-center gap-2" style={{ flexDirection: 'row' }}>
+            <img src="/logo.png" alt="LIEN" style={{ height: '32px', width: 'auto', maxWidth: '32px', display: 'block', flexShrink: 0 }} />
+            <span style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '18px', color: '#111111', fontWeight: '400', letterSpacing: '0.05em', whiteSpace: 'nowrap', lineHeight: '1' }}>Lien</span>
           </a>
           <div
             style={{
@@ -142,9 +142,9 @@ export default function RegisterPage() {
           </svg>
           Retour
         </button>
-        <div className="flex items-center justify-center gap-2">
-          <img src="/logo.png" alt="LIEN" className="h-8 w-auto" />
-          <span className="font-serif text-lg text-[#111111] tracking-wide">Lien</span>
+        <div className="flex items-center justify-center gap-2" style={{ flexDirection: 'row' }}>
+          <img src="/logo.png" alt="LIEN" style={{ height: '32px', width: 'auto', maxWidth: '32px', display: 'block', flexShrink: 0 }} />
+          <span style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '18px', color: '#111111', fontWeight: '400', letterSpacing: '0.05em', whiteSpace: 'nowrap', lineHeight: '1' }}>Lien</span>
         </div>
         <div
           style={{
