@@ -9,8 +9,10 @@ const nextConfig: NextConfig = {
     CLERK_SECRET_KEY: 'sk_test_pEAJoL4pZHn4MKosszwva6edqwc5RqohXgnIRZfCBN',
     NEXT_PUBLIC_CLERK_SIGN_IN_URL: '/login',
     NEXT_PUBLIC_CLERK_SIGN_UP_URL: '/register',
-    NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: '/dashboard',
-    NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: '/onboarding',
+    NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL: '/dashboard',
+    NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL: '/onboarding',
+    NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: '/dashboard',
+    NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: '/onboarding',
   },
 };
 
